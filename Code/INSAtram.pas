@@ -1,0 +1,5 @@
+program INSAtram;
+
+begin
+    
+end.
