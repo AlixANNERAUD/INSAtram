@@ -1,3 +1,4 @@
+
 Unit Unit_Logic;
 
 Interface
@@ -8,23 +9,26 @@ Uses Unit_Types, Unit_Graphics;
 
 // - Function decleration
 
-Function Creer_Station() : Type_Station_Pointer;
+Function Station_Create() : Type_Station_Pointer;
 
 Implementation
 
 // - Function definition
 
-Function Creer_Station() : Type_Station_Pointer;
-var Station_Pointer : Type_Station_Pointer;
-begin
+Function Station_Create() : Type_Station_Pointer;
 
-    Station_Pointer := Station_Allocate();
+Var Station_Pointer : Type_Station_Pointer;
+Begin
 
-    Station_Pointer^.Shape := Square;
+  Station_Allocate(Station_Pointer);
 
-    Station_Pointer^.Coordinates.X := 400;
-    Station_Pointer^.Coordinates.Y := 600;   
-end;
+  Station_Pointer^.Shape := Circle;
+
+  Station_Pointer^.Coordinates.X := 200;
+  Station_Pointer^.Coordinates.Y := 200;
+
+  Station_Create := Station_Pointer;
+End;
 
 
 End.

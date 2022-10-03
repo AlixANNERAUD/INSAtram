@@ -11,20 +11,26 @@ Uses sdl, sdl_image, sdl_ttf, sysutils;
 
 Const Profondeur_Couleur = 32;
 
-// - Type definition
+  // - Type definition
 
-// - - Timer
+  // - - Timer
 
 Type Type_Time = Longword;
 
-// - - SDL related objects
+  // - - SDL related objects
 
 Type Type_Surface = PSDL_Surface;
+
 Type Type_Rectangle = TSDL_Rect;
 
-Type Type_Sprite_Table = record
-  Station_Square, Station_Circle, Station_Triangle, Station_Lozenge, Station_Pentagon : Type_Surface;
-end;
+Type Type_Sprite_Table = Record
+  Station_Square, Station_Circle, Station_Triangle, Station_Lozenge, Station_Pentagon : Type_Surface
+  ;
+End;
+
+Type Type_Color = Record
+  Red, Green, Blue : Byte;
+End;
 
 
 // - Entity
@@ -36,29 +42,29 @@ End;
 
 Type Type_Shape = (Square, Circle, Triangle, Lozenge, Pentagon);
 
-// - - Station
+  // - - Station
 
-Type Type_Station = record
+Type Type_Station = Record
   Shape : Type_Shape;
   Coordinates : Type_Coordinates;
   Sprite : Type_Surface;
-end;
+End;
 
 Type Type_Station_Pointer = ^Type_Station;
 
-// - Game
+  // - Game
 
-Type Type_Game = record
+Type Type_Game = Record
   Window : Type_Surface;
   Sprite_Table : Type_Sprite_Table;
-end;
+End;
 
 
 // - Function declaration
 
 // - - Station allocation
 
-Function Station_Allocate() : Type_Station_Pointer;
+Procedure Station_Allocate(Var Station : Type_Station_Pointer);
 
 // - - Time
 Function Time_Get_Current(): Type_Time;
@@ -70,19 +76,20 @@ Implementation
 
 // - - Station
 
-Function Station_Allocate() : Type_Station_Pointer;
+Procedure Station_Allocate(Var Station : Type_Station_Pointer);
 Begin
-  Station_Allocate := GetMem(sizeof(Type_Station));
+  writeln('Station allocation');
+  Station := GetMem(sizeof(Type_Station));
 End;
 
-Procedure Station_Deallocate(var Station_Pointer : Type_Station_Pointer);
+Procedure Station_Deallocate(Var Station_Pointer : Type_Station_Pointer);
 Begin
-  if (not(Station_Pointer = nil)) then
-  Begin
-    SDL_FreeSurface(Station_Pointer^.Sprite);
-    FreeMem(Station_Pointer);
-    Station_Pointer := nil;
-  End;
+  If (Not(Station_Pointer = Nil)) Then
+    Begin
+      SDL_FreeSurface(Station_Pointer^.Sprite);
+      FreeMem(Station_Pointer);
+      Station_Pointer := Nil;
+    End;
 End;
 
 
