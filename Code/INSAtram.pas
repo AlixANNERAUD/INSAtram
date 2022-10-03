@@ -1,39 +1,30 @@
 
 Program INSAtram;
 
-Uses Unite_Logique, Unite_Affichage, Unite_Types, sdl_image, sdl;
+Uses Unit_Logic, Unit_Graphics, Unit_Types, sdl_image, sdl;
 
-Var Fenetre : Type_Surface;
-  Rectangle_Surface : Type_Surface;
-  Rectangle : Type_Rectangle;
-  Temps_Dernier_Rafraichissement : Type_Temps;
+Var Game : Type_Game;
+    Station_Pointer : Type_Station_Pointer;
+    Timer : Type_Time;
 
 Begin
 
-  Fenetre := Creer_Fenetre();
+  Graphics_Load(Game);
 
-
-  Rectangle.x := 451;
-  Rectangle.y := 451;
-  Rectangle.w := 1280;
-  Rectangle.h := 720;
-
-  Rectangle_Surface := SDL_CreateRGBSurface(0,1280, 720, Profondeur_Couleur, 0, 0, 0, 0);
-  SDL_FillRect(Rectangle_Surface, Nil, SDL_MapRGB(Rectangle_Surface^.format, 255, 255, 255));
+  Station_Pointer := Creer_Station();
 
 
   While true Do
     Begin
 
-      Temps_Dernier_Rafraichissement := Obtenir_Temps_Actuel();
+      Timer := Time_Get_Current();
 
-      SDL_BlitSurface(Rectangle_Surface, Nil, Fenetre, @Rectangle);
+      Station_Display(Station_Pointer^, Game);
 
-      SDL_Flip(Fenetre);
+      Graphics_Refresh(Game);
 
-      SDL_Delay(1000);
 
-      If Obtenir_Temps_Ecoule(Temps_Dernier_Rafraichissement) < 1000/60 Then
+      If Time_Get_Elapsed(Timer) < 1000/60 Then
         Begin
           SDL_Delay(20);
         End;
