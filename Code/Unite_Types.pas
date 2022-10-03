@@ -3,18 +3,48 @@ Unit Unite_Types;
 
 Interface
 
+// - Inclusion des libraries.
+
 Uses sdl, sdl_image, sdl_ttf, sysutils;
 
-Type Type_Surface = PSDL_Surface;
+// - Définition des constantes.
 
+Const Profondeur_Couleur = 32;
+
+
+
+  // - Définition des types.
+
+// Timer
+
+Type Type_Time = QWord;
+
+// - Graphismes
+
+Type Type_Surface = PSDL_Surface;
 Type Type_Rectangle = TSDL_Rect;
 
-  //Type Type_Station = record
-  //end;
+// - Entités
+
+// - - Généraux
+
+Type Type_Coordinates = Record
+  X, Y : Integer;
+End;
+
+Type Type_Shape = (Square, Circle, Triangle, Losange, Pentagone);
+
+// - - Station
+
+Type Type_Station = record
+  Forme : Type_Forme;
+  Coordonnees : Type_Coordonnees;
+  Image : Type_Surface;  
+end;
 
   //Type Type_Surface = PSDL_Type_Surface;
 
-Type Type_Temps = QWord;
+
 
 
 Function Obtenir_Temps_Actuel(): Type_Temps;
