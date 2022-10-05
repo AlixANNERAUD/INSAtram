@@ -26,8 +26,10 @@ Type Type_Surface = PSDL_Surface;
 Type Type_Rectangle = TSDL_Rect;
 
 Type Type_Sprite_Table = Record
-  Station_Square, Station_Circle, Station_Triangle, Station_Lozenge, Station_Pentagon : Type_Surface
-  ;
+  Station_Square, Station_Circle, Station_Triangle, Station_Lozenge,
+  Station_Pentagon : Type_Surface;
+  Passenger_Circle, Passenger_Square, Passenger_Triangle, Passenger_Lozenge,
+  Passenger_Pentagon : Type_Surface
 End;
 
 Type Type_Color = Record

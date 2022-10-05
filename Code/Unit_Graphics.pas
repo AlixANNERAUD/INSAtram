@@ -9,15 +9,25 @@ Uses Unit_Types, sdl, sdl_image, sdl_ttf, sysutils;
 
 // - - Paths
 
-Const Path_Image_Station_Circle = 'Ressources/Circle.png';
+Const Path_Image_Station_Circle = 'Ressources/Station_Circle.png';
 
-Const Path_Image_Station_Square = 'Ressources/Square.png';
+Const Path_Image_Station_Square = 'Ressources/Station_Square.png';
 
-Const Path_Image_Station_Triangle = 'Ressources/Triangle.png';
+Const Path_Image_Station_Triangle = 'Ressources/Station_Triangle.png';
 
-Const Path_Image_Station_Pentagon = 'Ressources/Pentagon.png';
+Const Path_Image_Station_Pentagon = 'Ressources/Station_Pentagon.png';
 
-Const Path_Image_Station_Lozenge = 'Ressources/Lozenge.png';
+Const Path_Image_Station_Lozenge = 'Ressources/Station_Lozenge.png';
+
+Const Path_Image_Passenger_Circle = 'Ressources/Passenger_Circle.png';
+
+Const Path_Image_Passenger_Square = 'Ressources/Passenger_Square.png';
+
+Const Path_Image_Passenger_Triangle = 'Ressources/Passenger_Triangle.png';
+
+Const Path_Image_Passenger_Pentagon = 'Ressources/Passenger_Pentagon.png';
+
+Const Path_Image_Passenger_Lozenge = 'Ressources/Passenger_Lozenge.png';
 
   // - - Size
 
@@ -55,7 +65,7 @@ Var Video_Informations : PSDL_VideoInfo;
 Begin
   SDL_Init(SDL_INIT_VIDEO);
   // - Initialisation de la SDL
-  Game.Window := SDL_SetVideoMode(0, 0, 32, SDL_FULLSCREEN);
+  Game.Window := SDL_SetVideoMode(0, 0, 32, SDL_SWSURFACE);
   // - Création de la fenêtre
   SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255));
   // - Obtention des informations de la fenêtre
@@ -69,6 +79,12 @@ Begin
   Game.Sprites.Station_Triangle := IMG_Load(Path_Image_Station_Triangle);
   Game.Sprites.Station_Pentagon := IMG_Load(Path_Image_Station_Pentagon);
   Game.Sprites.Station_Lozenge := IMG_Load(Path_Image_Station_Lozenge);
+
+  Game.Sprites.Passenger_Circle := IMG_Load(Path_Image_Passenger_Circle);
+  Game.Sprites.Passenger_Square := IMG_Load(Path_Image_Passenger_Square);
+  Game.Sprites.Passenger_Triangle := IMG_Load(Path_Image_Passenger_Triangle);
+  Game.Sprites.Passenger_Pentagon := IMG_Load(Path_Image_Passenger_Pentagon);
+  Game.Sprites.Passenger_Lozenge := IMG_Load(Path_Image_Passenger_Lozenge);
 
   Game.Stations_Count := 0;
 
@@ -124,6 +140,9 @@ Begin
 
   Destination_Rectangle.w := Passenger_Width;
   Destination_Rectangle.h := Passenger_Height;
+
+
+
   If (Station.Passengers_Count > 0) Then
     Begin
       For i := 0 To (Station.Passengers_Count - 1) Do

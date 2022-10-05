@@ -14,7 +14,7 @@ Procedure Logic_Load(Var Game : Type_Game);
 Procedure Station_Create(Var Game : Type_Game);
 
 Procedure Passenger_Create(Var Game : Type_Game);
-Procedure Passenger_Delete(Var Game : Type_Game);
+Procedure Passenger_Delete(Var Passenger_Pointer : Type_Passenger_Pointer);
 
 Implementation
 
@@ -29,21 +29,54 @@ End;
 
 Procedure Passenger_Create(Var Game : Type_Game);
 
-Var Temporary : Byte;
+Var Temporary, Shape : Byte;
+  Passenger_Pointer : Type_Passenger_Pointer;
 Begin
 
   // - Choose a random station
   Repeat
     Temporary := Random(Game.Stations_Count);
-  Until (Game.Stations[Temporary]^.Passengers_Count >= 6);
+  Until (Game.Stations[Temporary]^.Passengers_Count < 6);
+
 
   // - Allocate memory to passenger.
-  Game.Stations[Temporary]^.Passengers[Game.Stations[Temporary]^.Passengers_Count] := 
+  Passenger_Pointer := Passenger_Allocate();
+  Game.Stations[Temporary]^.Passengers[Game.Stations[Temporary]^.
+  Passengers_Count] := Passenger_Pointer;
+
+  Shape := Random(5);
 
 
+  Case Shape Of 
+    0 :
+        Begin
+          Passenger_Pointer^.Shape := Circle;
+          // Set station shape.
+          Passenger_Pointer^.Sprite := Game.Sprites.Passenger_Circle;
+          // Assign sprite to station.
+        End;
+    1 :
+        Begin
+          Passenger_Pointer^.Shape  := Lozenge;
+          Passenger_Pointer^.Sprite := Game.Sprites.Passenger_Lozenge;
+        End;
+    2 :
+        Begin
+          Passenger_Pointer^.Shape  := Pentagon;
+          Passenger_Pointer^.Sprite := Game.Sprites.Passenger_Pentagon;
+        End;
+    3 :
+        Begin
+          Passenger_Pointer^.Shape  := Square;
+          Passenger_Pointer^.Sprite := Game.Sprites.Passenger_Square;
+        End;
+    4 :
+        Begin
+          Passenger_Pointer^.Shape  := Triangle;
+          Passenger_Pointer^.Sprite := Game.Sprites.Passenger_Triangle;
+        End;
+  End;
 
-                                                                                  Passenger_Allocate
-                                                                                      ();
 
   inc(Game.Stations[Temporary]^.Passengers_Count);
 End;
@@ -53,25 +86,6 @@ Begin
   Passenger_Deallocate(Passenger_Pointer);
   Passenger_Pointer := Nil;
 End;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // - Function that allocate memory for station, add it's pointer into stations table and set it's shape and position randomly. 
 
@@ -88,45 +102,57 @@ Begin
 
       // 5 first station are always of different shape.
       If (Game.Stations_Count > 5) Then
-        Shape := Random(5)
+        Begin
+          Shape := Random(5)
+        End
       Else
-        Shape := Game.Stations_Count - 1;
+        Begin
+          Shape := Game.Stations_Count - 1
+        End;
 
       Case Shape Of 
         0 :
             Begin
               Game.Stations[Game.Stations_Count]^.Shape := Circle;
               // Set station shape.
-              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.Station_Circle;
+              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.
+                                                            Station_Circle;
               // Assign sprite to station.
             End;
         1 :
             Begin
               Game.Stations[Game.Stations_Count]^.Shape := Lozenge;
-              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.Station_Lozenge;
+              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.
+                                                            Station_Lozenge;
             End;
         2 :
             Begin
               Game.Stations[Game.Stations_Count]^.Shape := Pentagon;
-              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.Station_Pentagon;
+              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.
+                                                            Station_Pentagon;
             End;
         3 :
             Begin
               Game.Stations[Game.Stations_Count]^.Shape := Square;
-              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.Station_Square;
+              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.
+                                                            Station_Square;
             End;
         4 :
             Begin
               Game.Stations[Game.Stations_Count]^.Shape := Triangle;
-              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.Station_Triangle;
+              Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.
+                                                            Station_Triangle;
             End;
       End;
 
-      Game.Stations[Game.Stations_Count]^.Coordinates.X := Random(Game.Window_Size.X - Station_Width
-                                                           )
-      ;
-      Game.Stations[Game.Stations_Count]^.Coordinates.Y := Random(Game.Window_Size.Y -
+      Game.Stations[Game.Stations_Count]^.Coordinates.X := Random(Game.
+                                                           Window_Size.X -
+                                                           Station_Width);
+      Game.Stations[Game.Stations_Count]^.Coordinates.Y := Random(Game.
+                                                           Window_Size.Y -
                                                            Station_Height);
+
+      Game.Stations[Game.Stations_Count]^.Passengers_Count := 0;
 
       inc(Game.Stations_Count);
     End;

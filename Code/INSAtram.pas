@@ -9,20 +9,47 @@ Var Game : Type_Game;
   Station_Pointer : Type_Station_Pointer;
   Timer : Type_Time;
   i : Byte;
+  Quit : Boolean;
+  Event : TSDL_Event;
 
 Begin
 
   Randomize();
 
-  Logic_Load(Game);
-  Graphics_Load(Game);
+  Quit := False;
 
-  For i := 0 To 10 Do
+  While (Not(Quit)) Do
     Begin
-      Station_Create(Game);
-      Graphics_Refresh(Game);
+
+      SDL_PollEvent(@Event);
+
+
+      if (Event.type_ = SDL_QUITEV) Then
+          Quit := True
+      else if (Event.type_ = SDL_MOUSEBUTTONDOWN) Then
+          writeln('Mouse Button Down');
+
+
+      Logic_Load(Game);
+      Graphics_Load(Game);
+
+      For i := 0 To 10 Do
+        Begin
+          Station_Create(Game);
+          Graphics_Refresh(Game);
+        End;
+
+      //For i := 0 To 20 Do
+      //  Begin
+      //    Passenger_Create(Game);
+      //    Graphics_Refresh(Game);
+      //  End;
+
+
+      SDL_Delay(5000);
+
     End;
 
-
   Graphics_Unload(Game);
+
 End.
