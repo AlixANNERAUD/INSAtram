@@ -3,51 +3,67 @@ Program INSAtram;
 
 //Unit_Logic, Unit_Graphics, Unit_Types,
 
-Uses Unit_Types, Unit_Graphics, Unit_Logic, sdl_image, sdl;
+Uses Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl;
 
 Var Game : Type_Game;
-  Station_Pointer : Type_Station_Pointer;
   Timer : Type_Time;
   i : Byte;
   Quit : Boolean;
   Event : TSDL_Event;
+  Coord : Type_Coordinates;
+  Angle : Real;
 
 Begin
 
-  Randomize();
+
+
+  Logic_Load(Game);
+  Graphics_Load(Game);
+  Mouse_Load();
+
+
+  //For i := 0 To 20 Do
+  // Begin
+  //    Passenger_Create(Game);
+  //    Graphics_Refresh(Game);
+  //  End;
+
+        //For i := 0 To 10 Do
+      //  Begin
+          Station_Create(Game);
+          Station_Create(Game);
+      //    Graphics_Refresh(Game);
+      //  End;
+
 
   Quit := False;
 
   While (Not(Quit)) Do
     Begin
 
+      Timer := Time_Get_Current();
+
       SDL_PollEvent(@Event);
 
 
-      if (Event.type_ = SDL_QUITEV) Then
-          Quit := True
-      else if (Event.type_ = SDL_MOUSEBUTTONDOWN) Then
-          writeln('Mouse Button Down');
+      If (Event.type_ = SDL_QUITEV) Then
+        Quit := True
+      Else If (Event.type_ = SDL_MOUSEBUTTONDOWN) Then
+             writeln('Mouse Button Down');
 
+    
+      Coord := Mouse_Get_Position();
 
-      Logic_Load(Game);
-      Graphics_Load(Game);
+      Angle := Graphics_Get_Angle(Game.Stations[0]^.Coordinates, Coord);
+      writeln('Angle: ', Angle);
 
-      For i := 0 To 10 Do
+      Graphics_Refresh(Game);
+
+      // Limit fps to 60.
+      If (Time_Get_Elapsed(Timer) < 1000/60) Then
         Begin
-          Station_Create(Game);
-          Graphics_Refresh(Game);
+          SDL_Delay((1000 Div 60) - Time_Get_Elapsed(Timer));
         End;
-
-      //For i := 0 To 20 Do
-      //  Begin
-      //    Passenger_Create(Game);
-      //    Graphics_Refresh(Game);
-      //  End;
-
-
-      SDL_Delay(5000);
-
     End;
 
   Graphics_Unload(Game);

@@ -3,31 +3,38 @@ Unit Unit_Graphics;
 
 Interface
 
-Uses Unit_Types, sdl, sdl_image, sdl_ttf, sysutils;
+Uses Unit_Types, sdl, sdl_image, sdl_ttf, sysutils, Math;
 
 // - Constant definition
 
 // - - Paths
 
-Const Path_Image_Station_Circle = 'Ressources/Station_Circle.png';
+// - - - Images
 
-Const Path_Image_Station_Square = 'Ressources/Station_Square.png';
+Const Path_Image_Station_Circle = 'Ressources/Images/Station_Circle.png';
 
-Const Path_Image_Station_Triangle = 'Ressources/Station_Triangle.png';
+Const Path_Image_Station_Square = 'Ressources/Images/Station_Square.png';
 
-Const Path_Image_Station_Pentagon = 'Ressources/Station_Pentagon.png';
+Const Path_Image_Station_Triangle = 'Ressources/Images/Station_Triangle.png';
 
-Const Path_Image_Station_Lozenge = 'Ressources/Station_Lozenge.png';
+Const Path_Image_Station_Pentagon = 'Ressources/Images/Station_Pentagon.png';
 
-Const Path_Image_Passenger_Circle = 'Ressources/Passenger_Circle.png';
+Const Path_Image_Station_Lozenge = 'Ressources/Images/Station_Lozenge.png';
 
-Const Path_Image_Passenger_Square = 'Ressources/Passenger_Square.png';
+Const Path_Image_Passenger_Circle = 'Ressources/Images/Passenger_Circle.png';
 
-Const Path_Image_Passenger_Triangle = 'Ressources/Passenger_Triangle.png';
+Const Path_Image_Passenger_Square = 'Ressources/Images/Passenger_Square.png';
 
-Const Path_Image_Passenger_Pentagon = 'Ressources/Passenger_Pentagon.png';
+Const Path_Image_Passenger_Triangle = 'Ressources/Images/Passenger_Triangle.png';
 
-Const Path_Image_Passenger_Lozenge = 'Ressources/Passenger_Lozenge.png';
+Const Path_Image_Passenger_Pentagon = 'Ressources/Images/Passenger_Pentagon.png';
+
+Const Path_Image_Passenger_Lozenge = 'Ressources/Images/Passenger_Lozenge.png';
+
+// - - - Fonts
+
+Const Path_Font = 'Ressources/Fonts/FreeSans.ttf';
+Const Path_Font_Bold = 'Ressources/Fonts/FreeSansBold.ttf';
 
   // - - Size
 
@@ -46,11 +53,11 @@ Const Passenger_Height = 8;
 Procedure Graphics_Load(Var Game : Type_Game);
 Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
+Function Graphics_Get_Angle(Position_1, Position_2 : Type_Coordinates): Real;
 
 // - - Entity
 
 Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);
-
 
 Implementation
 
@@ -63,7 +70,7 @@ Procedure Graphics_Load(Var Game : Type_Game);
 
 Var Video_Informations : PSDL_VideoInfo;
 Begin
-  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_EVERYTHING);
   // - Initialisation de la SDL
   Game.Window := SDL_SetVideoMode(0, 0, 32, SDL_SWSURFACE);
   // - Création de la fenêtre
@@ -73,7 +80,7 @@ Begin
   Game.Window_Size.X := Video_Informations^.current_w;
   Game.Window_Size.Y := Video_Informations^.current_h;
   // - Remplissage de la fenêtre en blanc
-  // - Chargement des sprites
+  // - Sprites loading
   Game.Sprites.Station_Square := IMG_Load(Path_Image_Station_Square);
   Game.Sprites.Station_Circle := IMG_Load(Path_Image_Station_Circle);
   Game.Sprites.Station_Triangle := IMG_Load(Path_Image_Station_Triangle);
@@ -85,6 +92,10 @@ Begin
   Game.Sprites.Passenger_Triangle := IMG_Load(Path_Image_Passenger_Triangle);
   Game.Sprites.Passenger_Pentagon := IMG_Load(Path_Image_Passenger_Pentagon);
   Game.Sprites.Passenger_Lozenge := IMG_Load(Path_Image_Passenger_Lozenge);
+
+  // - Fonts loading
+  Game.Fonts[0] := TTF_OPENFONT(Path_Font, 12);
+  Game.Fonts[0] := TTF_OPENFONT(Path_Font_Bold, 12);
 
   Game.Stations_Count := 0;
 
@@ -119,6 +130,11 @@ Begin
     End;
 
   SDL_Flip(Game.Window);
+End;
+
+Function Graphics_Get_Angle(Position_1, Position_2 : Type_Coordinates): Real;
+Begin
+  Graphics_Get_Angle := RadToDeg(ArcTan2(-Position_2.Y + Position_1.Y, Position_2.X - Position_1.X));
 End;
 
 // - - Station

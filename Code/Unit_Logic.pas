@@ -22,7 +22,9 @@ Implementation
 
 Procedure Logic_Load(Var Game : Type_Game);
 Begin
+  Randomize();
   Game.Stations_Count := 0;
+
 End;
 
 // - Passengers
@@ -87,6 +89,7 @@ Begin
   Passenger_Pointer := Nil;
 End;
 
+
 // - Function that allocate memory for station, add it's pointer into stations table and set it's shape and position randomly. 
 
 Procedure Station_Create(Var Game : Type_Game);
@@ -101,13 +104,13 @@ Begin
       Game.Stations[Game.Stations_Count] := Station_Allocate();
 
       // 5 first station are always of different shape.
-      If (Game.Stations_Count > 5) Then
+      If (Game.Stations_Count > 4) Then
         Begin
           Shape := Random(5)
         End
       Else
         Begin
-          Shape := Game.Stations_Count - 1
+          Shape := Game.Stations_Count
         End;
 
       Case Shape Of 

@@ -13,6 +13,8 @@ Const Profondeur_Couleur = 32;
 
 Const Maximum_Number_Stations = 200;
 
+Const Maximum_Number_Stations_Per_Line = 20;
+
   // - Type definition
 
   // - - Timer
@@ -25,6 +27,8 @@ Type Type_Surface = PSDL_Surface;
 
 Type Type_Rectangle = TSDL_Rect;
 
+Type Type_Font = pTTF_Font;
+
 Type Type_Sprite_Table = Record
   Station_Square, Station_Circle, Station_Triangle, Station_Lozenge,
   Station_Pentagon : Type_Surface;
@@ -32,16 +36,12 @@ Type Type_Sprite_Table = Record
   Passenger_Pentagon : Type_Surface
 End;
 
-Type Type_Color = Record
-  Red, Green, Blue : Byte;
-End;
-
 
 // - Entity
 // - - Généraux
 
 Type Type_Coordinates = Record
-  X, Y : Integer;
+  X, Y : LongInt;
 End;
 
 Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
@@ -77,6 +77,17 @@ Type Type_Train = Record
   Wagons_Sprite : array[0..3] Of Type_Surface;
 End;
 
+Type Type_Train_Pointer = ^Type_Train;
+
+// - - Line
+
+Type Type_Line = Record
+  Stations : array[0..Maximum_Number_Stations_Per_Line] Of Type_Station_Pointer;
+  Trains : array[0..4] of Type_Train_Pointer;
+  Stations_Count : Byte;
+End;
+
+End;
 
 // - Game
 
@@ -84,6 +95,7 @@ Type Type_Game = Record
   Window : Type_Surface;
   Window_Size : Type_Coordinates;
   Sprites : Type_Sprite_Table;
+  Fonts : array[0..1] Of Type_Font;
   Stations : array[0..(Maximum_Number_Stations - 1)] Of Type_Station_Pointer;
   Stations_Count : Integer;
 End;
