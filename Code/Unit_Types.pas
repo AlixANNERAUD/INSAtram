@@ -11,6 +11,8 @@ Uses sdl, sdl_image, sdl_ttf, sysutils;
 
 Const Profondeur_Couleur = 32;
 
+Const Maximum_Number_Stations = 200;
+
   // - Type definition
 
   // - - Timer
@@ -40,7 +42,16 @@ Type Type_Coordinates = Record
   X, Y : Integer;
 End;
 
-Type Type_Shape = (Square, Circle, Triangle, Lozenge, Pentagon);
+Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
+
+  // - - Passengers
+
+Type Type_Passenger = Record
+  Shape : Type_Shape;
+  Sprite : Type_Surface;
+End;
+
+Type Type_Passenger_Pointer = ^Type_Passenger;
 
   // - - Station
 
@@ -48,15 +59,31 @@ Type Type_Station = Record
   Shape : Type_Shape;
   Coordinates : Type_Coordinates;
   Sprite : Type_Surface;
+  Passengers : array[0..5] Of Type_Passenger_Pointer;
+  Passengers_Count : Byte;
 End;
 
 Type Type_Station_Pointer = ^Type_Station;
 
-  // - Game
+  // - - Train
+
+Type Type_Train = Record
+  Coordinates : Type_Coordinates;
+  Speed : Type_Coordinates;
+  Acceleration : Type_Coordinates;
+  Locomotive_Sprite : Type_Surface;
+  Wagons_Sprite : array[0..3] Of Type_Surface;
+End;
+
+
+// - Game
 
 Type Type_Game = Record
   Window : Type_Surface;
-  Sprite_Table : Type_Sprite_Table;
+  Window_Size : Type_Coordinates;
+  Sprites : Type_Sprite_Table;
+  Stations : array[0..(Maximum_Number_Stations - 1)] Of Type_Station_Pointer;
+  Stations_Count : Integer;
 End;
 
 
@@ -64,7 +91,12 @@ End;
 
 // - - Station allocation
 
-Procedure Station_Allocate(Var Station : Type_Station_Pointer);
+Function Passenger_Allocate() : Type_Passenger_Pointer;
+Procedure Passenger_Deallocate(Passenger_Pointer : Type_Passenger_Pointer);
+
+Function Station_Allocate() : Type_Station_Pointer;
+
+
 
 // - - Time
 Function Time_Get_Current(): Type_Time;
@@ -76,20 +108,24 @@ Implementation
 
 // - - Station
 
-Procedure Station_Allocate(Var Station : Type_Station_Pointer);
+Function Passenger_Allocate() : Type_Passenger_Pointer;
 Begin
-  writeln('Station allocation');
-  Station := GetMem(sizeof(Type_Station));
+  Passenger_Allocate := GetMem(SizeOf(Type_Passenger));
 End;
 
-Procedure Station_Deallocate(Var Station_Pointer : Type_Station_Pointer);
+Procedure Passenger_Deallocate(Passenger_Pointer : Type_Passenger_Pointer);
 Begin
-  If (Not(Station_Pointer = Nil)) Then
-    Begin
-      SDL_FreeSurface(Station_Pointer^.Sprite);
-      FreeMem(Station_Pointer);
-      Station_Pointer := Nil;
-    End;
+  FreeMem(Passenger_Pointer);
+End;
+
+Function Station_Allocate() : Type_Station_Pointer;
+Begin
+  Station_Allocate := GetMem(sizeof(Type_Station));
+End;
+
+Procedure Station_Deallocate(Station_Pointer : Type_Station_Pointer);
+Begin
+  FreeMem(Station_Pointer);
 End;
 
 

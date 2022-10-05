@@ -5,7 +5,9 @@ Interface
 
 Uses Unit_Types, sdl, sdl_image, sdl_ttf, sysutils;
 
-// - Définition des constantes
+// - Constant definition
+
+// - - Paths
 
 Const Path_Image_Station_Circle = 'Ressources/Circle.png';
 
@@ -17,9 +19,15 @@ Const Path_Image_Station_Pentagon = 'Ressources/Pentagon.png';
 
 Const Path_Image_Station_Lozenge = 'Ressources/Lozenge.png';
 
-Const Station_Width = 48;
+  // - - Size
 
-Const Station_Height = 48;
+Const Station_Width = 32;
+
+Const Station_Height = 32;
+
+Const Passenger_Width = 8;
+
+Const Passenger_Height = 8;
 
   // - Function definition
 
@@ -29,9 +37,10 @@ Procedure Graphics_Load(Var Game : Type_Game);
 Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
-// - - Station
+// - - Entity
 
 Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);
+
 
 Implementation
 
@@ -42,68 +51,95 @@ Var Station_Test : Type_Surface;
 
 Procedure Graphics_Load(Var Game : Type_Game);
 
+Var Video_Informations : PSDL_VideoInfo;
 Begin
   SDL_Init(SDL_INIT_VIDEO);
   // - Initialisation de la SDL
   Game.Window := SDL_SetVideoMode(0, 0, 32, SDL_FULLSCREEN);
   // - Création de la fenêtre
-  // SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255));
-
-
-
-  SDL_Flip(Game.Window);
-
-  Graphics_Refresh(Game);
+  SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255));
+  // - Obtention des informations de la fenêtre
+  Video_Informations := SDL_GetVideoInfo();
+  Game.Window_Size.X := Video_Informations^.current_w;
+  Game.Window_Size.Y := Video_Informations^.current_h;
   // - Remplissage de la fenêtre en blanc
   // - Chargement des sprites
-  Game.Sprite_Table.Station_Square := IMG_Load(Path_Image_Station_Square);
-  Game.Sprite_Table.Station_Circle := IMG_Load(Path_Image_Station_Circle);
-  Game.Sprite_Table.Station_Triangle := IMG_Load(Path_Image_Station_Triangle);
-  Game.Sprite_Table.Station_Pentagon := IMG_Load(Path_Image_Station_Pentagon);
-  Game.Sprite_Table.Station_Lozenge := IMG_Load(Path_Image_Station_Lozenge);
+  Game.Sprites.Station_Square := IMG_Load(Path_Image_Station_Square);
+  Game.Sprites.Station_Circle := IMG_Load(Path_Image_Station_Circle);
+  Game.Sprites.Station_Triangle := IMG_Load(Path_Image_Station_Triangle);
+  Game.Sprites.Station_Pentagon := IMG_Load(Path_Image_Station_Pentagon);
+  Game.Sprites.Station_Lozenge := IMG_Load(Path_Image_Station_Lozenge);
+
+  Game.Stations_Count := 0;
+
+  Graphics_Refresh(Game);
 End;
 
 Procedure Graphics_Unload(Var Game : Type_Game);
 Begin
+  // Free the sprites in memory.
+  SDL_FreeSurface(Game.Sprites.Station_Square);
+  SDL_FreeSurface(Game.Sprites.Station_Circle);
+  SDL_FreeSurface(Game.Sprites.Station_Triangle);
+  SDL_FreeSurface(Game.Sprites.Station_Pentagon);
+  SDL_FreeSurface(Game.Sprites.Station_Lozenge);
+  // Free the window in memory.
   SDL_FreeSurface(Game.Window);
   Game.Window := Nil;
   SDL_Quit();
 End;
 
 Procedure Graphics_Refresh(Var Game : Type_Game);
+
+Var i : Byte;
 Begin
+
+  If (Game.Stations_Count > 0) Then
+    Begin
+      For i := 0 To Game.Stations_Count - 1 Do
+        Begin
+          Station_Display(Game.Stations[i]^, Game);
+        End;
+    End;
+
   SDL_Flip(Game.Window);
 End;
 
 // - - Station
 
-
-
 Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);
 
 Var Destination_Rectangle : Type_Rectangle;
+  i : Byte;
 Begin
-  writeln('Station_Display : Station.Shape = ', Station.Shape);
-
+  // - Display station
   Destination_Rectangle.x := Station.Coordinates.X;
   Destination_Rectangle.y := Station.Coordinates.Y;
-  Destination_Rectangle.w := 225;
-  Destination_Rectangle.h := 225;
+  Destination_Rectangle.w := Station_Width;
+  Destination_Rectangle.h := Station_Height;
 
-  writeln('Station_Display : Destination_Rectangle.x = ', Destination_Rectangle.x);
-  writeln('Station_Display : Destination_Rectangle.y = ', Destination_Rectangle.y);
-  writeln('Station_Display : Destination_Rectangle.w = ', Destination_Rectangle.w);
-  writeln('Station_Display : Destination_Rectangle.h = ', Destination_Rectangle.h);
+  SDL_BlitSurface(Station.Sprite, Nil, Game.Window, @Destination_Rectangle);
 
-  Case Station.Shape Of 
-    Square : Station.Sprite := Game.Sprite_Table.Station_Square;
-    Circle : Station.Sprite := Game.Sprite_Table.Station_Circle;
-    Pentagon : Station.Sprite := Game.Sprite_Table.Station_Pentagon;
-    Triangle : Station.Sprite := Game.Sprite_Table.Station_Triangle;
-    Lozenge : Station.Sprite := Game.Sprite_Table.Station_Lozenge;
-  End;
+  // - Display station passengers
 
-  SDL_BlitSurface(Station.Sprite, Nil, Game.Window, @Destination_Rectangle)
+  Destination_Rectangle.w := Passenger_Width;
+  Destination_Rectangle.h := Passenger_Height;
+  If (Station.Passengers_Count > 0) Then
+    Begin
+      For i := 0 To (Station.Passengers_Count - 1) Do
+        Begin
+          // - Determine x position
+          If (i < 3) Then
+            Destination_Rectangle.x := (Station.Coordinates.X - (2 * Passenger_Width))
+          Else
+            Destination_Rectangle.x := (Station.Coordinates.X + Station_Width + Passenger_Width);
+          // - Determine y position
+          Destination_Rectangle.y := Station.Coordinates.Y + ((i Mod 3) * (Passenger_Height + 4));
+
+          SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Game.Window, @Destination_Rectangle);
+        End;
+    End;
 End;
+
 
 End.
