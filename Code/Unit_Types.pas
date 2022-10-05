@@ -87,8 +87,6 @@ Type Type_Line = Record
   Stations_Count : Byte;
 End;
 
-End;
-
 // - Game
 
 Type Type_Game = Record
