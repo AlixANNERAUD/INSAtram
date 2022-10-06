@@ -3,11 +3,11 @@ Unit Unit_Types;
 
 Interface
 
-// - Inclusion des libraries.
+  // - Libraries inclusion.
 
 Uses sdl, sdl_image, sdl_ttf, sysutils;
 
-// - Définition des constantes.
+  // - Constants declaration.
 
 Const Profondeur_Couleur = 32;
 
@@ -28,6 +28,12 @@ Type Type_Surface = PSDL_Surface;
 Type Type_Rectangle = TSDL_Rect;
 
 Type Type_Font = pTTF_Font;
+
+  // - - Graphics
+
+Type Type_Color = Record
+  Red, Green, Blue, Alpha : Byte;
+End;
 
 Type Type_Sprite_Table = Record
   Station_Square, Station_Circle, Station_Triangle, Station_Lozenge,
@@ -79,11 +85,11 @@ End;
 
 Type Type_Train_Pointer = ^Type_Train;
 
-// - - Line
+  // - - Line
 
 Type Type_Line = Record
   Stations : array[0..Maximum_Number_Stations_Per_Line] Of Type_Station_Pointer;
-  Trains : array[0..4] of Type_Train_Pointer;
+  Trains : array[0..4] Of Type_Train_Pointer;
   Stations_Count : Byte;
 End;
 

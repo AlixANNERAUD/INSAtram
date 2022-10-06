@@ -12,6 +12,7 @@ Uses Unit_Types, Unit_Graphics;
 Procedure Logic_Load(Var Game : Type_Game);
 
 Procedure Station_Create(Var Game : Type_Game);
+Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
 
 Procedure Passenger_Create(Var Game : Type_Game);
 Procedure Passenger_Delete(Var Passenger_Pointer : Type_Passenger_Pointer);
@@ -90,6 +91,7 @@ Begin
 End;
 
 
+
 // - Function that allocate memory for station, add it's pointer into stations table and set it's shape and position randomly. 
 
 Procedure Station_Create(Var Game : Type_Game);
@@ -159,6 +161,12 @@ Begin
 
       inc(Game.Stations_Count);
     End;
+End;
+
+Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
+Begin
+  Station_Get_Center_Position.X := Station.Coordinates.X + Station_Width Div 2;
+  Station_Get_Center_Position.Y := Station.Coordinates.Y + Station_Height Div 2;
 End;
 
 

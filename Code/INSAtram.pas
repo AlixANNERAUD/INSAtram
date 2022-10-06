@@ -3,15 +3,16 @@ Program INSAtram;
 
 //Unit_Logic, Unit_Graphics, Unit_Types,
 
-Uses Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl;
+Uses Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl, sdl_gfx;
 
 Var Game : Type_Game;
   Timer : Type_Time;
   i : Byte;
   Quit : Boolean;
   Event : TSDL_Event;
-  Coord : Type_Coordinates;
+  Mouse_Position : Type_Coordinates;
   Angle : Real;
+  Color : Type_Color;
 
 Begin
 
@@ -22,21 +23,25 @@ Begin
   Mouse_Load();
 
 
-  //For i := 0 To 20 Do
-  // Begin
-  //    Passenger_Create(Game);
-  //    Graphics_Refresh(Game);
-  //  End;
 
-        //For i := 0 To 10 Do
-      //  Begin
-          Station_Create(Game);
-          Station_Create(Game);
-      //    Graphics_Refresh(Game);
-      //  End;
+  For i := 0 To 10 Do
+    Begin
+      Station_Create(Game);
+    End;
+
+
+  For i := 0 To 20 Do
+    Begin
+      Passenger_Create(Game);
+    End;
 
 
   Quit := False;
+
+  Color.Red := 255;
+  Color.Green := 0;
+  Color.Blue := 0;
+  Color.Alpha := 255;
 
   While (Not(Quit)) Do
     Begin
@@ -51,11 +56,22 @@ Begin
       Else If (Event.type_ = SDL_MOUSEBUTTONDOWN) Then
              writeln('Mouse Button Down');
 
-    
-      Coord := Mouse_Get_Position();
 
-      Angle := Graphics_Get_Angle(Game.Stations[0]^.Coordinates, Coord);
-      writeln('Angle: ', Angle);
+      Mouse_Position := Mouse_Get_Position();
+
+
+
+      SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255,
+                   255))
+      ;
+
+      For i:= 0 to 8 Do
+        Begin
+          Line_Display(Station_Get_Center_Position(Game.Stations[i]^),
+      Station_Get_Center_Position(Game.Stations[i+1]^), Game);
+        End;
+
+
 
       Graphics_Refresh(Game);
 
