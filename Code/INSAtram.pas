@@ -65,11 +65,15 @@ Begin
                    255))
       ;
 
-      For i:= 0 to 8 Do
+      For i:= 0 to 7 Do
         Begin
           Line_Display(Station_Get_Center_Position(Game.Stations[i]^),
       Station_Get_Center_Position(Game.Stations[i+1]^), Game);
         End;
+
+        Line_Display(Station_Get_Center_Position(Game.Stations[8]^), Mouse_Position, Game);
+        Line_Display(Mouse_Position, Station_Get_Center_Position(Game.Stations[9]^), Game);
+        
 
 
 

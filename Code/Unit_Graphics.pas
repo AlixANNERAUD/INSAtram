@@ -78,7 +78,7 @@ Var Video_Informations : PSDL_VideoInfo;
 Begin
   SDL_Init(SDL_INIT_EVERYTHING);
   // - Initialisation de la SDL
-  Game.Window := SDL_SetVideoMode(0, 0, 32, SDL_FULLSCREEN);
+  Game.Window := SDL_SetVideoMode(0, 0, 32, SDL_SWSURFACE);
   // - Création de la fenêtre
   SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255))
   ;
