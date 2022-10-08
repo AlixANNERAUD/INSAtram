@@ -149,7 +149,15 @@ End;
 Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Coordinates; Width : Integer; Color :
                              Type_Color);
+var a, b : Real;
 Begin
+  // - Compute the slope of the line.
+  a := (Position_2.Y - Position_1.Y) / (Position_2.X - Position_1.X);
+  // - Compute the slope of the perpendicular line.
+  a := (-1) / a;
+  // - Compute the offset of the perpendicular line.
+  b := Position_1.Y - a * Position_1.X;
+
   aalineRGBA(Game.Window, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y
              , Color.Red, Color.Green, Color.Blue, Color.Alpha);
  // Graphics_Refresh(Game);

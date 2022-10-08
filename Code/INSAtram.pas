@@ -24,13 +24,13 @@ Begin
 
 
 
-  For i := 0 To 10 Do
+  For i := 0 To 9 Do
     Begin
       Station_Create(Game);
     End;
 
 
-  For i := 0 To 20 Do
+  For i := 0 To 19 Do
     Begin
       Passenger_Create(Game);
     End;
