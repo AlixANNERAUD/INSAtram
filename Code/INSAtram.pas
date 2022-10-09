@@ -11,7 +11,6 @@ Var Game : Type_Game;
   Quit : Boolean;
   Event : TSDL_Event;
   Mouse_Position : Type_Coordinates;
-  Angle : Real;
   Color : Type_Color;
 
 Begin
@@ -54,8 +53,10 @@ Begin
       If (Event.type_ = SDL_QUITEV) Then
         Quit := True
       Else If (Event.type_ = SDL_MOUSEBUTTONDOWN) Then
+      begin
              writeln('Mouse Button Down');
-
+             Quit := True;
+      end;
 
       Mouse_Position := Mouse_Get_Position();
 
@@ -68,7 +69,7 @@ Begin
       For i:= 0 to 7 Do
         Begin
           Line_Display(Station_Get_Center_Position(Game.Stations[i]^),
-      Station_Get_Center_Position(Game.Stations[i+1]^), Game);
+          Station_Get_Center_Position(Game.Stations[i+1]^), Game);
         End;
 
         Line_Display(Station_Get_Center_Position(Game.Stations[8]^), Mouse_Position, Game);

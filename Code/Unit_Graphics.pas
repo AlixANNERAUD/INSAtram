@@ -3,7 +3,7 @@ Unit Unit_Graphics;
 
 Interface
 
-Uses Unit_Types, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Math;
+Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Math;
 
 // - Constant definition
 
@@ -56,6 +56,7 @@ Const Passenger_Height = 8;
 Procedure Graphics_Load(Var Game : Type_Game);
 Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
+
 Function Graphics_Get_Angle(Position_1, Position_2 : Type_Coordinates): Real;
 Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Coordinates; Width : Integer; Color :
@@ -65,8 +66,12 @@ Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
 
 Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);
 
+
+
 Procedure Line_Display(Position_1, Position_2 : Type_Coordinates; Var Game :
                        Type_Game);
+
+
 
 Implementation
 
@@ -149,18 +154,11 @@ End;
 Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Coordinates; Width : Integer; Color :
                              Type_Color);
-var a, b : Real;
 Begin
-  // - Compute the slope of the line.
-  a := (Position_2.Y - Position_1.Y) / (Position_2.X - Position_1.X);
-  // - Compute the slope of the perpendicular line.
-  a := (-1) / a;
-  // - Compute the offset of the perpendicular line.
-  b := Position_1.Y - a * Position_1.X;
 
   aalineRGBA(Game.Window, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y
              , Color.Red, Color.Green, Color.Blue, Color.Alpha);
- // Graphics_Refresh(Game);
+
 End;
 
 // - - Station

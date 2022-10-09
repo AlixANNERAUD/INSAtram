@@ -17,6 +17,10 @@ Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
 Procedure Passenger_Create(Var Game : Type_Game);
 Procedure Passenger_Delete(Var Passenger_Pointer : Type_Passenger_Pointer);
 
+Procedure Line_Create(Var Game : Type_Game);
+Procedure Line_Add_Station(var Line : Type_Line; Station : Type_Station_Pointer);
+Procedure Line_Remove_Staton(var Line : Type_Line; Station : Type_Station_Pointer);
+
 Implementation
 
 // - Function definition
@@ -25,6 +29,7 @@ Procedure Logic_Load(Var Game : Type_Game);
 Begin
   Randomize();
   Game.Stations_Count := 0;
+  Game.Lines_Count := 0;
 
 End;
 
@@ -167,6 +172,40 @@ Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
 Begin
   Station_Get_Center_Position.X := Station.Coordinates.X + Station_Width Div 2;
   Station_Get_Center_Position.Y := Station.Coordinates.Y + Station_Height Div 2;
+End;
+
+Procedure Line_Create(var Game : Type_Game);
+Begin
+  if (Game.Lines_Count < Maximum_Number_Lines) Then
+    Begin
+      Game.Lines[Game.Lines_Count].Stations_Count := 0;
+      Game.Lines[Game.Lines_Count].Trains_Count := 0;
+      inc(Game.Lines_Count);
+    End;
+End;
+
+Procedure Line_Add_Station(var Line : Type_Line; Station : Type_Station_Pointer);
+Begin
+  if (Line.Stations_Count < Maximum_Number_Stations_Per_Line) Then
+  begin;
+    Line.Stations[Line.Stations_Count] := Station;
+    inc(Line.Stations_Count);
+  end;
+End;
+
+Procedure Line_Remove_Staton(var Line : Type_Line; Station : Type_Station_Pointer);
+var i : Byte;
+Begin
+  for i := 0 to Line.Stations_Count - 1 do
+  Begin
+    if (Line.Stations[i] = Station) then
+    Begin
+      Line.Stations[i] := Line.Stations[Line.Stations_Count - 1];
+      Line.Stations[Line.Stations_Count - 1] := Nil;
+      dec(Line.Stations_Count);
+      break;
+    End;
+  End;
 End;
 
 

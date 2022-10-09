@@ -15,7 +15,16 @@ Const Maximum_Number_Stations = 200;
 
 Const Maximum_Number_Stations_Per_Line = 20;
 
+Const Maximum_Number_Lines = 8;
+
+Const Maximum_Number_Trains_Per_Lines = 4;
+
+
   // - Type definition
+
+  // - - General
+
+Type Long_Integer_Pointer = ^LongInt;
 
   // - - Timer
 
@@ -42,6 +51,22 @@ Type Type_Sprite_Table = Record
   Passenger_Pentagon : Type_Surface
 End;
 
+// - - Animation
+
+
+
+// Animation structure used by animation function in order to animate objects.
+Type Type_Animation = Record
+
+  End_Time : Type_Time;
+  Variable : Long_Integer_Pointer;
+  Minimum_Value, Maximum_Value : LongInt;
+  //Path : Type_Animation_Path;
+  Enabled : Boolean;
+
+End;
+
+//Type Type_Animation_Path = function(var Animation : Type_Animation) : LongInt;
 
 // - Entity
 // - - Généraux
@@ -75,10 +100,21 @@ Type Type_Station_Pointer = ^Type_Station;
 
   // - - Train
 
+Type Type_Locomotive = Record
+  Position : Type_Coordinates;
+  Sprite : Type_Surface;
+End;
+
+Type Type_Wagon = Record
+  Position : Type_Coordinates;
+  Sprite : Type_Surface;
+End;
+
 Type Type_Train = Record
-  Coordinates : Type_Coordinates;
+  Position : Type_Coordinates;
   Speed : Type_Coordinates;
   Acceleration : Type_Coordinates;
+
   Locomotive_Sprite : Type_Surface;
   Wagons_Sprite : array[0..3] Of Type_Surface;
 End;
@@ -89,8 +125,10 @@ Type Type_Train_Pointer = ^Type_Train;
 
 Type Type_Line = Record
   Stations : array[0..Maximum_Number_Stations_Per_Line] Of Type_Station_Pointer;
-  Trains : array[0..4] Of Type_Train_Pointer;
   Stations_Count : Byte;
+
+  Trains : array[0..(Maximum_Number_Trains_Per_Lines - 1)] Of Type_Train_Pointer;
+  Trains_Count : Byte;
 End;
 
 // - Game
@@ -100,8 +138,12 @@ Type Type_Game = Record
   Window_Size : Type_Coordinates;
   Sprites : Type_Sprite_Table;
   Fonts : array[0..1] Of Type_Font;
+  // - Station
   Stations : array[0..(Maximum_Number_Stations - 1)] Of Type_Station_Pointer;
-  Stations_Count : Integer;
+  Stations_Count : Byte;
+  // - Lines
+  Lines : array[0..(Maximum_Number_Lines - 1)] of Type_Line;
+  Lines_Count : Byte;
 End;
 
 
@@ -113,8 +155,6 @@ Function Passenger_Allocate() : Type_Passenger_Pointer;
 Procedure Passenger_Deallocate(Passenger_Pointer : Type_Passenger_Pointer);
 
 Function Station_Allocate() : Type_Station_Pointer;
-
-
 
 // - - Time
 Function Time_Get_Current(): Type_Time;
