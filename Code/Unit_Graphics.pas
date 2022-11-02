@@ -25,13 +25,13 @@ Const Path_Image_Passenger_Circle = 'Ressources/Images/Passenger_Circle.png';
 
 Const Path_Image_Passenger_Square = 'Ressources/Images/Passenger_Square.png';
 
-Const Path_Image_Passenger_Triangle = 'Ressources/Images/Passenger_Triangle.png'
-  ;
+Const Path_Image_Passenger_Triangle = 'Ressources/Images/Passenger_Triangle.png';
 
-Const Path_Image_Passenger_Pentagon = 'Ressources/Images/Passenger_Pentagon.png'
-  ;
+Const Path_Image_Passenger_Pentagon = 'Ressources/Images/Passenger_Pentagon.png';
 
 Const Path_Image_Passenger_Lozenge = 'Ressources/Images/Passenger_Lozenge.png';
+
+Const Path_Image_Locomotive = 'Ressources/Images/Locomotive.png';
 
   // - - - Fonts
 
@@ -48,6 +48,7 @@ Const Station_Height = 32;
 Const Passenger_Width = 8;
 
 Const Passenger_Height = 8;
+
 
   // - Function definition
 
@@ -66,10 +67,16 @@ Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
 
 Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);
 
-
+Function Station_Get_Intermediate_Point(Position_1, Position_2 : Type_Coordinates) : Type_Coordinates;
 
 Procedure Line_Display(Position_1, Position_2 : Type_Coordinates; Var Game :
                        Type_Game);
+
+
+Procedure Train_Display(Var Train : Type_Train; Var Line : Type_Line; Var Game :
+                        Type_Game);
+                  
+  
 
 
 
@@ -104,6 +111,9 @@ Begin
   Game.Sprites.Passenger_Triangle := IMG_Load(Path_Image_Passenger_Triangle);
   Game.Sprites.Passenger_Pentagon := IMG_Load(Path_Image_Passenger_Pentagon);
   Game.Sprites.Passenger_Lozenge := IMG_Load(Path_Image_Passenger_Lozenge);
+
+  Game.Sprites.Locomotive := IMG_Load(Path_Image_Locomotive);
+
 
   // - Fonts loading
   Game.Fonts[0] := TTF_OPENFONT(Path_Font, 12);
@@ -181,14 +191,14 @@ Begin
       Intermediate_Position.Y := Position_2.Y + abs(Position_2.X - Position_1.X)
       ;
     End
-  // - Angle between -45° and -135° (included)
+    // - Angle between -45° and -135° (included)
   Else If ((Angle <= (-Pi/4)) And (Angle >= ((-3*Pi)/4))) Then
          Begin
            Intermediate_Position.X := Position_1.X;
            Intermediate_Position.Y := Position_2.Y - abs(Position_2.X -
                                       Position_1.X);
          End
-  // - Angle between -45° and 45° (excluded)
+         // - Angle between -45° and 45° (excluded)
   Else If (((Angle > (-Pi/4)) And (Angle < 0)) Or ((Angle < (Pi/4)) And (Angle
           >= 0))) Then
          Begin
@@ -196,7 +206,7 @@ Begin
            Intermediate_Position.X := Position_2.X - abs(Position_2.Y -
                                       Position_1.Y);
          End
-  // - Angle between 135° and -135° (excluded)
+         // - Angle between 135° and -135° (excluded)
   Else
     Begin
       Intermediate_Position.Y := Position_1.Y;
@@ -211,7 +221,23 @@ Begin
 
   Graphics_Draw_Line(Game, Position_1, Intermediate_Position, 0, Color);
   Graphics_Draw_Line(Game, Intermediate_Position, Position_2, 0, Color);
+End;
 
+
+Procedure Train_Display(Var Train : Type_Train; Var Line : Line_Type; Var Game : Type_Game);
+Var Destination_Rectangle : Type_Rectangle;
+Begin
+
+
+
+  // - Affiche la locomotive.
+  SDL_BlitSurface(Game.Sprites.Locomotive, Nil, Game.Window, @Destination_Rectangle);
+  // - Affiche les passagers. 
+  If (Train.Passengers_Count > 0) Then
+    Begin
+      // - Display the passengers
+    End;
+End;
 
 End;
 
@@ -255,6 +281,5 @@ Begin
         End;
     End;
 End;
-
 
 End.

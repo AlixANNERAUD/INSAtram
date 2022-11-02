@@ -168,24 +168,31 @@ Begin
     End;
 End;
 
+// Fonction qui permet d'obtenir le centre d'une station.
 Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
 Begin
   Station_Get_Center_Position.X := Station.Coordinates.X + Station_Width Div 2;
   Station_Get_Center_Position.Y := Station.Coordinates.Y + Station_Height Div 2;
 End;
 
+// Procédure qui permet de créer une ligne.
 Procedure Line_Create(var Game : Type_Game);
 Begin
+  // Vérifie si la ligne créer ne dépasse pas du tableau (ne correspondant pas à la limite "temporaire" pour un joueur).
   if (Game.Lines_Count < Maximum_Number_Lines) Then
     Begin
+      // Initialisation des attributs de la ligne.
       Game.Lines[Game.Lines_Count].Stations_Count := 0;
       Game.Lines[Game.Lines_Count].Trains_Count := 0;
+ 
       inc(Game.Lines_Count);
     End;
 End;
 
+// Procédure qui ajoute le pointeur d'une station à une ligne.
 Procedure Line_Add_Station(var Line : Type_Line; Station : Type_Station_Pointer);
 Begin
+  // 
   if (Line.Stations_Count < Maximum_Number_Stations_Per_Line) Then
   begin;
     Line.Stations[Line.Stations_Count] := Station;
@@ -193,6 +200,7 @@ Begin
   end;
 End;
 
+// Procédure qui supprime le pointeur d'une station au tableau des stations d'une ligne.
 Procedure Line_Remove_Staton(var Line : Type_Line; Station : Type_Station_Pointer);
 var i : Byte;
 Begin

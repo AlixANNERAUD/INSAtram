@@ -4,7 +4,6 @@ Interface
 
 Uses Unit_Types;
 
-
 Procedure Animation_Refresh(var Game : Type_Game);
 
 Implementation

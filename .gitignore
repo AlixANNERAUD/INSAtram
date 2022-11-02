@@ -14,5 +14,6 @@
 fp.ini
 fp.cfg
 fp.dsk
+*.res
 
 # End of https://www.toptal.com/developers/gitignore/api/freepascal

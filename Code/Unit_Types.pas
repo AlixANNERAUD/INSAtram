@@ -48,12 +48,11 @@ Type Type_Sprite_Table = Record
   Station_Square, Station_Circle, Station_Triangle, Station_Lozenge,
   Station_Pentagon : Type_Surface;
   Passenger_Circle, Passenger_Square, Passenger_Triangle, Passenger_Lozenge,
-  Passenger_Pentagon : Type_Surface
+  Passenger_Pentagon : Type_Surface;
+  Locomotive, Wagon : Type_Surface
 End;
 
 // - - Animation
-
-
 
 // Animation structure used by animation function in order to animate objects.
 Type Type_Animation = Record
@@ -105,18 +104,22 @@ Type Type_Locomotive = Record
   Sprite : Type_Surface;
 End;
 
+
 Type Type_Wagon = Record
   Position : Type_Coordinates;
   Sprite : Type_Surface;
 End;
 
 Type Type_Train = Record
-  Position : Type_Coordinates;
-  Speed : Type_Coordinates;
-  Acceleration : Type_Coordinates;
+  
+  Position : Integer;             // Position relative du train sur la ligne.
+  Speed : Integer;                // Vitesse du train.
+  Acceleration : Integer;         // Accélération du train.
 
-  Locomotive_Sprite : Type_Surface;
-  Wagons_Sprite : array[0..3] Of Type_Surface;
+  Locomotive : Type_Locomotive;   // Locomotive du train.
+
+  Wagon_Count : Byte;                 //  Nombre de wagons.
+  Wagon : array[0..2] Of Type_Wagon;  //  Pointeur vers les wagons du train.
 End;
 
 Type Type_Train_Pointer = ^Type_Train;
@@ -149,14 +152,20 @@ End;
 
 // - Function declaration
 
-// - - Station allocation
+// - - Object allocation.
 
 Function Passenger_Allocate() : Type_Passenger_Pointer;
-Procedure Passenger_Deallocate(Passenger_Pointer : Type_Passenger_Pointer);
-
+Function Train_Allocate() : Type_Train_Pointer;
 Function Station_Allocate() : Type_Station_Pointer;
 
+// - - Object deallocation.
+
+Procedure Passenger_Deallocate(Passenger_Pointer : Type_Passenger_Pointer);
+Procedure Train_Deallocate(Train_Pointer : Type_Train_Pointer);
+Procedure Station_Deallocate(Station_Pointer : Type_Station_Pointer);
+
 // - - Time
+
 Function Time_Get_Current(): Type_Time;
 Function Time_Get_Elapsed(Start_Time : Type_Time) : Type_Time;
 
@@ -164,16 +173,16 @@ Implementation
 
 // - Function definition
 
-// - - Station
+// - - Object allocation.
 
 Function Passenger_Allocate() : Type_Passenger_Pointer;
 Begin
   Passenger_Allocate := GetMem(SizeOf(Type_Passenger));
 End;
 
-Procedure Passenger_Deallocate(Passenger_Pointer : Type_Passenger_Pointer);
+Function Train_Allocate() : Type_Train_Pointer;
 Begin
-  FreeMem(Passenger_Pointer);
+  Train_Allocate := GetMem(SizeOf(Type_Train));
 End;
 
 Function Station_Allocate() : Type_Station_Pointer;
@@ -181,11 +190,22 @@ Begin
   Station_Allocate := GetMem(sizeof(Type_Station));
 End;
 
+// - - Object deallocation.
+
+Procedure Passenger_Deallocate(Passenger_Pointer : Type_Passenger_Pointer);
+Begin
+  FreeMem(Passenger_Pointer);
+End;
+
+Procedure Train_Deallocate(Train_Pointer : Type_Train_Pointer);
+Begin
+  FreeMem(Train_Pointer);
+End;
+
 Procedure Station_Deallocate(Station_Pointer : Type_Station_Pointer);
 Begin
   FreeMem(Station_Pointer);
 End;
-
 
 // - - Time
 
