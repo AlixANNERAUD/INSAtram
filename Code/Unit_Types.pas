@@ -3,11 +3,11 @@ Unit Unit_Types;
 
 Interface
 
-  // - Libraries inclusion.
+// - Libraries inclusion.
 
 Uses sdl, sdl_image, sdl_ttf, sysutils;
 
-  // - Constants declaration.
+// - Constants declaration.
 
 Const Profondeur_Couleur = 32;
 
@@ -18,6 +18,7 @@ Const Maximum_Number_Stations_Per_Line = 20;
 Const Maximum_Number_Lines = 8;
 
 Const Maximum_Number_Trains_Per_Lines = 4;
+
 
 
   // - Type definition
@@ -55,6 +56,7 @@ End;
 // - - Animation
 
 // Animation structure used by animation function in order to animate objects.
+
 Type Type_Animation = Record
 
   End_Time : Type_Time;
@@ -111,15 +113,23 @@ Type Type_Wagon = Record
 End;
 
 Type Type_Train = Record
-  
-  Position : Integer;             // Position relative du train sur la ligne.
-  Speed : Integer;                // Vitesse du train.
-  Acceleration : Integer;         // Accélération du train.
 
-  Locomotive : Type_Locomotive;   // Locomotive du train.
+  Counter_Station : Integer;
+  // Est incrémenté à chaque passage en quai (par la station?) pour localiser le train sur la ligne.
+  Position : Integer;
+  // Position relative du train sur la ligne.
+  Speed : Integer;
+  // Vitesse du train.
+  Acceleration : Integer;
+  // Accélération du train.
 
-  Wagon_Count : Byte;                 //  Nombre de wagons.
-  Wagon : array[0..2] Of Type_Wagon;  //  Pointeur vers les wagons du train.
+  Locomotive : Type_Locomotive;
+  // Locomotive du train.
+
+  Wagon_Count : Byte;
+  //  Nombre de wagons.
+  Wagon : array[0..2] Of Type_Wagon;
+  //  Pointeur vers les wagons du train.
 End;
 
 Type Type_Train_Pointer = ^Type_Train;
@@ -145,7 +155,7 @@ Type Type_Game = Record
   Stations : array[0..(Maximum_Number_Stations - 1)] Of Type_Station_Pointer;
   Stations_Count : Byte;
   // - Lines
-  Lines : array[0..(Maximum_Number_Lines - 1)] of Type_Line;
+  Lines : array[0..(Maximum_Number_Lines - 1)] Of Type_Line;
   Lines_Count : Byte;
 End;
 
