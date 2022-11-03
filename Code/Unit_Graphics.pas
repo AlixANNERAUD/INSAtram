@@ -45,6 +45,10 @@ Const Station_Width = 32;
 
 Const Station_Height = 32;
 
+Const Locomotive_Width = 32;
+
+Const Locomotive_Height = 24;
+
 Const Passenger_Width = 8;
 
 Const Passenger_Height = 8;
@@ -69,18 +73,11 @@ Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);
 
 Function Station_Get_Intermediate_Point(Position_1, Position_2 : Type_Coordinates) : Type_Coordinates;
 
-Function Station_Get_Intermediate_Point_Progression(Position_1, Position_2 : Type_Coordinates) : Integer;
-
-
 Procedure Line_Display(Position_1, Position_2 : Type_Coordinates; Var Game :
                        Type_Game);
 
-
 Procedure Train_Display(Var Train : Type_Train; Var Line : Type_Line; Var Game :
                         Type_Game);
-                  
-
-
 
 
 Implementation
@@ -227,6 +224,7 @@ Begin
 End;
 
 Function Station_Get_Intermediate_Point(Position_1, Position_2 : Type_Coordinates) : Type_Coordinates;
+
 Var Angle : Real;
 Begin
   Angle := Graphics_Get_Angle(Position_1, Position_2);
@@ -242,7 +240,7 @@ Begin
          Begin
            Station_Get_Intermediate_Point.X := Position_1.X;
            Station_Get_Intermediate_Point.Y := Position_2.Y - abs(Position_2.X -
-                                      Position_1.X);
+                                               Position_1.X);
          End
          // - Angle between -45° and 45° (excluded)
   Else If (((Angle > (-Pi/4)) And (Angle < 0)) Or ((Angle < (Pi/4)) And (Angle
@@ -250,7 +248,7 @@ Begin
          Begin
            Station_Get_Intermediate_Point.Y := Position_1.Y;
            Station_Get_Intermediate_Point.X := Position_2.X - abs(Position_2.Y -
-                                      Position_1.Y);
+                                               Position_1.Y);
          End
          // - Angle between 135° and -135° (excluded)
   Else
@@ -258,19 +256,19 @@ Begin
       Station_Get_Intermediate_Point.Y := Position_1.Y;
       Station_Get_Intermediate_Point.X := Position_2.X + abs(Position_2.Y - Position_1.Y);
     End;
-end.
-
-Function Station_Get_Intermediate_Point_Progression(Position_1, Position_2 : Type_Coordinates) : Integer;
-Var Line_Length : Byte;
-Begin
-
-end.
+End;
 
 Procedure Train_Display(Var Train : Type_Train; Var Line : Line_Type; Var Game : Type_Game);
+
 Var Destination_Rectangle : Type_Rectangle;
 Begin
+  // - Change le sprite de la locomotive pour son image alignée sur la portion de ligne entre deux stations spécifiées par le 'Train.Counter_Station' qui localise le train sur la ligne.
+  Game.Sprites.Locomotive := rotozoomSurface(Game.Sprites.Locomotive, Graphics_Get_Angle(Line.Stations[Train.Counter_Station].Coordinates,Line.Stations[Train.Counter_Station+1].Coordinates), 1, 1);
 
-
+  Destination_Rectangle.x := Train.Locomotive.Position.X;
+  Destination_Rectangle.y := Train.Locomotive.Position.Y;
+  Destination_Rectangle.w := Locomotive_Width;
+  Destination_Rectangle.h := Locomotive_Height;
 
   // - Affiche la locomotive.
   SDL_BlitSurface(Game.Sprites.Locomotive, Nil, Game.Window, @Destination_Rectangle);
