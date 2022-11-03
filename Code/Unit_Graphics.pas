@@ -69,6 +69,9 @@ Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);
 
 Function Station_Get_Intermediate_Point(Position_1, Position_2 : Type_Coordinates) : Type_Coordinates;
 
+Function Station_Get_Intermediate_Point_Progression(Position_1, Position_2 : Type_Coordinates) : Integer;
+
+
 Procedure Line_Display(Position_1, Position_2 : Type_Coordinates; Var Game :
                        Type_Game);
 
@@ -76,7 +79,7 @@ Procedure Line_Display(Position_1, Position_2 : Type_Coordinates; Var Game :
 Procedure Train_Display(Var Train : Type_Train; Var Line : Type_Line; Var Game :
                         Type_Game);
                   
-  
+
 
 
 
@@ -223,6 +226,45 @@ Begin
   Graphics_Draw_Line(Game, Intermediate_Position, Position_2, 0, Color);
 End;
 
+Function Station_Get_Intermediate_Point(Position_1, Position_2 : Type_Coordinates) : Type_Coordinates;
+Var Angle : Real;
+Begin
+  Angle := Graphics_Get_Angle(Position_1, Position_2);
+
+  If ((Angle >= (Pi/4)) And (Angle <= ((3*Pi)/4))) Then
+    Begin
+      Station_Get_Intermediate_Point.X := Position_1.X;
+      Station_Get_Intermediate_Point.Y := Position_2.Y + abs(Position_2.X - Position_1.X)
+      ;
+    End
+    // - Angle between -45° and -135° (included)
+  Else If ((Angle <= (-Pi/4)) And (Angle >= ((-3*Pi)/4))) Then
+         Begin
+           Station_Get_Intermediate_Point.X := Position_1.X;
+           Station_Get_Intermediate_Point.Y := Position_2.Y - abs(Position_2.X -
+                                      Position_1.X);
+         End
+         // - Angle between -45° and 45° (excluded)
+  Else If (((Angle > (-Pi/4)) And (Angle < 0)) Or ((Angle < (Pi/4)) And (Angle
+          >= 0))) Then
+         Begin
+           Station_Get_Intermediate_Point.Y := Position_1.Y;
+           Station_Get_Intermediate_Point.X := Position_2.X - abs(Position_2.Y -
+                                      Position_1.Y);
+         End
+         // - Angle between 135° and -135° (excluded)
+  Else
+    Begin
+      Station_Get_Intermediate_Point.Y := Position_1.Y;
+      Station_Get_Intermediate_Point.X := Position_2.X + abs(Position_2.Y - Position_1.Y);
+    End;
+end.
+
+Function Station_Get_Intermediate_Point_Progression(Position_1, Position_2 : Type_Coordinates) : Integer;
+Var Line_Length : Byte;
+Begin
+
+end.
 
 Procedure Train_Display(Var Train : Type_Train; Var Line : Line_Type; Var Game : Type_Game);
 Var Destination_Rectangle : Type_Rectangle;
