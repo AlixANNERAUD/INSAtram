@@ -46,11 +46,14 @@ Type Type_Color = Record
 End;
 
 Type Type_Sprite_Table = Record
+  // - Stations
   Station_Square, Station_Circle, Station_Triangle, Station_Lozenge,
   Station_Pentagon : Type_Surface;
+  // - Passagers
   Passenger_Circle, Passenger_Square, Passenger_Triangle, Passenger_Lozenge,
   Passenger_Pentagon : Type_Surface;
-  Locomotive, Wagon : Type_Surface
+  // - Vehicules (Locomotive et Wagon)
+  Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : Type_Surface;
 End;
 
 // - - Animation
@@ -114,14 +117,10 @@ End;
 
 Type Type_Train = Record
 
-  Counter_Station : Integer;
-  // Est incrémenté à chaque passage en quai (par la station?) pour localiser le train sur la ligne.
-  Position : Integer;
-  // Position relative du train sur la ligne.
-  Speed : Integer;
-  // Vitesse du train.
-  Acceleration : Integer;
-  // Accélération du train.
+  Last_Station : Type_Station_Pointer;  // - Pointeur de la dernière station.
+  Distance : Integer;       // - Distance parcourue depuis la dernière station en pixel.
+  Speed : Integer;          // - Vitesse du train.
+  Acceleration : Integer;   // - Accélération du train.
 
   Locomotive : Type_Locomotive;
   // Locomotive du train.

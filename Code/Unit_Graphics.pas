@@ -7,9 +7,13 @@ Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Ma
 
 // - Constant definition
 
-// - - Paths
+// - - Settings
 
-// - - - Images
+Const Color_Depth = 32;
+
+  // - - Paths
+
+  // - - - Images
 
 Const Path_Image_Station_Circle = 'Ressources/Images/Station_Circle.png';
 
@@ -41,13 +45,19 @@ Const Path_Font_Bold = 'Ressources/Fonts/FreeSansBold.ttf';
 
   // - - Size
 
+  // - - - Station
+
 Const Station_Width = 32;
 
 Const Station_Height = 32;
 
-Const Locomotive_Width = 32;
+  // - - - Vehicle (Locomotive and Wagon)
 
-Const Locomotive_Height = 24;
+Const Vehicle_Width = 32;
+
+Const Vehicle_Height = 24;
+
+  // - - - Passenger
 
 Const Passenger_Width = 8;
 
@@ -66,6 +76,7 @@ Function Graphics_Get_Angle(Position_1, Position_2 : Type_Coordinates): Real;
 Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Coordinates; Width : Integer; Color :
                              Type_Color);
+Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates): Integer;
 
 // - - Entity
 
@@ -90,7 +101,7 @@ Var Video_Informations : PSDL_VideoInfo;
 Begin
   SDL_Init(SDL_INIT_EVERYTHING);
   // - Initialisation de la SDL
-  Game.Window := SDL_SetVideoMode(0, 0, 32, SDL_SWSURFACE);
+  Game.Window := SDL_SetVideoMode(0, 0, Color_Depth, SDL_SWSURFACE);
   // - Création de la fenêtre
   SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255))
   ;
@@ -100,19 +111,32 @@ Begin
   Game.Window_Size.Y := Video_Informations^.current_h;
   // - Remplissage de la fenêtre en blanc
   // - Sprites loading
+
+  // - - Station
   Game.Sprites.Station_Square := IMG_Load(Path_Image_Station_Square);
   Game.Sprites.Station_Circle := IMG_Load(Path_Image_Station_Circle);
   Game.Sprites.Station_Triangle := IMG_Load(Path_Image_Station_Triangle);
   Game.Sprites.Station_Pentagon := IMG_Load(Path_Image_Station_Pentagon);
   Game.Sprites.Station_Lozenge := IMG_Load(Path_Image_Station_Lozenge);
 
+  // - - Passenger
   Game.Sprites.Passenger_Circle := IMG_Load(Path_Image_Passenger_Circle);
   Game.Sprites.Passenger_Square := IMG_Load(Path_Image_Passenger_Square);
   Game.Sprites.Passenger_Triangle := IMG_Load(Path_Image_Passenger_Triangle);
   Game.Sprites.Passenger_Pentagon := IMG_Load(Path_Image_Passenger_Pentagon);
   Game.Sprites.Passenger_Lozenge := IMG_Load(Path_Image_Passenger_Lozenge);
 
-  Game.Sprites.Locomotive := IMG_Load(Path_Image_Locomotive);
+  // - - Véhicule (Locomotive et Wagon)
+
+  Game.Sprites.Vehicle_0_Degree := SDL_CreateRGBSurface(0, Vehicule_Width, Vehicule_Height, Color_Depth, 0, 0, 0, 0);
+  SDL_FillRect(Game.Sprites.Vehicle_0_Degree, Nil, SDL_MapRGB(Game.Window^.format, 0, 0, 0));
+
+  Game.Sprites.Vehicle_45_Degree := rotozoomSurface(Game.Sprites.Vehicle_0_Degree, 45, 1, 1);
+
+  Game.Sprites.Vehicle_90_Degree := SDL_CreateRGBSurface(0, Vehicule_Height, Vehicule_Width, Color_Depth, 0, 0, 0, 0);
+  SDL_FillRect(Game.Sprites.Vehicle_0_Degree, Nil, SDL_MapRGB(Game.Window^.format, 0, 0, 0));
+
+  Game.Sprites.Vehicle_135_Degree := rotozoomSurface(Game.Sprites.Vehicle_90_Degree, 45, 1, 1);
 
 
   // - Fonts loading
@@ -153,6 +177,11 @@ Begin
 
 
   SDL_Flip(Game.Window);
+End;
+
+Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates): Integer;
+Begin
+  Graphics_Get_Distance := round(sqrt(sqr(Position_2.X-Position_1.X)+sqr(Position_2.Y-Position_1.Y)));
 End;
 
 Function Graphics_Get_Angle(Position_1, Position_2 : Type_Coordinates): Real;
@@ -261,22 +290,83 @@ End;
 Procedure Train_Display(Var Train : Type_Train; Var Line : Line_Type; Var Game : Type_Game);
 
 Var Destination_Rectangle : Type_Rectangle;
+  i : Byte;
+  Next_Station : Type_Station_Pointer;
+  Intermediate_Point : Type_Coordinates;
+  Angle : Real;
+  Coord_Centre : Type_Coordinates;
 Begin
-  // - Change le sprite de la locomotive pour son image alignée sur la portion de ligne entre deux stations spécifiées par le 'Train.Counter_Station' qui localise le train sur la ligne.
-  Game.Sprites.Locomotive := rotozoomSurface(Game.Sprites.Locomotive, Graphics_Get_Angle(Line.Stations[Train.Counter_Station].Coordinates,Line.Stations[Train.Counter_Station+1].Coordinates), 1, 1);
 
-  Destination_Rectangle.x := Train.Locomotive.Position.X;
-  Destination_Rectangle.y := Train.Locomotive.Position.Y;
-  Destination_Rectangle.w := Locomotive_Width;
-  Destination_Rectangle.h := Locomotive_Height;
+  // Dernière station
+  // Station d'arrivée
+  // -> Point intermédiaire -> longueur ou se situe le point intermédiaire.
 
-  // - Affiche la locomotive.
-  SDL_BlitSurface(Game.Sprites.Locomotive, Nil, Game.Window, @Destination_Rectangle);
-  // - Affiche les passagers. 
-  If (Train.Passengers_Count > 0) Then
+  // - Détermination de la station d'arrivée à partir de la station de départ.  
+  For i := 0 To Line.Stations_Count - 1 Do
     Begin
-      // - Display the passengers
+      If (Line.Stations[i] = Train.Last_Station) Then
+        Next_Station := Line.Stations[i + 1];
     End;
+
+  // - Détermination du point intermédiaire.
+  Station_Get_Intermediate_Point(Train.Last_Station^.Position, Next_Station^.Position);
+
+  // - Détermination de la droite sur laquel le train se trouve et calcule l'angle du véhicule en conséquence.
+  If (Train.Distance <= Graphics_Get_Distance(Train.Last_Station^.Position, Intermediate_Point)) Then
+    Begin
+      Angle := Graphics_Get_Angle(Train.Last_Station^.Position, Intermediate_Point);
+    End
+  Else
+    Begin
+      Angle := Graphics_Get_Angle(Intermediate_Point, Next_Station^.Position);
+    End;
+
+  // - Simplification de l'angle pour effectuer les comparaison dans les 2er quadrants.
+  If (Angle < 0) Then
+    Angle := Angle + Pi
+  Else If (Angle > Pi) Then
+         Angle := Angle - Pi;
+
+  // - Détermination du sprite en fonction de l'angle.
+  If ((Angle >= 0) And (Angle < (Pi/8)) or (Angle > (7*Pi/8))) Then // Si l'angle est entre 0° et 22.5° ou entre 157.5° et 180°
+    Train.Locomotive.Sprite := Vehicle_0_Degree;                     // Le sprite est à 0°
+    Coord_Centre.Y := Train.Last_Station^.Position.Y;
+    Coord_Centre.X := Train.Distance
+  Else If ((Angle >= (Pi/8) And (Angle < (3*Pi/8)))) Then           // Si l'angle est entre 22.5° et 67.5°
+    Train.Locomotive.Sprite := Vehicle_45_Degree                    // Le sprite est à 45°.
+    Coord_Centre.Y := round(sqrt(sqr(Train.Distance)*0.5));
+    Coord_Centre.X := Coord_Centre.Y
+  Else If ((Angle >= (3*Pi/8)) and (Angle < (5*Pi/8))) Then         // Si l'angle est entre 67.5° et 112.5°
+    Train.Locomotive.Sprite := Vehicle_90_Degree                    // Le sprite est à 90°.
+    Coord_Centre.Y := Train.Distance;
+    Coord_Centre.X := Train.Last_Station^.Position.X
+  Else If (Angle >= (5*Pi/8)) and (Angle < (7*Pi/8)) Then           // Si l'angle est entre 112.5° et 157.5°
+    Train.Locomotive.Sprite := Vehicle_135_Degree;                  // Le sprite est à 135°.
+    Coord_Centre.Y := round(sqrt(sqr(Train.Distance)*0.5));
+    Coord_Centre.X := (-1)*Coord_Centre.Y;
+
+
+
+  {
+    Determination coordonnées cartésiennes :
+    Si angle 0 ou Pi : horizontal : donc y = y_station (ou point intermédiaire)
+    Si angle 45 : x = y, distance² = x² + y² = x² + x² = 2x² => x = y = sqrt(distance²/2) 
+    Si angle 90 : verticale : donc x = x_station (ou point intermédiaire)  
+  }
+
+
+          Destination_Rectangle.x := Train.Locomotive.Position.X;
+          Destination_Rectangle.y := Train.Locomotive.Position.Y;
+          Destination_Rectangle.w := Locomotive_Width;
+          Destination_Rectangle.h := Locomotive_Height;
+
+          // - Affiche la locomotive.
+          SDL_BlitSurface(Game.Sprites.Locomotive, Nil, Game.Window, @Destination_Rectangle);
+          // - Affiche les passagers. 
+          If (Train.Passengers_Count > 0) Then
+         Begin
+           // - Display the passengers
+         End;
 End;
 
 End;
