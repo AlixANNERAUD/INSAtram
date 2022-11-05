@@ -1,0 +1,6 @@
+
+Program Suce;
+
+Begin
+   
+End.
