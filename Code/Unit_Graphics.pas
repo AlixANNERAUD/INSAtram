@@ -73,6 +73,8 @@ Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
 Function Graphics_Get_Angle(Position_1, Position_2 : Type_Coordinates): Real;
+Function Graphics_Get_Direction(Angle : Real) : Real;
+
 Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Coordinates; Width : Integer; Color :
                              Type_Color);
@@ -190,6 +192,44 @@ Begin
                         Position_2.X - Position_1.X);
 End;
 
+// Fonction déterminant l'orientation d'un angle parmis : 0, Pi/4, Pi/2, 3Pi/4, Pi, -Pi/4, -Pi/2, -3Pi/4.
+Function Graphics_Get_Direction(Angle : Real) : Real;
+
+Var Sign : Integer;
+Begin
+
+  // Si l'angle est négatif (dans la partie inférieure du cercle),
+  //son signe est inversé, mais pris en compte pour plus tard afin de simplfier la disjonction des cas.
+  If (Angle < 0) Then
+    Begin
+      Angle := -Angle;
+      Sign := -1;
+    End
+    // Si l'angle est positif mais dans la partie inférieur du cercle trigonométrique,
+    // on lui ajoute 2Pi afin d'obtenir son analogue négatif puis comme pour le cas précédent,
+    // on annule son signe et on prend en compte son signe pour plus tard.
+  Else If (Angle > Pi) Then
+         Begin
+           Angle := -(Angle - (2*Pi));
+           Sign := -1;
+         End
+  Else
+    Sign := 1;
+
+  If ((Angle >= 0) And (Angle < (Pi/8))) Then               // Si l'angle est entre 0° et 22.5° ou entre 157.5° et 180°
+    Graphics_Get_Direction := 0                           // L'orientation est de 0°;
+  Else If ((Angle >= (Pi/8)) And (Angle < (3*Pi/8))) Then   // Si l'angle est entre 22.5° et 67.5°
+         Graphics_Get_Direction := Sign * (Pi/4)          // L'orientation est de 45° ou -45° (en fonction du signe).
+  Else If ((Angle >= (3*Pi/8)) And (Angle < (5*Pi/8))) Then // Si l'angle est entre 67.5° et 112.5°
+         Graphics_Get_Direction := Sign * (Pi/2)          // L'orientation est de 90° ou -90° (en fonction du signe).
+  Else If ((Angle >= (5*Pi/8)) And (Angle < (7*Pi/8))) Then // Si l'angle est entre 112.5° et 157.5°
+         Graphics_Get_Direction := Sign * (3*Pi/4);
+  // L'orientation est de 135° ou -135° (en fonction du signe).
+  Else If (Angle >= (7*Pi/8)) Then                          // Si l'angle est supérieur à 157.5°.
+         Graphics_Get_Direction := Pi;
+  // L'orientatino est de 180°
+End;
+
 Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Coordinates; Width : Integer; Color :
                              Type_Color);
@@ -207,41 +247,11 @@ Procedure Line_Display(Position_1, Position_2 : Type_Coordinates; Var Game :
                        Type_Game);
 
 Var Angle : Real;
-  Intermediate_Position : Type_Coordinates;
+  Intermediate_Point : Type_Coordinates;
   Color : Type_Color;
 Begin
 
-  Angle := Graphics_Get_Angle(Position_1, Position_2);
-
-  // - Angle between 45° and 135° (included)
-  If ((Angle >= (Pi/4)) And (Angle <= ((3*Pi)/4))) Then
-    Begin
-      Intermediate_Position.X := Position_1.X;
-      Intermediate_Position.Y := Position_2.Y + abs(Position_2.X - Position_1.X)
-      ;
-    End
-    // - Angle between -45° and -135° (included)
-  Else If ((Angle <= (-Pi/4)) And (Angle >= ((-3*Pi)/4))) Then
-         Begin
-           Intermediate_Position.X := Position_1.X;
-           Intermediate_Position.Y := Position_2.Y - abs(Position_2.X -
-                                      Position_1.X);
-         End
-         // - Angle between -45° and 45° (excluded)
-  Else If (((Angle > (-Pi/4)) And (Angle < 0)) Or ((Angle < (Pi/4)) And (Angle
-          >= 0))) Then
-         Begin
-           Intermediate_Position.Y := Position_1.Y;
-           Intermediate_Position.X := Position_2.X - abs(Position_2.Y -
-                                      Position_1.Y);
-         End
-         // - Angle between 135° and -135° (excluded)
-  Else
-    Begin
-      Intermediate_Position.Y := Position_1.Y;
-      Intermediate_Position.X := Position_2.X + abs(Position_2.Y - Position_1.Y)
-      ;
-    End;
+  Intermediate_Point := Station_Get_Intermediate_Point(Position_1, Position_2);
 
   Color.Red := 0;
   Color.Green := 0;
@@ -292,9 +302,12 @@ Procedure Train_Display(Var Train : Type_Train; Var Line : Line_Type; Var Game :
 Var Destination_Rectangle : Type_Rectangle;
   i : Byte;
   Next_Station : Type_Station_Pointer;
-  Intermediate_Point : Type_Coordinates;
+  Intermediate_Point_Position : Type_Coordinates;
+  Intermediate_Point_Distance : Integer;
   Angle : Real;
-  Coord_Centre : Type_Coordinates;
+  Direction : Real;
+  Norme : Integer;
+  Centered_Position : Type_Coordinates;
 Begin
 
   // Dernière station
@@ -309,78 +322,151 @@ Begin
     End;
 
   // - Détermination du point intermédiaire.
-  Station_Get_Intermediate_Point(Train.Last_Station^.Position, Next_Station^.Position);
+  Intermediate_Point_Position := Station_Get_Intermediate_Point(Train.Last_Station^.Position, Next_Station^.Position);
 
-// - Détermination de la droite sur laquel le train se trouve et calcule l'angle du véhicule en conséquence.
-  If (Train.Distance <= Graphics_Get_Distance(Train.Last_Station^.Position, Intermediate_Point)) Then
+  Intermediate_Point_Distance := Graphics_Get_Distance(Train.Last_Station^.Position, Intermediate_Point);
+
+  // - Détermination de la droite sur laquel le train se trouve et calcule l'angle du véhicule en conséquence.
+  If (Train.Distance <= Intermediate_Point_Distance) Then // Si le train se trouve avant le point intermédiaire.
     Begin
       Angle := Graphics_Get_Angle(Train.Last_Station^.Position, Intermediate_Point);
+
+      // - Détermination de l'orientation.
+      Direction := Graphics_Get_Direction(Angle);
+
+      If ((Direction = 0) Or (Direction = Pi) Or (Direction = Pi/2) Or (Direction = -Pi/2)) Then
+        Begin
+          Norme := Distance;
+        End
+      Else
+        Begin
+          Norme := sqrt(sqr(Train.Distance*0.5));
+        End;
+
     End
-  Else
+  Else  // Si le train se trouve après le point intermédiaire.
     Begin
       Angle := Graphics_Get_Angle(Intermediate_Point, Next_Station^.Position);
+
+      // - Détermination de l'orientation.
+      Direction := Graphics_Get_Direction(Angle);
+
+      If ((Direction = 0) Or (Direction = Pi) Or (Direction = Pi/2) Or (Direction = -Pi/2)) Then
+        Begin
+          Norme := Distance - Intermediate_Point_Distance;
+        End
+      Else
+        Begin
+          Norme := sqrt(sqr((Train.Distance - Intermediate_Point_Distance)*0.5));
+        End;
     End;
 
-If (Angle < 0) or (Angle > Pi) Then
+
+  If (Angle < 0) Or (Angle > Pi) Then
     //  -   Determinations des coordonnées centrales de la locomotive dans la moitiée inférieure du cercle.
-    
-    If (((Angle >= Pi) And (Angle < (9*Pi/8))) or ((Angle >= (-1)*Pi) And (Angle < ((-7)*Pi/8)))) Then                  // Si l'angle est à pi
-        Coord_Centre.Y := Train.Last_Station^.Position.Y;
-        Coord_Centre.X := (-1)*Train.Distance
-    Else If (((Angle >= (9*Pi/8)) And (Angle < (11*Pi/8))) or ((Angle >= (-7)*Pi/8) And (Angle < ((-5)*Pi/8)))) Then    // Si l'angle est à 10pi/8 ou -6pi/8
-        Coord_Centre.Y := (-1)*round(sqrt(sqr(Train.Distance)*0.5));
-        Coord_Centre.X := Coord_Centre.Y
-    Else If (((Angle >= (11*Pi/8)) And (Angle < (13*Pi/8))) or ((Angle >= (-5)*Pi/8) And (Angle < ((-3)*Pi/8)))) Then   // Si l'angle est à 3pi/2 ou -pi/2
-        Coord_Centre.Y := (-1)*Train.Distance;
-        Coord_Centre.X := Train.Last_Station^.Position.X
-    Else If (((Angle >= (13*Pi/8)) And (Angle < (15*Pi/8))) or ((Angle >= (-3)*Pi/8) And (Angle < ((-1)*Pi/8)))) Then   // Si l'angle est à 14pi/8 ou -2pi/8 (à -pi/4)
-        Coord_Centre.Y := (-1)*round(sqrt(sqr(Train.Distance)*0.5));
-        Coord_Centre.X := (-1)*Coord_Centre.Y
-    Else If (((Angle >= (15*Pi/8)) And (Angle < (16*Pi/8))) or ((Angle >= (-1)*Pi/8) And (Angle < 0))) Then             // Si l'angle est à 0 ou 16pi/8
-        Coord_Centre.Y := Train.Last_Station^.Position.Y;
-        Coord_Centre.X := Train.Distance
+    Begin
 
-    //  -   Simplification de l'angle pour se retrouver dans le demi cercle supérieur.
+      If (((Angle >= Pi) And (Angle < (9*Pi/8))) Or ((Angle >= -Pi) And (Angle < ((-7)*Pi/8)))) Then
+        // Si l'angle est à pi
+        Begin
+          Centered_Position.Y := Train.Last_Station^.Position.Y;
+          Centered_Position.X := -Train.Distance
+        End
+      Else If (((Angle >= (9*Pi/8)) And (Angle < (11*Pi/8))) Or ((Angle >= (-7)*Pi/8) And (Angle < ((-5)*Pi/8)))) Then // Si l'angle est à 10pi/8 ou -6pi/8
+             Begin
+               Centered_Position.Y := -round(sqrt(sqr(Train.Distance)*0.5));
+               Centered_Position.X := Centered_Position.Y
+             End
+      Else If (((Angle >= (11*Pi/8)) And (Angle < (13*Pi/8))) Or ((Angle >= (-5)*Pi/8) And (Angle < ((-3)*Pi/8)))) Then // Si l'angle est à 3pi/2 ou -pi/2
+             Begin
+               Centered_Position.Y := -Train.Distance;
+               Centered_Position.X := Train.Last_Station^.Position.X
+             End
+      Else If (((Angle >= (13*Pi/8)) And (Angle < (15*Pi/8))) Or ((Angle >= (-3)*Pi/8) And (Angle < ((-1)*Pi/8)))) Then
+             // Si l'angle est à 14pi/8 ou -2pi/8 (à -pi/4)
+             Begin
+               Centered_Position.Y := -round(sqrt(sqr(Train.Distance)*0.5));
+               Centered_Position.X := -Centered_Position.Y
+             End
+      Else If (((Angle >= (15*Pi/8)) And (Angle < (16*Pi/8))) Or ((Angle >= (-1)*Pi/8) And (Angle < 0))) Then
+             Begin
+               // Si l'angle est à 0 ou 16pi/8
+               Centered_Position.Y := Train.Last_Station^.Position.Y;
+               Centered_Position.X := Train.Distance
+             End;
 
-    If (Angle < 0) Then
+      // - Simplification de l'angle pour se retrouver dans la partie supérieure du cercle trigonométrique.
+      If (Angle < 0) Then
         Angle := Angle + Pi
-    Else If (Angle > Pi) Then
-        Angle := Angle - Pi
+      Else If (Angle > Pi) Then
+             Angle := Angle - Pi;
 
-    //  -   Détermination du sprite en fonction de l'angle.
-    
-    If (((Angle >= 0) And (Angle < (Pi/8))) or (Angle > (7*Pi/8))) Then     // Si l'angle est entre 0° et 22.5° ou entre 157.5° et 180°
+      // - Détermination du sprite en fonction de l'angle.
+      If (((Angle >= 0) And (Angle < (Pi/8))) Or (Angle > (7*Pi/8))) Then
+        // Si l'angle est entre 0° et 22.5° ou entre 157.5° et 180°
         Train.Locomotive.Sprite := Vehicle_0_Degree                         // Le sprite est à 0°
-    Else If ((Angle >= (Pi/8)) And (Angle < (3*Pi/8))) Then                 // Si l'angle est entre 22.5° et 67.5°
-        Train.Locomotive.Sprite := Vehicle_45_Degree                        // Le sprite est à 45°.
-    Else If ((Angle >= (3*Pi/8)) and (Angle < (5*Pi/8))) Then               // Si l'angle est entre 67.5° et 112.5°
-        Train.Locomotive.Sprite := Vehicle_90_Degree                        // Le sprite est à 90°.
-    Else If ((Angle >= (5*Pi/8)) and (Angle < (7*Pi/8))) Then               // Si l'angle est entre 112.5° et 157.5°
-        Train.Locomotive.Sprite := Vehicle_135_Degree                       // Le sprite est à 135°.
+      Else If ((Angle >= (Pi/8)) And (Angle < (3*Pi/8))) Then                 // Si l'angle est entre 22.5° et 67.5°
+             Train.Locomotive.Sprite := Vehicle_45_Degree                        // Le sprite est à 45°.
+      Else If ((Angle >= (3*Pi/8)) And (Angle < (5*Pi/8))) Then               // Si l'angle est entre 67.5° et 112.5°
+             Train.Locomotive.Sprite := Vehicle_90_Degree                        // Le sprite est à 90°.
+      Else If ((Angle >= (5*Pi/8)) And (Angle < (7*Pi/8))) Then               // Si l'angle est entre 112.5° et 157.5°
+             Train.Locomotive.Sprite := Vehicle_135_Degree;
+      // Le sprite est à 135°.
 
-Else
-    If (((Angle >= 0) And (Angle < (Pi/8))) Then                            // Si l'angle est entre 0° et 22.5°
-        Train.Locomotive.Sprite := Vehicle_0_Degree;                        // Le sprite est à 0°
-        Coord_Centre.Y := Train.Last_Station^.Position.Y;
-        Coord_Centre.X := Train.Distance
-    Else if (Angle > (7*Pi/8)) Then                                         // Si l'angle est entre 157.5° et 180°
-        Train.Locomotive.Sprite := Vehicle_0_Degree;                        // Le sprite est à 0°
-        Coord_Centre.Y := Train.Last_Station^.Position.Y;
-        Coord_Centre.X := (-1)*Train.Distance
-    Else If ((Angle >= (Pi/8)) And (Angle < (3*Pi/8))) Then                 // Si l'angle est entre 22.5° et 67.5°
-        Train.Locomotive.Sprite := Vehicle_45_Degree;                       // Le sprite est à 45°.
-        Coord_Centre.Y := round(sqrt(sqr(Train.Distance)*0.5));
-        Coord_Centre.X := Coord_Centre.Y
-    Else If ((Angle >= (3*Pi/8)) and (Angle < (5*Pi/8))) Then               // Si l'angle est entre 67.5° et 112.5°
-        Train.Locomotive.Sprite := Vehicle_90_Degree;                       // Le sprite est à 90°.
-        Coord_Centre.Y := Train.Distance;
-        Coord_Centre.X := Train.Last_Station^.Position.X
-    Else If ((Angle >= (5*Pi/8)) and (Angle < (7*Pi/8))) Then               // Si l'angle est entre 112.5° et 157.5°
-        Train.Locomotive.Sprite := Vehicle_135_Degree;                      // Le sprite est à 135°.
-        Coord_Centre.Y := round(sqrt(sqr(Train.Distance)*0.5));
-        Coord_Centre.X := (-1)*Coord_Centre.Y;
+    End;
+  Else
+    Begin
 
-  {
+      If (((Angle >= 0) And (Angle < (Pi/8))) Then                            // Si l'angle est entre 0° et 22.5°
+        Train.Locomotive.Sprite := Vehicle_0_Degree;
+      // Le sprite est à 0°
+      Centered_Position.Y := Train.Last_Station^.Position.Y;
+      Centered_Position.X := Train.Distance
+      Else If (Angle > (7*Pi/8)) Then
+             // Si l'angle est entre 157.5° et 180°
+             Train.Locomotive.Sprite := Vehicle_0_Degree;
+      // Le sprite est à 0°
+      Centered_Position.Y := Train.Last_Station^.Position.Y;
+      Centered_Position.X := (-1)*Train.Distance
+      Else If ((Angle >= (Pi/8)) And (Angle < (3*Pi/8))) Then
+             // Si l'angle est entre 22.5° et 67.5°
+             Train.Locomotive.Sprite := Vehicle_45_Degree;
+      // Le sprite est à 45°.
+      Centered_Position.Y := round(sqrt(sqr(Train.Distance)*0.5));
+      Centered_Position.X := Centered_Position.Y
+      Else If ((Angle >= (3*Pi/8)) And (Angle < (5*Pi/8))) Then
+             // Si l'angle est entre 67.5° et 112.5°
+             Train.Locomotive.Sprite := Vehicle_90_Degree;
+      // Le sprite est à 90°.
+      Centered_Position.Y := Train.Distance;
+      Centered_Position.X := Train.Last_Station^.Position.X
+      Else If ((Angle >= (5*Pi/8)) And (Angle < (7*Pi/8))) Then
+             // Si l'angle est entre 112.5° et 157.5°
+             Train.Locomotive.Sprite := Vehicle_135_Degree;
+      // Le sprite est à 135°.
+      Centered_Position.Y := round(sqrt(sqr(Train.Distance)*0.5));
+      Centered_Position.X := (-1)*Centered_Position.Y;
+
+    End;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
     Determination coordonnées cartésiennes :
     Si angle 0 ou Pi : horizontal : donc y = y_station (ou point intermédiaire)
     Si angle 45 : x = y, distance² = x² + y² = x² + x² = 2x² => x = y = sqrt(distance²/2) 
@@ -388,15 +474,13 @@ Else
   }
 
 
-          // - Affiche la locomotive.
-          SDL_BlitSurface(Game.Sprites.Locomotive, Nil, Game.Window, @Destination_Rectangle);
-          // - Affiche les passagers. 
-          If (Train.Passengers_Count > 0) Then
-         Begin
-           // - Display the passengers
-         End;
-End;
-
+  // - Affiche la locomotive.
+  SDL_BlitSurface(Game.Sprites.Locomotive, Nil, Game.Window, @Destination_Rectangle);
+  // - Affiche les passagers. 
+  If (Train.Passengers_Count > 0) Then
+    Begin
+      // - Display the passengers
+    End;
 End;
 
 Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);

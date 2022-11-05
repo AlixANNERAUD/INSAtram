@@ -45,6 +45,7 @@ Type Type_Color = Record
   Red, Green, Blue, Alpha : Byte;
 End;
 
+// Structure contenant tous pointeurs des sprites du jeu.
 Type Type_Sprite_Table = Record
   // - Stations
   Station_Square, Station_Circle, Station_Triangle, Station_Lozenge,
@@ -53,7 +54,7 @@ Type Type_Sprite_Table = Record
   Passenger_Circle, Passenger_Square, Passenger_Triangle, Passenger_Lozenge,
   Passenger_Pentagon : Type_Surface;
   // - Vehicules (Locomotive et Wagon)
-  Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : Type_Surface;
+  Vehicle_Vertical, Vehicle_Diagonal, Vehicle_Horizontal, Vehicle_135_Degree : Type_Surface;
 End;
 
 // - - Animation
