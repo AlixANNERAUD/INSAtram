@@ -169,6 +169,30 @@ Procedure Graphics_Refresh(Var Game : Type_Game);
 Var i :   Byte;
 Begin
 
+  // - Rempli la fenêtre en blanc.
+  SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255));
+
+  // - Affiche les lignes.
+  If (Lines_Count > 0) Then
+    Begin
+      For i := 0 To Lines_Count - 1 Do
+        Begin
+          // - Affichage des traits représentant la ligne.
+          Line_Display(Lines[i]^.Position_1, Lines[i]^.Position_2, Game);
+          // - Affichage des trains sur la ligne.
+          For i := 0 To Trains_Count - 1 Do
+          Begin
+            Train_Display(Trains[i]^, Lines[i]^, Game);
+          End;
+        End;
+    End;
+
+  // - Affiche les trains.
+
+
+
+  // - Affiche les stations.
+
   If (Game.Stations_Count > 0) Then
     Begin
       For i := 0 To Game.Stations_Count - 1 Do
@@ -176,6 +200,7 @@ Begin
           Station_Display(Game.Stations[i]^, Game);
         End;
     End;
+
 
 
   SDL_Flip(Game.Window);
@@ -326,161 +351,156 @@ Begin
     End;
   Intermediate_Position := Station_Get_Intermediate_Position(Train.Last_Station^.Position, Next_Station^.Position);
 
-  Intermediate_Position_Distance := Graphics_Get_Distance(Train.Last_Station^.Position, Intermediate_Point);
+  Intermediate_Position_Distance := Graphics_Get_Distance(Train.Last_Station^.Position, Intermediate_Position);
 
   // - Détermination de la droite sur laquel le train se trouve et calcule l'angle du véhicule en conséquence.
   If (Train.Distance <= Intermediate_Position_Distance) Then // Si le train se trouve avant le point intermédiaire.
     Begin
-      Angle := Graphics_Get_Angle(Train.Last_Station^.Position, Intermediate_Point);
+      Angle := Graphics_Get_Angle(Train.Last_Station^.Position, Intermediate_Position);
       // - Détermination de l'orientation.
       Direction := Graphics_Get_Direction(Angle);
 
-      Case Direction Of 
-        0 :
-            Begin
-              Centered_Position.X := Train.Last_Station^.Position.X + Train.Distance;
-              Centered_Position.Y := Train.Last_Station^.Position.Y;
-              Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
-            End;
-        Pi :
+      If (Direction = 0) Then
+        Begin
+          Centered_Position.X := Train.Last_Station^.Position.X + Train.Distance;
+          Centered_Position.Y := Train.Last_Station^.Position.Y;
+          Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
+        End
+      Else If (Direction = Pi) Then
              Begin
                Centered_Position.X := Train.Last_Station^.Position.X - Train.Distance;
                Centered_Position.Y := Train.Last_Station^.Position.Y;
                Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
-             End;
-        Pi/2 :
-               Begin
-                 Centered_Position.X := Train.Last_Station^.Position.X;
-                 Centered_Position.Y := Train.Last_Station^.Position.Y - Train.Distance;
-                 Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
-               End;
-        -Pi/2 :
+             End
+      Else If (Direction = Pi/2) Then
+             Begin
+               Centered_Position.X := Train.Last_Station^.Position.X;
+               Centered_Position.Y := Train.Last_Station^.Position.Y - Train.Distance;
+               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+             End
+      Else If (Direction = -Pi/2) Then
+             Begin
+               Centered_Position.X := Train.Last_Station^.Position.X;
+               Centered_Position.Y := Train.Last_Station^.Position.Y + Train.Distance;
+               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+             End
+      Else
+        Begin
+          Norme := round(sqrt(sqr(Train.Distance*0.5)));
+          If (Direction < 0) Then // Partie inférieur du cercle trigonométrique (sens des y positifs).
+            Begin
+              Centered_Position.Y := Train.Last_Station^.Position.Y + Norme;
+              If (Direction = -Pi/4) Then
                 Begin
-                  Centered_Position.X := Train.Last_Station^.Position.X;
-                  Centered_Position.Y := Train.Last_Station^.Position.Y + Train.Distance;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+                  Centered_Position.X := Train.Last_Station^.Position.X + Norme;
+                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
+                End
+              Else
+                Begin
+                  Centered_Position.X := Train.Last_Station^.Position.X - Norme;
+                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
                 End;
-        Else
-          Begin
-            Norme := sqrt(sqr(Train.Distance*0.5));
-            If (Drection < 0) Then // Partie inférieur du cercle trigonométrique (sens des y positifs).
-              Begin
-                Centered_Position.Y := Train.Last_Station^.Position.Y + Norme;
-                If (Direction = -Pi/4) Then
-                  Begin
-                    Centered_Position.X := Train.Last_Station^.Position.X + Norme;
-                    Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
-                  End
-                Else
-                  Begin
-                    Centered_Position.X := Train.Last_Station^.Position.X - Norme;
-                    Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
-                  End;
-              End
-            Else  // Partie supérieur du cercle trigonométrique (sens des y négatifs).
-              Begin
-                Centered_Position.Y := Train.Last_Station^.Position.Y - Norme;
-                If (Direction = Pi/4) Then
-                  Begin
-                    Centered_Position.X := Train.Last_Station^.Position.X + Norme;
-                    Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
-                  End
-                Else
-                  Begin
-                    Centered_Position.X := Train.Last_Station^.Position.X - Norme;
-                    Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
-                  End;
-              End;
-          End;
-      End;
+            End
+          Else  // Partie supérieur du cercle trigonométrique (sens des y négatifs).
+            Begin
+              Centered_Position.Y := Train.Last_Station^.Position.Y - Norme;
+              If (Direction = Pi/4) Then
+                Begin
+                  Centered_Position.X := Train.Last_Station^.Position.X + Norme;
+                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
+                End
+              Else
+                Begin
+                  Centered_Position.X := Train.Last_Station^.Position.X - Norme;
+                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
+                End;
+            End;
+        End;
     End
   Else  // Si le train se trouve après le point intermédiaire.
     Begin
 
       // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
-      Angle := Graphics_Get_Angle(Intermediate_Point, Next_Station^.Position);
+      Angle := Graphics_Get_Angle(Intermediate_Position, Next_Station^.Position);
       // - Détermination de l'orientation.
       Direction := Graphics_Get_Direction(Angle);
 
-      Case Direction Of 
-        0 :
-            Begin
-              Centered_Position.X := Intermediate_Point_Position.X + Train.Distance;
-              Centered_Position.Y := Intermediate_Point_Position.Y;
-              Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
-            End;
-        Pi :
-             Begin
-               Centered_Position.X := Intermediate_Point_Position.X - Train.Distance;
-               Centered_Position.Y := Intermediate_Point_Position.Y;
-               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
-             End;
-        Pi/2 :
-               Begin
-                 Centered_Position.X := Intermediate_Point_Position.X;
-                 Centered_Position.Y := Intermediate_Point_Position.Y - Train.Distance;
-                 Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
-               End;
-        -Pi/2 :
-                Begin
-                  Centered_Position.X := Intermediate_Point_Position.X;
-                  Centered_Position.Y := Intermediate_Point_Position.Y + Train.Distance;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
-                End;
-        Else
-          Begin
-            Norme := sqrt(sqr(Train.Distance*0.5));
-            If (Drection < 0) Then // Partie inférieur du cercle trigonométrique (sens des y positifs).
-              Begin
-                Centered_Position.Y := Intermediate_Point_Position.Y + Norme;
-                If (Direction = -Pi/4) Then
-                  Begin
-                    Centered_Position.X := Intermediate_Point_Position.X + Norme;
-                    Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
-                  End
-                Else
-                  Begin
-                    Centered_Position.X := Intermediate_Point_Position.X - Norme;
-                    Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
-                  End;
-              End
-            Else  // Partie supérieur du cercle trigonométrique (sens des y négatifs).
-              Begin
-                Centered_Position.Y := Intermediate_Point_Position.Y - Norme;
-                If (Direction = Pi/4) Then
-                  Begin
-                    Centered_Position.X := Intermediate_Point_Position.X + Norme;
-                    Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
-                  End
-                Else
-                  Begin
-                    Centered_Position.X := Intermediate_Point_Position.X - Norme;
-                    Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
-                  End;
-              End;
-          End;
-      End;
-
-      // - Détermination de la position absolue du train à partir des coordonnées centrées.
-      If ((Direction = 0) And (Direction = Pi)) Then
+      If (Direction = 0) Then
         Begin
-          Train.Vehicle[0].Position.X := Centered_Position.X - (Vehicle_Width*0.5);
-          Train.Vehicle[0].Position.Y := Centered_Position.Y - (Vehicle_Height*0.5);
+          Centered_Position.X := Intermediate_Position.X + Train.Distance;
+          Centered_Position.Y := Intermediate_Position.Y;
+          Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
         End
-      Else If ((Direction = Pi/2) And (Direction = -(Pi/2))) Then
+      Else If (Direction = Pi) Then
              Begin
-
-               Train.Vehicle[0].Position.Y := Centered_Position.Y - (Vehicle_Width*0.5);
-               Train.Vehicle[0].Position.X := Centered_Position.X - (Vehicle_Height*0.5);
-             End;
+               Centered_Position.X := Intermediate_Position.X - Train.Distance;
+               Centered_Position.Y := Intermediate_Position.Y;
+               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
+             End
+      Else If (Direction = Pi/2) Then
+             Begin
+               Centered_Position.X := Intermediate_Position.X;
+               Centered_Position.Y := Intermediate_Position.Y - Train.Distance;
+               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+             End
+      Else If (Direction = -Pi/2) Then
+             Begin
+               Centered_Position.X := Intermediate_Position.X;
+               Centered_Position.Y := Intermediate_Position.Y + Train.Distance;
+               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+             End
       Else
         Begin
-          Square_Side_Length := sqrt(sqr(Vehicle_Width)*0.5)+sqrt(sqr(Vehicle_Height)*0.5) //Se référer au rapport du projet pour les explications
-                                Train.Vehicle[0].Position.X := Centered_Position.X - Square_Side_Length*0.5;
-          Train.Vehicle[0].Position.Y := Centered_Position.Y - Square_Side_Length*0.5;
+          Norme := round(sqrt(sqr(Train.Distance*0.5)));
+          If (Direction < 0) Then // Partie inférieur du cercle trigonométrique (sens des y positifs).
+            Begin
+              Centered_Position.Y := Intermediate_Position.Y + Norme;
+              If (Direction = -Pi/4) Then
+                Begin
+                  Centered_Position.X := Intermediate_Position.X + Norme;
+                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
+                End
+              Else
+                Begin
+                  Centered_Position.X := Intermediate_Position.X - Norme;
+                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
+                End;
+            End
+          Else  // Partie supérieur du cercle trigonométrique (sens des y négatifs).
+            Begin
+              Centered_Position.Y := Intermediate_Position.Y - Norme;
+              If (Direction = Pi/4) Then
+                Begin
+                  Centered_Position.X := Intermediate_Position.X + Norme;
+                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
+                End
+              Else
+                Begin
+                  Centered_Position.X := Intermediate_Position.X - Norme;
+                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
+                End;
+            End;
         End;
 
+    End;
 
+  // - Détermination de la position absolue du train à partir des coordonnées centrées.
+  If ((Direction = 0) And (Direction = Pi)) Then
+    Begin
+      Train.Vehicle[0].Position.X := round(Centered_Position.X - (Vehicle_Width*0.5));
+      Train.Vehicle[0].Position.Y := round(Centered_Position.Y - (Vehicle_Height*0.5));
+    End
+  Else If ((Direction = Pi/2) And (Direction = -(Pi/2))) Then
+         Begin
+           Train.Vehicle[0].Position.Y := round(Centered_Position.Y - (Vehicle_Width*0.5));
+           Train.Vehicle[0].Position.X := round(Centered_Position.X - (Vehicle_Height*0.5));
+         End
+  Else
+    Begin
+      Square_Side_Length := round(sqrt(sqr(Vehicle_Width)*0.5)+sqrt(sqr(Vehicle_Height)*0.5));
+      //Se référer au rapport du projet pour les explications
+      Train.Vehicle[0].Position.X := round(Centered_Position.X - Square_Side_Length*0.5);
+      Train.Vehicle[0].Position.Y := round(Centered_Position.Y - Square_Side_Length*0.5);
     End;
 
 
@@ -489,10 +509,11 @@ Begin
   // - Affiche la locomotive.
   SDL_BlitSurface(Train.Vehicle[0].Sprite, Nil, Game.Window, @Destination_Rectangle);
   // - Affiche les passagers. 
-  If (Train.Passengers_Count > 0) Then
+  {If (Train.Passengers_Count > 0) Then
     Begin
       // - Display the passengers
     End;
+  }
 End;
 
 Procedure Station_Display(Var Station : Type_Station; Var Game : Type_Game);
@@ -501,8 +522,8 @@ Var Destination_Rectangle :   Type_Rectangle;
   i :   Byte;
 Begin
   // - Display station
-  Destination_Rectangle.x := Station.Coordinates.X;
-  Destination_Rectangle.y := Station.Coordinates.Y;
+  Destination_Rectangle.x := Station.Position.X;
+  Destination_Rectangle.y := Station.Position.Y;
   Destination_Rectangle.w := Station_Width;
   Destination_Rectangle.h := Station_Height;
 
@@ -521,13 +542,13 @@ Begin
         Begin
           // - Determine x position
           If (i < 3) Then
-            Destination_Rectangle.x := (Station.Coordinates.X - (2 *
+            Destination_Rectangle.x := (Station.Position.X - (2 *
                                        Passenger_Width))
           Else
-            Destination_Rectangle.x := (Station.Coordinates.X + Station_Width +
+            Destination_Rectangle.x := (Station.Position.X + Station_Width +
                                        Passenger_Width);
           // - Determine y position
-          Destination_Rectangle.y := Station.Coordinates.Y + ((i Mod 3) * (
+          Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
                                      Passenger_Height + 4));
 
           SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Game.Window, @

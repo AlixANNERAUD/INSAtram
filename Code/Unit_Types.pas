@@ -124,7 +124,7 @@ Type Type_Train = Record
 
   Vehicles_Count : Byte;
   //  Nombre de wagons.
-  Vehicles : array[0..3] Of Type_Vehicle;
+  Vehicle : array[0..3] Of Type_Vehicle;
   //  Pointeur vers les wagons du train.
 End;
 

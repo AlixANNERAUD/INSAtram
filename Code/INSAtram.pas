@@ -53,28 +53,16 @@ Begin
       If (Event.type_ = SDL_QUITEV) Then
         Quit := True
       Else If (Event.type_ = SDL_MOUSEBUTTONDOWN) Then
-      begin
-             writeln('Mouse Button Down');
-             Quit := True;
-      end;
+             Begin
+               writeln('Mouse Button Down');
+               Quit := True;
+             End;
 
       Mouse_Position := Mouse_Get_Position();
 
 
 
-      SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255,
-                   255))
-      ;
 
-      For i:= 0 to 7 Do
-        Begin
-          Line_Display(Station_Get_Center_Position(Game.Stations[i]^),
-          Station_Get_Center_Position(Game.Stations[i+1]^), Game);
-        End;
-
-        Line_Display(Station_Get_Center_Position(Game.Stations[8]^), Mouse_Position, Game);
-        Line_Display(Mouse_Position, Station_Get_Center_Position(Game.Stations[9]^), Game);
-        
 
 
 

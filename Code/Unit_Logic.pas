@@ -18,8 +18,8 @@ Procedure Passenger_Create(Var Game : Type_Game);
 Procedure Passenger_Delete(Var Passenger_Pointer : Type_Passenger_Pointer);
 
 Procedure Line_Create(Var Game : Type_Game);
-Procedure Line_Add_Station(var Line : Type_Line; Station : Type_Station_Pointer);
-Procedure Line_Remove_Staton(var Line : Type_Line; Station : Type_Station_Pointer);
+Procedure Line_Add_Station(Var Line : Type_Line; Station : Type_Station_Pointer);
+Procedure Line_Remove_Staton(Var Line : Type_Line; Station : Type_Station_Pointer);
 
 Implementation
 
@@ -49,8 +49,7 @@ Begin
 
   // - Allocate memory to passenger.
   Passenger_Pointer := Passenger_Allocate();
-  Game.Stations[Temporary]^.Passengers[Game.Stations[Temporary]^.
-  Passengers_Count] := Passenger_Pointer;
+  Game.Stations[Temporary]^.Passengers[Game.Stations[Temporary]^.Passengers_Count] := Passenger_Pointer;
 
   Shape := Random(5);
 
@@ -155,10 +154,10 @@ Begin
             End;
       End;
 
-      Game.Stations[Game.Stations_Count]^.Coordinates.X := Random(Game.
+      Game.Stations[Game.Stations_Count]^.Position.X := Random(Game.
                                                            Window_Size.X -
                                                            Station_Width);
-      Game.Stations[Game.Stations_Count]^.Coordinates.Y := Random(Game.
+      Game.Stations[Game.Stations_Count]^.Position.Y := Random(Game.
                                                            Window_Size.Y -
                                                            Station_Height);
 
@@ -171,49 +170,50 @@ End;
 // Fonction qui permet d'obtenir le centre d'une station.
 Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
 Begin
-  Station_Get_Center_Position.X := Station.Coordinates.X + Station_Width Div 2;
-  Station_Get_Center_Position.Y := Station.Coordinates.Y + Station_Height Div 2;
+  Station_Get_Center_Position.X := Station.Position.X + Station_Width Div 2;
+  Station_Get_Center_Position.Y := Station.Position.Y + Station_Height Div 2;
 End;
 
 // Procédure qui permet de créer une ligne.
-Procedure Line_Create(var Game : Type_Game);
+Procedure Line_Create(Var Game : Type_Game);
 Begin
   // Vérifie si la ligne créer ne dépasse pas du tableau (ne correspondant pas à la limite "temporaire" pour un joueur).
-  if (Game.Lines_Count < Maximum_Number_Lines) Then
+  If (Game.Lines_Count < Maximum_Number_Lines) Then
     Begin
       // Initialisation des attributs de la ligne.
       Game.Lines[Game.Lines_Count].Stations_Count := 0;
       Game.Lines[Game.Lines_Count].Trains_Count := 0;
- 
+
       inc(Game.Lines_Count);
     End;
 End;
 
 // Procédure qui ajoute le pointeur d'une station à une ligne.
-Procedure Line_Add_Station(var Line : Type_Line; Station : Type_Station_Pointer);
+Procedure Line_Add_Station(Var Line : Type_Line; Station : Type_Station_Pointer);
 Begin
   // 
-  if (Line.Stations_Count < Maximum_Number_Stations_Per_Line) Then
-  begin;
-    Line.Stations[Line.Stations_Count] := Station;
-    inc(Line.Stations_Count);
-  end;
+  If (Line.Stations_Count < Maximum_Number_Stations_Per_Line) Then
+    Begin;
+      Line.Stations[Line.Stations_Count] := Station;
+      inc(Line.Stations_Count);
+    End;
 End;
 
 // Procédure qui supprime le pointeur d'une station au tableau des stations d'une ligne.
-Procedure Line_Remove_Staton(var Line : Type_Line; Station : Type_Station_Pointer);
-var i : Byte;
+Procedure Line_Remove_Staton(Var Line : Type_Line; Station : Type_Station_Pointer);
+
+Var i : Byte;
 Begin
-  for i := 0 to Line.Stations_Count - 1 do
-  Begin
-    if (Line.Stations[i] = Station) then
+  For i := 0 To Line.Stations_Count - 1 Do
     Begin
-      Line.Stations[i] := Line.Stations[Line.Stations_Count - 1];
-      Line.Stations[Line.Stations_Count - 1] := Nil;
-      dec(Line.Stations_Count);
-      break;
+      If (Line.Stations[i] = Station) Then
+        Begin
+          Line.Stations[i] := Line.Stations[Line.Stations_Count - 1];
+          Line.Stations[Line.Stations_Count - 1] := Nil;
+          dec(Line.Stations_Count);
+          break;
+        End;
     End;
-  End;
 End;
 
 
