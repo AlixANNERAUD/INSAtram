@@ -46,6 +46,7 @@ Type Type_Color = Record
 End;
 
 // Structure contenant tous pointeurs des sprites du jeu.
+
 Type Type_Sprite_Table = Record
   // - Stations
   Station_Square, Station_Circle, Station_Triangle, Station_Lozenge,
@@ -53,8 +54,8 @@ Type Type_Sprite_Table = Record
   // - Passagers
   Passenger_Circle, Passenger_Square, Passenger_Triangle, Passenger_Lozenge,
   Passenger_Pentagon : Type_Surface;
-  // - Vehicules (Locomotive et Wagon)
-  Vehicle_Vertical, Vehicle_Diagonal, Vehicle_Horizontal, Vehicle_135_Degree : Type_Surface;
+  // - Vehicles (Locomotive et Wagon)
+  Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : Type_Surface;
 End;
 
 // - - Animation
@@ -95,7 +96,7 @@ Type Type_Passenger_Pointer = ^Type_Passenger;
 
 Type Type_Station = Record
   Shape : Type_Shape;
-  Coordinates : Type_Coordinates;
+  Position : Type_Coordinates;
   Sprite : Type_Surface;
   Passengers : array[0..5] Of Type_Passenger_Pointer;
   Passengers_Count : Byte;
@@ -105,30 +106,25 @@ Type Type_Station_Pointer = ^Type_Station;
 
   // - - Train
 
-Type Type_Locomotive = Record
-  Position : Type_Coordinates;
-  Sprite : Type_Surface;
-End;
-
-
-Type Type_Wagon = Record
+Type Type_Vehicle = Record
   Position : Type_Coordinates;
   Sprite : Type_Surface;
 End;
 
 Type Type_Train = Record
 
-  Last_Station : Type_Station_Pointer;  // - Pointeur de la dernière station.
-  Distance : Integer;       // - Distance parcourue depuis la dernière station en pixel.
-  Speed : Integer;          // - Vitesse du train.
-  Acceleration : Integer;   // - Accélération du train.
+  Last_Station : Type_Station_Pointer;
+  // - Pointeur de la dernière station.
+  Distance : Integer;
+  // - Distance parcourue depuis la dernière station en pixel.
+  Speed : Integer;
+  // - Vitesse du train.
+  Acceleration : Integer;
+  // - Accélération du train.
 
-  Locomotive : Type_Locomotive;
-  // Locomotive du train.
-
-  Wagon_Count : Byte;
+  Vehicles_Count : Byte;
   //  Nombre de wagons.
-  Wagon : array[0..2] Of Type_Wagon;
+  Vehicles : array[0..3] Of Type_Vehicle;
   //  Pointeur vers les wagons du train.
 End;
 
