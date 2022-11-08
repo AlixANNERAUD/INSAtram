@@ -166,33 +166,31 @@ End;
 
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
-Var i :   Byte;
+Var i, j:   Byte;
 Begin
 
   // - Rempli la fenêtre en blanc.
   SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255));
 
   // - Affiche les lignes.
-  If (Lines_Count > 0) Then
+  If (Game.Lines_Count > 0) Then
     Begin
-      For i := 0 To Lines_Count - 1 Do
+      For i := 0 To Game.Lines_Count - 1 Do
         Begin
           // - Affichage des traits représentant la ligne.
-          Line_Display(Lines[i]^.Position_1, Lines[i]^.Position_2, Game);
+          For j := 0 To Game.Lines[i].Stations_Count - 2 Do
+            Begin
+              Line_Display(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Stations[j + 1]^.Position, Game);
+            End;
           // - Affichage des trains sur la ligne.
-          For i := 0 To Trains_Count - 1 Do
+          For j := 0 To Trains_Count - 1 Do
           Begin
             Train_Display(Trains[i]^, Lines[i]^, Game);
           End;
         End;
     End;
 
-  // - Affiche les trains.
-
-
-
   // - Affiche les stations.
-
   If (Game.Stations_Count > 0) Then
     Begin
       For i := 0 To Game.Stations_Count - 1 Do
@@ -200,8 +198,6 @@ Begin
           Station_Display(Game.Stations[i]^, Game);
         End;
     End;
-
-
 
   SDL_Flip(Game.Window);
 End;

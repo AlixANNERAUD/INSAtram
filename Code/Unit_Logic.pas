@@ -3,44 +3,102 @@ Unit Unit_Logic;
 
 Interface
 
-// - Include internal units.
+// - Inclut les unités internes au projet. 
 
 Uses Unit_Types, Unit_Graphics;
 
-// - Function decleration
+// - Déclaration des fonctions et procédures.
 
+// - - Logqiue générale.
 Procedure Logic_Load(Var Game : Type_Game);
 
-Procedure Station_Create(Var Game : Type_Game);
-Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
-
-Procedure Passenger_Create(Var Game : Type_Game);
-Procedure Passenger_Delete(Var Passenger_Pointer : Type_Passenger_Pointer);
-
+// - - Lignes
 Procedure Line_Create(Var Game : Type_Game);
 Procedure Line_Add_Station(Var Line : Type_Line; Station : Type_Station_Pointer);
 Procedure Line_Remove_Staton(Var Line : Type_Line; Station : Type_Station_Pointer);
 
+// - - Passagers
+Procedure Passenger_Create(Var Game : Type_Game);
+Procedure Passenger_Delete(Var Passenger_Pointer : Type_Passenger_Pointer);
+
+// - - Stations
+Procedure Station_Create(Var Game : Type_Game);
+Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
+
+// - - Trains
+Procedure Train_Create(Var Line : Type_Line);
+Procedure Train_Delete(Var Line : Type_Line, Var Train_Pointer : Type_Train_Pointer);
+Procedure Train_Add_Vehicle(Var Train : Type_Train);
+Procedure Train_Delete_Vehicle(Var Train : Type_Train);
+
+
+
+
 Implementation
 
-// - Function definition
+// - Définition des fonctions et des procédures.
 
+// - - Fonctions et procédures relatives à la logique générale.
+
+// Initialise la partie 
 Procedure Logic_Load(Var Game : Type_Game);
 Begin
   Randomize();
   Game.Stations_Count := 0;
   Game.Lines_Count := 0;
-
 End;
 
-// - Passengers
+// - - Fonctions et procédures relatives aux lignes.
 
+// Procédure qui permet de créer une ligne.
+Procedure Line_Create(Var Game : Type_Game);
+Begin
+  // Vérifie si la ligne créer ne dépasse pas du tableau (ne correspondant pas à la limite "temporaire" pour un joueur).
+  If (Game.Lines_Count < Maximum_Number_Lines) Then
+    Begin
+      // Initialisation des attributs de la ligne.
+      Game.Lines[Game.Lines_Count].Stations_Count := 0;
+      Game.Lines[Game.Lines_Count].Trains_Count := 0;
+
+      inc(Game.Lines_Count);
+    End;
+End;
+
+// Procédure qui ajoute le pointeur d'une station à une ligne.
+Procedure Line_Add_Station(Var Line : Type_Line; Station : Type_Station_Pointer);
+Begin
+  // 
+  If (Line.Stations_Count < Maximum_Number_Stations_Per_Line) Then
+    Begin;
+      Line.Stations[Line.Stations_Count] := Station;
+      inc(Line.Stations_Count);
+    End;
+End;
+
+// Procédure qui supprime le pointeur d'une station au tableau des stations d'une ligne.
+Procedure Line_Remove_Staton(Var Line : Type_Line; Station : Type_Station_Pointer);
+
+Var i : Byte;
+Begin
+  For i := 0 To Line.Stations_Count - 1 Do
+    Begin
+      If (Line.Stations[i] = Station) Then
+        Begin
+          Line.Stations[i] := Line.Stations[Line.Stations_Count - 1];
+          Line.Stations[Line.Stations_Count - 1] := Nil;
+          dec(Line.Stations_Count);
+          break;
+        End;
+    End;
+End;
+
+// -  - Fonctions et procédures relatives au passagers
+
+// Fonction qui créer un passager.
 Procedure Passenger_Create(Var Game : Type_Game);
-
 Var Temporary, Shape : Byte;
   Passenger_Pointer : Type_Passenger_Pointer;
 Begin
-
   // - Choose a random station
   Repeat
     Temporary := Random(Game.Stations_Count);
@@ -52,7 +110,6 @@ Begin
   Game.Stations[Temporary]^.Passengers[Game.Stations[Temporary]^.Passengers_Count] := Passenger_Pointer;
 
   Shape := Random(5);
-
 
   Case Shape Of 
     0 :
@@ -88,28 +145,26 @@ Begin
   inc(Game.Stations[Temporary]^.Passengers_Count);
 End;
 
+// Fonction qui supprime un passager et libère sa mémoire allouée.
 Procedure Passenger_Delete(Var Passenger_Pointer : Type_Passenger_Pointer);
 Begin
   Passenger_Deallocate(Passenger_Pointer);
   Passenger_Pointer := Nil;
 End;
 
+// - - Fonctions et procédures relatives aux stations.
 
-
-// - Function that allocate memory for station, add it's pointer into stations table and set it's shape and position randomly. 
-
+// Fonction qui alloue de la mémoire pour une station, qui ajoute son pointeur dans un tableau de pointeurs et détermine sa forme et position aléatoirement. 
 Procedure Station_Create(Var Game : Type_Game);
 
 Var Shape : Byte;
 Begin
   If (Game.Stations_Count < Maximum_Number_Stations) Then
     Begin
-
-      // Insert break point 
-
+      // Allocation de la mémoire pour la station.
       Game.Stations[Game.Stations_Count] := Station_Allocate();
 
-      // 5 first station are always of different shape.
+      // Les 5 premières stations sont de formes différentes.
       If (Game.Stations_Count > 4) Then
         Begin
           Shape := Random(5)
@@ -123,10 +178,10 @@ Begin
         0 :
             Begin
               Game.Stations[Game.Stations_Count]^.Shape := Circle;
-              // Set station shape.
+              // Détermine la forme de la station.
               Game.Stations[Game.Stations_Count]^.Sprite := Game.Sprites.
                                                             Station_Circle;
-              // Assign sprite to station.
+              // Assigne son 'sprite' à la station.
             End;
         1 :
             Begin
@@ -174,47 +229,11 @@ Begin
   Station_Get_Center_Position.Y := Station.Position.Y + Station_Height Div 2;
 End;
 
-// Procédure qui permet de créer une ligne.
-Procedure Line_Create(Var Game : Type_Game);
+// - - Fonctions et procédures relatives aux lignes.
+
+Procedure Train_Create(VAr Line : Type_Line);
 Begin
-  // Vérifie si la ligne créer ne dépasse pas du tableau (ne correspondant pas à la limite "temporaire" pour un joueur).
-  If (Game.Lines_Count < Maximum_Number_Lines) Then
-    Begin
-      // Initialisation des attributs de la ligne.
-      Game.Lines[Game.Lines_Count].Stations_Count := 0;
-      Game.Lines[Game.Lines_Count].Trains_Count := 0;
 
-      inc(Game.Lines_Count);
-    End;
 End;
-
-// Procédure qui ajoute le pointeur d'une station à une ligne.
-Procedure Line_Add_Station(Var Line : Type_Line; Station : Type_Station_Pointer);
-Begin
-  // 
-  If (Line.Stations_Count < Maximum_Number_Stations_Per_Line) Then
-    Begin;
-      Line.Stations[Line.Stations_Count] := Station;
-      inc(Line.Stations_Count);
-    End;
-End;
-
-// Procédure qui supprime le pointeur d'une station au tableau des stations d'une ligne.
-Procedure Line_Remove_Staton(Var Line : Type_Line; Station : Type_Station_Pointer);
-
-Var i : Byte;
-Begin
-  For i := 0 To Line.Stations_Count - 1 Do
-    Begin
-      If (Line.Stations[i] = Station) Then
-        Begin
-          Line.Stations[i] := Line.Stations[Line.Stations_Count - 1];
-          Line.Stations[Line.Stations_Count - 1] := Nil;
-          dec(Line.Stations_Count);
-          break;
-        End;
-    End;
-End;
-
 
 End.

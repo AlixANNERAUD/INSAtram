@@ -60,12 +60,6 @@ Begin
 
       Mouse_Position := Mouse_Get_Position();
 
-
-
-
-
-
-
       Graphics_Refresh(Game);
 
       // Limit fps to 60.
