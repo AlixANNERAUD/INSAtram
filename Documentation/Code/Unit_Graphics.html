@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<title>INSAtram: Unit_Graphics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="PasDoc 0.16.0">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="StyleSheet" type="text/css" href="pasdoc.css">
+</head>
+<body>
+<div class="container"><div class="navigation">
+<h2><a href="index.html">INSAtram</a></h2><ul><li><a href="AllUnits.html">Unités</a></li><li><a href="ClassHierarchy.html">Hiérarchie des classes</a></li><li><a href="AllClasses.html">Classes, interfaces, enregistrements et objets</a></li><li><a href="AllTypes.html">Types</a></li><li><a href="AllVariables.html">Variables</a></li><li><a href="AllConstants.html">Constantes</a></li><li><a href="AllFunctions.html">Fonctions et procédures</a></li><li><a href="AllIdentifiers.html">Identificateurs</a></li></ul></div><div class="content">
+INSAtram<h1 class="unit">Unité Unit_Graphics</h1>
+<div class="sections">
+<div class="one_section"><a class="section" href="#PasDoc-Description">Description</a></div><div class="one_section">Uses</div><div class="one_section">Classes, interfaces, enregistrements et objets</div><div class="one_section"><a class="section" href="#PasDoc-FuncsProcs">Fonctions et procédures</a></div><div class="one_section">Types</div><div class="one_section"><a class="section" href="#PasDoc-Constants">Constantes</a></div><div class="one_section">Variables</div></div>
+<span id="PasDoc-Description"></span><h2 class="description">Description</h2>
+&nbsp;<span id="PasDoc-Uses"></span><h2 class="overview">Aperçu</h2>
+<span id="PasDoc-FuncsProcs"></span><h3 class="summary">Fonctions et procédures</h3>
+<table class="summary wide_list">
+<tr class="list">
+<td class="itemcode"><code>Procedure <strong><a href="Unit_Graphics.html#Graphics_Load">Graphics_Load</a></strong>(Var Game : Type_Game);</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code>Procedure <strong><a href="Unit_Graphics.html#Graphics_Unload">Graphics_Unload</a></strong>(Var Game : Type_Game);</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code>Procedure <strong><a href="Unit_Graphics.html#Graphics_Refresh">Graphics_Refresh</a></strong>(Var Game : Type_Game);</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code>Function <strong><a href="Unit_Graphics.html#Graphics_Get_Angle">Graphics_Get_Angle</a></strong>(Position_1, Position_2 : Type_Coordinates): Real;</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code>Function <strong><a href="Unit_Graphics.html#Graphics_Get_Direction">Graphics_Get_Direction</a></strong>(Angle : Real) : Real;</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code>Procedure <strong><a href="Unit_Graphics.html#Graphics_Draw_Line">Graphics_Draw_Line</a></strong>(Var Game : Type_Game; Position_1, Position_2 : Type_Coordinates; Width : Integer; Color : Type_Color);</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code>Function <strong><a href="Unit_Graphics.html#Graphics_Get_Distance">Graphics_Get_Distance</a></strong>(Position_1, Position_2 : Type_Coordinates): Integer;</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code>Procedure <strong><a href="Unit_Graphics.html#Station_Display">Station_Display</a></strong>(Var Station : Type_Station; Var Game : Type_Game);</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code>Function <strong><a href="Unit_Graphics.html#Station_Get_Intermediate_Position">Station_Get_Intermediate_Position</a></strong>(Position_1, Position_2 : Type_Coordinates) : Type_Coordinates;</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code>Procedure <strong><a href="Unit_Graphics.html#Line_Display">Line_Display</a></strong>(Position_1, Position_2 : Type_Coordinates; Var Game : Type_Game);</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code>Procedure <strong><a href="Unit_Graphics.html#Train_Display">Train_Display</a></strong>(Var Train : Type_Train; Var Line : Type_Line; Var Game : Type_Game);</code></td>
+</tr>
+</table>
+<span id="PasDoc-Constants"></span><h3 class="summary">Constantes</h3>
+<table class="summary wide_list">
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Color_Depth">Color_Depth</a></strong> =   32;</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Station_Circle">Path_Image_Station_Circle</a></strong> =   'Ressources/Images/Station_Circle.png';</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Station_Square">Path_Image_Station_Square</a></strong> =   'Ressources/Images/Station_Square.png';</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Station_Triangle">Path_Image_Station_Triangle</a></strong> =   'Ressources/Images/Station_Triangle.png';</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Station_Pentagon">Path_Image_Station_Pentagon</a></strong> =   'Ressources/Images/Station_Pentagon.png';</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Station_Lozenge">Path_Image_Station_Lozenge</a></strong> =   'Ressources/Images/Station_Lozenge.png';</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Passenger_Circle">Path_Image_Passenger_Circle</a></strong> =   'Ressources/Images/Passenger_Circle.png';</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Passenger_Square">Path_Image_Passenger_Square</a></strong> =   'Ressources/Images/Passenger_Square.png';</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Passenger_Triangle">Path_Image_Passenger_Triangle</a></strong> =   'Ressources/Images/Passenger_Triangle.png';</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Passenger_Pentagon">Path_Image_Passenger_Pentagon</a></strong> =   'Ressources/Images/Passenger_Pentagon.png';</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Passenger_Lozenge">Path_Image_Passenger_Lozenge</a></strong> =   'Ressources/Images/Passenger_Lozenge.png';</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Image_Locomotive">Path_Image_Locomotive</a></strong> =   'Ressources/Images/Locomotive.png';</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Font">Path_Font</a></strong> =   'Ressources/Fonts/FreeSans.ttf';</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Path_Font_Bold">Path_Font_Bold</a></strong> =   'Ressources/Fonts/FreeSansBold.ttf';</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Station_Width">Station_Width</a></strong> =   32;</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Station_Height">Station_Height</a></strong> =   32;</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Vehicle_Width">Vehicle_Width</a></strong> =   32;</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Vehicle_Height">Vehicle_Height</a></strong> =   24;</code></td>
+</tr>
+<tr class="list">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Passenger_Width">Passenger_Width</a></strong> =   8;</code></td>
+</tr>
+<tr class="list2">
+<td class="itemcode"><code><strong><a href="Unit_Graphics.html#Passenger_Height">Passenger_Height</a></strong> =   8;</code></td>
+</tr>
+</table>
+<h2 class="description">Description</h2>
+<h3 class="detail">Fonctions et procédures</h3>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Graphics_Load"></span><code>Procedure <strong>Graphics_Load</strong>(Var Game : Type_Game);</code></td>
+</tr>
+<tr><td colspan="1">
+<p>
+- Function definition - - Window</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Graphics_Unload"></span><code>Procedure <strong>Graphics_Unload</strong>(Var Game : Type_Game);</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Graphics_Refresh"></span><code>Procedure <strong>Graphics_Refresh</strong>(Var Game : Type_Game);</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Graphics_Get_Angle"></span><code>Function <strong>Graphics_Get_Angle</strong>(Position_1, Position_2 : Type_Coordinates): Real;</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Graphics_Get_Direction"></span><code>Function <strong>Graphics_Get_Direction</strong>(Angle : Real) : Real;</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Graphics_Draw_Line"></span><code>Procedure <strong>Graphics_Draw_Line</strong>(Var Game : Type_Game; Position_1, Position_2 : Type_Coordinates; Width : Integer; Color : Type_Color);</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Graphics_Get_Distance"></span><code>Function <strong>Graphics_Get_Distance</strong>(Position_1, Position_2 : Type_Coordinates): Integer;</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Station_Display"></span><code>Procedure <strong>Station_Display</strong>(Var Station : Type_Station; Var Game : Type_Game);</code></td>
+</tr>
+<tr><td colspan="1">
+<p>
+- - Entity</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Station_Get_Intermediate_Position"></span><code>Function <strong>Station_Get_Intermediate_Position</strong>(Position_1, Position_2 : Type_Coordinates) : Type_Coordinates;</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Line_Display"></span><code>Procedure <strong>Line_Display</strong>(Position_1, Position_2 : Type_Coordinates; Var Game : Type_Game);</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Train_Display"></span><code>Procedure <strong>Train_Display</strong>(Var Train : Type_Train; Var Line : Type_Line; Var Game : Type_Game);</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<h3 class="detail">Constantes</h3>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Color_Depth"></span><code><strong>Color_Depth</strong> =   32;</code></td>
+</tr>
+<tr><td colspan="1">
+<p>
+- Constant definition - - Settings</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Station_Circle"></span><code><strong>Path_Image_Station_Circle</strong> =   'Ressources/Images/Station_Circle.png';</code></td>
+</tr>
+<tr><td colspan="1">
+<p>
+- - Paths - - - Images</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Station_Square"></span><code><strong>Path_Image_Station_Square</strong> =   'Ressources/Images/Station_Square.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Station_Triangle"></span><code><strong>Path_Image_Station_Triangle</strong> =   'Ressources/Images/Station_Triangle.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Station_Pentagon"></span><code><strong>Path_Image_Station_Pentagon</strong> =   'Ressources/Images/Station_Pentagon.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Station_Lozenge"></span><code><strong>Path_Image_Station_Lozenge</strong> =   'Ressources/Images/Station_Lozenge.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Passenger_Circle"></span><code><strong>Path_Image_Passenger_Circle</strong> =   'Ressources/Images/Passenger_Circle.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Passenger_Square"></span><code><strong>Path_Image_Passenger_Square</strong> =   'Ressources/Images/Passenger_Square.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Passenger_Triangle"></span><code><strong>Path_Image_Passenger_Triangle</strong> =   'Ressources/Images/Passenger_Triangle.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Passenger_Pentagon"></span><code><strong>Path_Image_Passenger_Pentagon</strong> =   'Ressources/Images/Passenger_Pentagon.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Passenger_Lozenge"></span><code><strong>Path_Image_Passenger_Lozenge</strong> =   'Ressources/Images/Passenger_Lozenge.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Image_Locomotive"></span><code><strong>Path_Image_Locomotive</strong> =   'Ressources/Images/Locomotive.png';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Font"></span><code><strong>Path_Font</strong> =   'Ressources/Fonts/FreeSans.ttf';</code></td>
+</tr>
+<tr><td colspan="1">
+<p>
+- - - Fonts</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Path_Font_Bold"></span><code><strong>Path_Font_Bold</strong> =   'Ressources/Fonts/FreeSansBold.ttf';</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Station_Width"></span><code><strong>Station_Width</strong> =   32;</code></td>
+</tr>
+<tr><td colspan="1">
+<p>
+- - Size - - - Station</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Station_Height"></span><code><strong>Station_Height</strong> =   32;</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Vehicle_Width"></span><code><strong>Vehicle_Width</strong> =   32;</code></td>
+</tr>
+<tr><td colspan="1">
+<p>
+- - - Vehicle (Locomotive and Wagon)</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Vehicle_Height"></span><code><strong>Vehicle_Height</strong> =   24;</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Passenger_Width"></span><code><strong>Passenger_Width</strong> =   8;</code></td>
+</tr>
+<tr><td colspan="1">
+<p>
+- - - Passenger</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="itemcode"><span id="Passenger_Height"></span><code><strong>Passenger_Height</strong> =   8;</code></td>
+</tr>
+<tr><td colspan="1">
+&nbsp;</td></tr>
+</table>
+<hr><span class="appinfo"><em>Produit par <a href="https://pasdoc.github.io/">PasDoc 0.16.0</a>. </em>
+</span>
+</div></div></body></html>
