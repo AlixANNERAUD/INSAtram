@@ -19,6 +19,8 @@ Const Maximum_Number_Lines = 8;
 
 Const Maximum_Number_Trains_Per_Lines = 4;
 
+Const Maximum_Number_Vehicles_Per_Train = 3;
+
 
 
   // - Type definition
@@ -124,7 +126,7 @@ Type Type_Train = Record
 
   Vehicles_Count : Byte;
   //  Nombre de wagons.
-  Vehicle : array[0..3] Of Type_Vehicle;
+  Vehicle : array[0..(Maximum_Number_Vehicles_Per_Train - 1)] Of Type_Vehicle;
   //  Pointeur vers les wagons du train.
 End;
 

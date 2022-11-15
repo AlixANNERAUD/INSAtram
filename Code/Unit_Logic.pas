@@ -27,12 +27,9 @@ Function Station_Get_Center_Position(Station : Type_Station) : Type_Coordinates;
 
 // - - Trains
 Procedure Train_Create(Var Line : Type_Line);
-Procedure Train_Delete(Var Line : Type_Line, Var Train_Pointer : Type_Train_Pointer);
+Procedure Train_Delete(Var Train_Pointer : Type_Train_Pointer; Var Line : Type_Line);
 Procedure Train_Add_Vehicle(Var Train : Type_Train);
 Procedure Train_Delete_Vehicle(Var Train : Type_Train);
-
-
-
 
 Implementation
 
@@ -96,6 +93,7 @@ End;
 
 // Fonction qui créer un passager.
 Procedure Passenger_Create(Var Game : Type_Game);
+
 Var Temporary, Shape : Byte;
   Passenger_Pointer : Type_Passenger_Pointer;
 Begin
@@ -210,11 +208,11 @@ Begin
       End;
 
       Game.Stations[Game.Stations_Count]^.Position.X := Random(Game.
-                                                           Window_Size.X -
-                                                           Station_Width);
+                                                        Window_Size.X -
+                                                        Station_Width);
       Game.Stations[Game.Stations_Count]^.Position.Y := Random(Game.
-                                                           Window_Size.Y -
-                                                           Station_Height);
+                                                        Window_Size.Y -
+                                                        Station_Height);
 
       Game.Stations[Game.Stations_Count]^.Passengers_Count := 0;
 
@@ -231,9 +229,42 @@ End;
 
 // - - Fonctions et procédures relatives aux lignes.
 
-Procedure Train_Create(VAr Line : Type_Line);
+Procedure Train_Create(Var Line : Type_Line);
 Begin
+  If (Line.Trains_Count < Maximum_Number_Trains_Per_Lines) Then
+    Begin
+      Line.Trains[Line.Trains_Count] := Train_Allocate();
+      inc(Line.Trains_Count);
+    End;
+End;
 
+Procedure Train_Delete(Var Train_Pointer : Type_Train_Pointer; Var Line : Type_Line);
+
+Var i : Byte;
+Begin
+  If (Line.Trains_Count > 0) Then
+    Begin
+
+      For i := 0 To Line.Trains_Count - 1 Do
+        Begin
+          If (Line.Trains[i] = Train_Pointer) Then
+            Line.Trains[i] := Line.Trains[Line.Trains_Count - 1];
+        End;
+      dec(Line.Trains_Count);
+      Train_Deallocate(Train_Pointer);
+    End;
+End;
+
+Procedure Train_Add_Vehicle(Var Train : Type_Train);
+Begin
+  if (Train.Vehicles_Count < Maximum_Number_Vehicles_Per_Train) Then
+    inc(Train.Vehicles_Count);
+End;
+
+Procedure Train_Delete_Vehicle(Var Train : Type_Train);
+Begin
+  if (Train.Vehicles_Count > 0) Then
+    dec(Train.Vehicles_Count);
 End;
 
 End.

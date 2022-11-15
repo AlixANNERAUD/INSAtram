@@ -183,10 +183,10 @@ Begin
               Line_Display(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Stations[j + 1]^.Position, Game);
             End;
           // - Affichage des trains sur la ligne.
-          For j := 0 To Trains_Count - 1 Do
-          Begin
-            Train_Display(Trains[i]^, Lines[i]^, Game);
-          End;
+          For j := 0 To Game.Lines[i].Trains_Count - 1 Do
+            Begin
+              Train_Display(Game.Lines[i].Trains[j]^, Game.Lines[i], Game);
+            End;
         End;
     End;
 

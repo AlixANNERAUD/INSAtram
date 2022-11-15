@@ -22,17 +22,23 @@ Begin
   Mouse_Load();
 
 
-
+  Line_Create(Game);
   For i := 0 To 9 Do
     Begin
       Station_Create(Game);
+      Line_Add_Station(Game.Lines[0], Game.Stations[i]);
     End;
 
+  Train_Create(Game.Lines[0]);
+  Game.Lines[0].Trains[0]^.Last_Station := Game.Lines[0].Stations[0];
+  Game.Lines[0].Trains[0]^.Distance := 10;
 
   For i := 0 To 19 Do
     Begin
       Passenger_Create(Game);
     End;
+
+
 
 
   Quit := False;
