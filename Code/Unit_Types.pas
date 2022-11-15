@@ -23,6 +23,7 @@ Const Maximum_Number_Vehicles_Per_Train = 3;
 
 
 
+
   // - Type definition
 
   // - - General
@@ -66,7 +67,7 @@ End;
 
 Type Type_Animation = Record
 
-  End_Time : Type_Time;
+  Delay_Time : Type_Time;
   Variable : Long_Integer_Pointer;
   Minimum_Value, Maximum_Value : LongInt;
   //Path : Type_Animation_Path;
@@ -97,8 +98,8 @@ Type Type_Passenger_Pointer = ^Type_Passenger;
   // - - Station
 
 Type Type_Station = Record
+  Position, Size : Type_Coordinates;
   Shape : Type_Shape;
-  Position : Type_Coordinates;
   Sprite : Type_Surface;
   Passengers : array[0..5] Of Type_Passenger_Pointer;
   Passengers_Count : Byte;
@@ -108,9 +109,12 @@ Type Type_Station_Pointer = ^Type_Station;
 
   // - - Train
 
+Type Type_Vehicule_State = (Stopped, Driving);
+
 Type Type_Vehicle = Record
-  Position : Type_Coordinates;
+  Position, Size : Type_Coordinates;
   Sprite : Type_Surface;
+  Driving : Boolean;
 End;
 
 Type Type_Train = Record

@@ -162,6 +162,12 @@ Begin
       // Allocation de la mémoire pour la station.
       Game.Stations[Game.Stations_Count] := Station_Allocate();
 
+      // Définition des attributs de la station
+
+      Game.Stations[Game.Stations_Count]^.Size.X := Station_Width;
+      Game.Stations[Game.Stations_Count]^.Size.Y := Station_Height;
+
+      // Détermination de la forme de la station.
       // Les 5 premières stations sont de formes différentes.
       If (Game.Stations_Count > 4) Then
         Begin
