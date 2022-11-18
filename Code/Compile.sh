@@ -1,2 +1,2 @@
-fpc ./INSAtram.pas -FE"../Binaries"
+fpc ./INSAtram.pas -FE"../Binaries" -gh
 

@@ -5,68 +5,9 @@ Interface
 
 Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Math;
 
-// - Constant definition
+// - Function definition
 
-// - - Settings
-
-Const Color_Depth =   32;
-
-  // - - Paths
-
-  // - - - Images
-
-Const Path_Image_Station_Circle =   'Ressources/Images/Station_Circle.png';
-
-Const Path_Image_Station_Square =   'Ressources/Images/Station_Square.png';
-
-Const Path_Image_Station_Triangle =   'Ressources/Images/Station_Triangle.png';
-
-Const Path_Image_Station_Pentagon =   'Ressources/Images/Station_Pentagon.png';
-
-Const Path_Image_Station_Lozenge =   'Ressources/Images/Station_Lozenge.png';
-
-Const Path_Image_Passenger_Circle =   'Ressources/Images/Passenger_Circle.png';
-
-Const Path_Image_Passenger_Square =   'Ressources/Images/Passenger_Square.png';
-
-Const Path_Image_Passenger_Triangle =   'Ressources/Images/Passenger_Triangle.png';
-
-Const Path_Image_Passenger_Pentagon =   'Ressources/Images/Passenger_Pentagon.png';
-
-Const Path_Image_Passenger_Lozenge =   'Ressources/Images/Passenger_Lozenge.png';
-
-Const Path_Image_Vehicle =   'Ressources/Images/Vehicle.png';
-
-  // - - - Fonts
-
-Const Path_Font =   'Ressources/Fonts/FreeSans.ttf';
-
-Const Path_Font_Bold =   'Ressources/Fonts/FreeSansBold.ttf';
-
-  // - - Size
-
-  // - - - Station
-
-Const Station_Width =   32;
-
-Const Station_Height =   32;
-
-  // - - - Vehicle (Locomotive and Wagon)
-
-Const Vehicle_Width =   32;
-
-Const Vehicle_Height =   24;
-
-  // - - - Passenger
-
-Const Passenger_Width =   8;
-
-Const Passenger_Height =   8;
-
-
-  // - Function definition
-
-  // - - Window
+// - - Window
 
 Procedure Graphics_Load(Var Game : Type_Game);
 Procedure Graphics_Unload(Var Game : Type_Game);
@@ -115,36 +56,28 @@ Begin
   Video_Informations := SDL_GetVideoInfo();
   Game.Window_Size.X := Video_Informations^.current_w;
   Game.Window_Size.Y := Video_Informations^.current_h;
-  // - Remplissage de la fenêtre en blanc
-  // - Sprites loading
+
+  // - Chargement des ressoureces.
 
   // - - Station
-  Game.Sprites.Station_Square := IMG_Load(Path_Image_Station_Square);
-  Game.Sprites.Station_Circle := IMG_Load(Path_Image_Station_Circle);
-  Game.Sprites.Station_Triangle := IMG_Load(Path_Image_Station_Triangle);
-  Game.Sprites.Station_Pentagon := IMG_Load(Path_Image_Station_Pentagon);
-  Game.Sprites.Station_Lozenge := IMG_Load(Path_Image_Station_Lozenge);
+  Game.Sprites.Station[0] := IMG_Load(Path_Image_Station_Circle);
+  Game.Sprites.Station[1] := IMG_Load(Path_Image_Station_Lozenge);
+  Game.Sprites.Station[2] := IMG_Load(Path_Image_Station_Pentagon);
+  Game.Sprites.Station[3] := IMG_Load(Path_Image_Station_Square);
+  Game.Sprites.Station[4] := IMG_Load(Path_Image_Station_Triangle);
 
   // - - Passenger
-  Game.Sprites.Passenger_Circle := IMG_Load(Path_Image_Passenger_Circle);
-  Game.Sprites.Passenger_Square := IMG_Load(Path_Image_Passenger_Square);
-  Game.Sprites.Passenger_Triangle := IMG_Load(Path_Image_Passenger_Triangle);
-  Game.Sprites.Passenger_Pentagon := IMG_Load(Path_Image_Passenger_Pentagon);
-  Game.Sprites.Passenger_Lozenge := IMG_Load(Path_Image_Passenger_Lozenge);
-
-
+  Game.Sprites.Passenger[0] := IMG_Load(Path_Image_Passenger_Circle);
+  Game.Sprites.Passenger[1] := IMG_Load(Path_Image_Passenger_Lozenge);
+  Game.Sprites.Passenger[2] := IMG_Load(Path_Image_Passenger_Pentagon);
+  Game.Sprites.Passenger[3] := IMG_Load(Path_Image_Passenger_Square);
+  Game.Sprites.Passenger[4] := IMG_Load(Path_Image_Passenger_Triangle);
 
   // - - Véhicule (Locomotive et Wagon)
-
-  //Game.Sprites.Vehicle_0_Degree := SDL_CreateRGBSurface(0, Vehicle_Width, Vehicle_Height, Color_Depth, 0, 0, 0, 0);
-  //SDL_FillRect(Game.Sprites.Vehicle_0_Degree, Nil, SDL_MapRGBA(Game.Window^.format, 0, 0, 0, 255));
 
   Game.Sprites.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
 
   Game.Sprites.Vehicle_45_Degree := rotozoomSurface(Game.Sprites.Vehicle_0_Degree, 45, 1, 1);
-
-  //Game.Sprites.Vehicle_90_Degree := SDL_CreateRGBSurface(0, Vehicle_Height, Vehicle_Width, Color_Depth, 0, 0, 0, 0);
-  //SDL_FillRect(Game.Sprites.Vehicle_0_Degree, Nil, SDL_MapRGBA(Game.Window^.format, 0, 0, 0));
 
   Game.Sprites.Vehicle_90_Degree := rotozoomSurface(Game.Sprites.Vehicle_0_Degree, 90, 1, 1);
 
@@ -186,32 +119,27 @@ Begin
   SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255));
 
   // - Affichage des lignes.
-  If (Game.Lines_Count > 0) Then
+  For i := low(Game.Lines) To high(Game.Lines) Do
     Begin
-      For i := 0 To Game.Lines_Count - 1 Do
+      // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
+      For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) Do
         Begin
-          // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
-          For j := 0 To Game.Lines[i].Stations_Count - 2 Do
-            Begin
-              Line_Render(Graphics_Get_Centered_Position(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Stations[j]^.Size),Graphics_Get_Centered_Position(Game.Lines[i].Stations[j + 1]^.Position,
-                                                                                                                                                              Game.Lines[i].Stations[j + 1]^.Size), Game
-              );
-            End;
-          // - Affichage des trains sur la ligne.
-          For j := 0 To Game.Lines[i].Trains_Count - 1 Do
-            Begin
-              Train_Render(Game.Lines[i].Trains[j]^, Game.Lines[i], Game);
-            End;
+          Line_Render(Graphics_Get_Centered_Position(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Stations[j]^.Size),Graphics_Get_Centered_Position(Game.Lines[i].Stations[j + 1]^.Position,
+                                                                                                                                                          Game.Lines[i].Stations[j + 1]^.Size), Game
+          );
+        End;
+      // - Affichage des trains sur la ligne.
+      For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+        Begin
+          Train_Render(Game.Lines[i].Trains[j], Game.Lines[i], Game);
         End;
     End;
 
+
   // - Affichage les stations.
-  If (Game.Stations_Count > 0) Then
+  For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      For i := 0 To Game.Stations_Count - 1 Do
-        Begin
-          Station_Render(Game.Stations[i]^, Game);
-        End;
+      Station_Render(Game.Stations[i], Game);
     End;
 
   // Destination_Rectangle.X := 200;
@@ -349,7 +277,6 @@ Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Var Game : 
 
 Var Destination_Rectangle :   Type_Rectangle;
   i :   Byte;
-  Next_Station :   Type_Station_Pointer;
   Intermediate_Position :   Type_Coordinates;
   Intermediate_Position_Distance, Square_Side_Length :   Integer;
   Direction :   Integer;
@@ -361,21 +288,10 @@ Var Destination_Rectangle :   Type_Rectangle;
 Begin
 
 
-
-  // - Détermination de la station d'arrivée à partir de la station de départ.  
-  For i := 0 To Line.Stations_Count - 1 Do
-    Begin
-      If (Line.Stations[i] = Train.Last_Station) Then
-        Begin
-          Next_Station := Line.Stations[i + 1];
-          break;
-        End;
-    End;
-
   // Calcul des coordonnées centrée des stations de départ et d'arrivé.
 
   Stations_Centered_Position[0] := Graphics_Get_Centered_Position(Train.Last_Station^.Position, Train.Last_Station^.Size);
-  Stations_Centered_Position[1] := Graphics_Get_Centered_Position(Next_Station^.Position, Next_Station^.Size);
+  Stations_Centered_Position[1] := Graphics_Get_Centered_Position(Train.Next_Station^.Position, Train.Next_Station^.Size);
 
   // - Détermination du point intermédiaire.
   Intermediate_Position := Station_Get_Intermediate_Position(Stations_Centered_Position[0], Stations_Centered_Position[1]);
@@ -539,16 +455,21 @@ Begin
            Destination_Rectangle.x := round(Centered_Position.X - (Vehicle_Height*0.5));
            Destination_Rectangle.y := round(Centered_Position.Y - (Vehicle_Width*0.5));
          End
- Else
+  Else
     Begin
+
+
+
+
+
 {
       Square_Side_Length := round(sqrt(sqr(Vehicle_Width)*0.5)+sqrt(sqr(Vehicle_Height)*0.5));
       //Se référer au rapport du projet pour les explications
       Train.Vehicle[0].Position.X := round(Centered_Position.X - Square_Side_Length*0.5);
       Train.Vehicle[0].Position.Y := round(Centered_Position.Y - Square_Side_Length*0.5);
 }
-  Destination_Rectangle.x := Centered_Position.X;
-  Destination_Rectangle.y := Centered_Position.Y;
+      Destination_Rectangle.x := Centered_Position.X;
+      Destination_Rectangle.y := Centered_Position.Y;
     End;
 
 
@@ -580,24 +501,22 @@ Begin
   Destination_Rectangle.w := Passenger_Width;
   Destination_Rectangle.h := Passenger_Height;
 
-  If (Station.Passengers_Count > 0) Then
-    Begin
-      For i := 0 To (Station.Passengers_Count - 1) Do
-        Begin
-          // - Determine x position
-          If (i < 3) Then
-            Destination_Rectangle.x := (Station.Position.X - (2 *
-                                       Passenger_Width))
-          Else
-            Destination_Rectangle.x := (Station.Position.X + Station_Width +
-                                       Passenger_Width);
-          // - Determine y position
-          Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
-                                     Passenger_Height + 4));
 
-          SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Game.Window, @
-                          Destination_Rectangle);
-        End;
+  For i := low(Station.Passengers) To high(Station.Passengers) Do
+    Begin
+      // - Determine x position
+      If (i < 3) Then
+        Destination_Rectangle.x := (Station.Position.X - (2 *
+                                   Passenger_Width))
+      Else
+        Destination_Rectangle.x := (Station.Position.X + Station_Width +
+                                   Passenger_Width);
+      // - Determine y position
+      Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
+                                 Passenger_Height + 4));
+
+      SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Game.Window, @
+                      Destination_Rectangle);
     End;
 End;
 
