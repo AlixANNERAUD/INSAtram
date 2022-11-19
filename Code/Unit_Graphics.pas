@@ -9,6 +9,7 @@ Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Ma
 
 // - - Window
 
+
 Procedure Graphics_Load(Var Game : Type_Game);
 Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
@@ -21,7 +22,7 @@ Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Color);
 Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
 
-// - - Station
+Procedure Text_Render(Var Text : Type_Text; Var Game : Type_Game);
 
 // - - Entity
 
@@ -80,8 +81,8 @@ Begin
   Game.Sprites.Vehicle_135_Degree := rotozoomSurface(Game.Sprites.Vehicle_0_Degree, 135, 1, 1);
 
   // - Fonts loading
-  Game.Fonts[0] := TTF_OPENFONT(Path_Font, 12);
-  Game.Fonts[0] := TTF_OPENFONT(Path_Font_Bold, 12);
+  Game.Fonts[0] := TTF_OPENFONT(Path_Font, Font_Size_Normal);
+  Game.Fonts[0] := TTF_OPENFONT(Path_Font_Bold, Font_Size_Normal);
 
   Graphics_Refresh(Game);
 End;
@@ -120,9 +121,6 @@ Begin
             Begin
               For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
                 Begin
-
-                writeln('j = ', j);
-
                   Line_Render(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Stations[j + 1]^.Position_Centered, Game.Lines[i].Color, Game);
                  
                 End;
@@ -132,7 +130,6 @@ Begin
             Begin
               For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
                 Begin
-                  writeln('j = ', j);
                   Train_Render(Game.Lines[i].Trains[j], Game.Lines[i], Game);
                 End;
             End;

@@ -52,6 +52,10 @@ Const Path_Font_Bold =   'Ressources/Fonts/FreeSansBold.ttf';
 
   // - - Object constants
 
+  // - - - Font
+
+  Const Font_Size_Normal =  12;
+
   // - - - Game
 
 Const Game_Maximum_Lines_Number = 8;
@@ -118,11 +122,13 @@ End;
 // Structure contenant tous pointeurs des sprites du jeu.
 
 Type Type_Sprite_Table = Record
-  // - Stations (5 formes différentes).
+  // Font
+  Font : Type_Font;
+  // Stations (5 formes différentes).
   Stations : Array [0 .. (Shapes_Number - 1)] Of Type_Surface;
-  // - Passagers (5 formes différentes).
+  // Passagers (5 formes différentes).
   Passengers : Array [0 .. (Shapes_Number - 1)] Of Type_Surface;
-  // - Vehicles (locomotive et wagon).
+  // Vehicles (locomotive et wagon).
   Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : Type_Surface;
 End;
 
@@ -224,10 +230,40 @@ Type Type_Player = Record
   Tunnel_Token : Byte;
 End;
 
+// - Interface graphique
+
+Type Type_Image = Record
+  Position, Size : Type_Coordinates;
+  Surface : Type_Surface;
+End;
+
+Type Type_Button = Record
+  Position, Size : Type_Coordinates;
+  Surface : Type_Surface;
+End;
+
+Type Type_Text = Record
+  Position, Size : Type_Coordinates;
+  Text : String;
+  Color : Type_Color;
+End;
+
+Type Type_Text_Ponter = ^Type_Text;
+
+Type Type_Interface = Record
+  Lines_Buttons : Array[0 .. (Game_Maximum_Lines_Number - 1)] Of Type_Button;
+  
+  Score : Type_Text;
+
+End;
+
 // - Game
 
 Type Type_Game = Record
   // Fenêtre du jeu.
+
+  
+
   Window : Type_Surface;
   Window_Size : Type_Coordinates;
   // Structure contenant les sprites du jeu.
@@ -252,6 +288,8 @@ Function Get_Centered_Position(Position, Size : Type_Coordinates) : Type_Coordin
 
 // - - Object creation.
 
+Function Text_Create(Position, Size : Type_Coordinates; Texte : String; Color : Type_Color) : Type_Text_Pointer;
+
 Function Station_Create(Var Game: Type_Game) : Boolean;
 Function Line_Create(Color : Type_Color; Var Game : Type_Game) : Boolean;
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
@@ -262,6 +300,7 @@ Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
 
 // - - Object deletion.
 
+Procedure Text_Delete(Var Text : Type_Text_Pointer);
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
@@ -290,6 +329,16 @@ Begin
   Position.X := Position.X + (Size.X Div 2);
   Position.Y := Position.Y + (Size.Y Div 2);
   Get_Centered_Position := Position;
+End;
+
+Function Text_Create(Position, Size : Type_Coordinates; Text : String; Color : Type_Color) : Type_Text_Pointer;
+Var Text : Type_Text_Pointer;
+Begin
+  Text := GetMem(SizeOf(Type_Text));
+  Text^.Position := Position;
+  Text^.Size := Size;
+  Text^.Text := Text;
+  Text^.Color := Color;
 End;
 
 // Procédure qui alloue de la mémoire pour une station et le référence dans le tableau dynamique, détermine sa forme et position aléatoirement et defini ses attributs.

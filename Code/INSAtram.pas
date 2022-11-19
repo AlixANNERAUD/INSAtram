@@ -21,11 +21,7 @@ Begin
   Color.Blue := 0;
   Color.Alpha := 255;
 
-  writeln('Initializing SDL...');
-
   Logic_Load(Game);
-
-  writeln('Initializing SDL...');
 
   Graphics_Load(Game);
 
@@ -84,7 +80,6 @@ Begin
 
       Graphics_Refresh(Game);
 
-      writeln('!!!!Test!!!!!');
       //inc(Game.Lines[0].Trains[0]^.Distance);
 
 
