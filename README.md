@@ -1,12 +1,52 @@
-# INSAtram 🚃
+# 🚃 INSAtram
 
-## Somaire
+## 🗺️ Table of contents
 
-## Introduction
+- [🪧Introduction](#🪧-introduction)
+- [📦️ Installation](#📦️-installation)
+    - [🎮️ Use](#🎮️-use)
+    - [🧑‍💻 Development](#🧑‍💻-development)
+- [🗃️ Structure](#🗃️-structure)
+- [ℹ️ About](#ℹ️-about)
+    - [⚖️ Licence](#⚖️-licence)
+    - [📃 Credits](#📃-credits)
 
-Le meilleur jeux du monde développé par des trous de balles.
+## 🪧 Introduction
 
-## Installation
+This game is a copy of Mini Metro developed by the studio Dinosaur Polo Club.
+This is a project carried out for the IT project requested by INSA Rouen in the 2nd year of preparatory class.
+Thus, **no intellectual property rights** were violated during the realization of this project. It was designed and developed **solely** from **observations** made on the game.
 
-Tout d'abord,
+## 📦️ Installation
 
+### 🎮️ Use
+
+You can download the archives containing the binaries as well as all the necessary libraries here:
+
+- [Linux]()
+- [Windows]()
+
+### 🧑‍💻 Development
+
+In order to compile the project, you will need to install the following tools.
+
+- First, you need SDL 1.2. On ubuntu, install the synaptic packet manager.
+
+## 🗃️ Structure
+
+The project is structured in folder as follows:
+- `Binaries` : Contains compiled binaries (compiler output) as well as the resources (Fonts, Images).
+- `Code` : Contains the project code as well as the scripts allowing the compilation and the launching.
+- `Documentation` : Contains project documentation (specifications, top-down analysis, final report).
+
+## ℹ️ About
+
+### ⚖️ Licence
+
+This project is under MIT Licence.
+
+### 📃 Credits
+
+This project uses the following 
+- SDL 1.2
+- Free Pascal Compiler
