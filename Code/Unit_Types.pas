@@ -168,7 +168,7 @@ Type Type_Passenger_Pointer = ^Type_Passenger;
   // - - Station
 
 Type Type_Station = Record
-  Position, Size : Type_Coordinates;
+  Position, Size, Position_Centered : Type_Coordinates;
   Shape : Type_Shape;
   Sprite : Type_Surface;
   Passengers : array Of Type_Passenger_Pointer;
@@ -248,9 +248,10 @@ Type Type_Game_Pointer = ^Type_Game;
 
 // - Function declaration
 
+Function Get_Centered_Position(Position, Size : Type_Coordinates) : Type_Coordinates;
+
 // - - Object creation.
 
-Function Game_Create() : Type_Game_Pointer;
 Function Station_Create(Var Game: Type_Game) : Boolean;
 Function Line_Create(Color : Type_Color; Var Game : Type_Game) : Boolean;
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
@@ -261,7 +262,6 @@ Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
 
 // - - Object deletion.
 
-Procedure Game_Delete(Var Game : Type_Game_Pointer);
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
@@ -285,9 +285,11 @@ Implementation
 
 // - Création
 
-Function Game_Create() : Type_Game_Pointer;
+Function Get_Centered_Position(Position, Size : Type_Coordinates) : Type_Coordinates;
 Begin
-  Game_Create := GetMem(Sizeof(Type_Game));
+  Position.X := Position.X + (Size.X Div 2);
+  Position.Y := Position.Y + (Size.Y Div 2);
+  Get_Centered_Position := Position;
 End;
 
 // Procédure qui alloue de la mémoire pour une station et le référence dans le tableau dynamique, détermine sa forme et position aléatoirement et defini ses attributs.
@@ -312,6 +314,10 @@ Begin
       Game.Stations[high(Game.Stations)].Shape := Number_To_Shape(Shape);
       Game.Stations[high(Game.Stations)].Sprite := Game.Sprites.Stations[Shape];
 
+
+      Game.Stations[high(Game.Stations)].Size.X := Station_Width;
+      Game.Stations[high(Game.Stations)].Size.Y := Station_Height;
+
       Game.Stations[high(Game.Stations)].Position.X := Random(Game.
                                                        Window_Size.X -
                                                        Station_Width);
@@ -319,8 +325,9 @@ Begin
                                                        Window_Size.Y -
                                                        Station_Height);
 
-      Game.Stations[high(Game.Stations)].Size.X := Station_Width;
-      Game.Stations[high(Game.Stations)].Size.Y := Station_Height;
+      // Calcul les coordoonées centré de la station.
+      Game.Stations[high(Game.Stations)].Position_Centered := Get_Centered_Position(Game.Stations[high(Game.Stations)].Position, Game.Stations[high(Game.Stations)].Size);
+
       Station_Create := True;
     End
   Else
@@ -425,12 +432,6 @@ Begin
 End;
 
 // - - Object deletion.
-
-Procedure Game_Delete(Var Game_Pointer : Type_Game_Pointer);
-Begin
-  FreeMem(Game_Pointer);
-  Game_Pointer := nil;
-End;
 
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 

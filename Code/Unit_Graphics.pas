@@ -21,8 +21,6 @@ Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Color);
 Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
 
-Function Graphics_Get_Centered_Position(Position, Size : Type_Coordinates): Type_Coordinates;
-
 // - - Station
 
 // - - Entity
@@ -31,7 +29,7 @@ Procedure Station_Render(Var Station : Type_Station; Var Game : Type_Game);
 
 Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
 
-Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Var Game :
+Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Color; Var Game :
                       Type_Game);
 
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Var Game :
@@ -73,6 +71,7 @@ Begin
   Game.Sprites.Passengers[3] := IMG_Load(Path_Image_Passenger_Square);
   Game.Sprites.Passengers[4] := IMG_Load(Path_Image_Passenger_Triangle);
 
+
   // - - Véhicule (Locomotive et Wagon)
 
   Game.Sprites.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
@@ -108,32 +107,47 @@ Procedure Graphics_Refresh(Var Game : Type_Game);
 
 Var i, j:   Byte;
 Begin
-
   // - Rempli la fenêtre en blanc.
   SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255));
 
-  // - Affichage des lignes.
-  For i := low(Game.Lines) To high(Game.Lines) Do
+  If (length(Game.Lines) > 0) Then
     Begin
-      // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
-      For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) Do
+      // - Affichage des lignes.
+      For i := low(Game.Lines) To high(Game.Lines) Do
         Begin
-          Line_Render(Graphics_Get_Centered_Position(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Stations[j]^.Size),Graphics_Get_Centered_Position(Game.Lines[i].Stations[j + 1]^.Position,
-                                                                                                                                                          Game.Lines[i].Stations[j + 1]^.Size), Game
-          );
-        End;
-      // - Affichage des trains sur la ligne.
-      For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
-        Begin
-          Train_Render(Game.Lines[i].Trains[j], Game.Lines[i], Game);
+          // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
+          If (length(Game.Lines[i].Stations) > 0) Then
+            Begin
+              For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
+                Begin
+
+                writeln('j = ', j);
+
+                  Line_Render(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Stations[j + 1]^.Position_Centered, Game.Lines[i].Color, Game);
+                 
+                End;
+            End;
+          // - Affichage des trains sur la ligne.
+          If (length(Game.Lines[i].Trains) > 0) Then
+            Begin
+              For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+                Begin
+                  writeln('j = ', j);
+                  Train_Render(Game.Lines[i].Trains[j], Game.Lines[i], Game);
+                End;
+            End;
         End;
     End;
 
 
-  // - Affichage les stations.
-  For i := low(Game.Stations) To high(Game.Stations) Do
+
+  If (length(Game.Stations) > 0) Then
     Begin
-      Station_Render(Game.Stations[i], Game);
+      // - Affichage les stations.
+      For i := low(Game.Stations) To high(Game.Stations) Do
+        Begin
+          Station_Render(Game.Stations[i], Game);
+        End;
     End;
 
   SDL_Flip(Game.Window);
@@ -151,12 +165,6 @@ Begin
 End;
 
 // Fonction qui calcule les coordonnées centrée d'un objet à partir de sa position dans le repère et sa taille.
-Function Graphics_Get_Centered_Position(Position, Size : Type_Coordinates): Type_Coordinates;
-Begin
-  Position.X := Position.X + (Size.X Div 2);
-  Position.Y := Position.Y + (Size.Y Div 2);
-  Graphics_Get_Centered_Position := Position;
-End;
 
 // Fonction déterminant l'orientation d'un angle parmis : 0, 45, 90, 135, 180, -45, -90, -135.
 Function Graphics_Get_Direction(Angle : Real) : Integer;
@@ -209,19 +217,13 @@ End;
 // - - Station
 
 // - Procédure génère le rendu dans la fenêtre des traits entre les stations en utilisant que des angles de 0, 45 et 90 degrés.
-Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Var Game :
+Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Color; Var Game :
                       Type_Game);
 
 Var Intermediate_Position :   Type_Coordinates;
-  Color :   Type_Color;
 Begin
 
   Intermediate_Position := Station_Get_Intermediate_Position(Position_1, Position_2);
-
-  Color.Red := 0;
-  Color.Green := 0;
-  Color.Blue := 0;
-  Color.Alpha := 255;
 
   Graphics_Draw_Line(Game, Position_1, Intermediate_Position, 0, Color);
   Graphics_Draw_Line(Game, Intermediate_Position, Position_2, 0, Color);
@@ -275,16 +277,14 @@ Var Destination_Rectangle : Type_Rectangle;
   // 0 : Station de départ, 2 : Station d'arrivée.
 
 Begin
-
-
   // Calcul des coordonnées centrée des stations de départ et d'arrivé.
 
-  Stations_Centered_Position[0] := Graphics_Get_Centered_Position(Train.Last_Station^.Position, Train.Last_Station^.Size);
-  Stations_Centered_Position[1] := Graphics_Get_Centered_Position(Train.Next_Station^.Position, Train.Next_Station^.Size);
-
+  Stations_Centered_Position[0] := Train.Last_Station^.Position_Centered;
+  Stations_Centered_Position[1] := Train.Next_Station^.Position_Centered;
   // - Détermination du point intermédiaire.
   Intermediate_Position := Station_Get_Intermediate_Position(Stations_Centered_Position[0], Stations_Centered_Position[1]);
   Intermediate_Position_Distance := Graphics_Get_Distance(Stations_Centered_Position[0], Intermediate_Position);
+
 
   // - Détermination de la droite sur laquel le train se trouve et calcule l'angle du véhicule en conséquence.
   If (Train.Distance <= Intermediate_Position_Distance) Then // Si le train se trouve avant le point intermédiaire.
@@ -457,6 +457,10 @@ Begin
 
 
 
+
+
+
+
 {
       Square_Side_Length := round(sqrt(sqr(Vehicle_Width)*0.5)+sqrt(sqr(Vehicle_Height)*0.5));
       //Se référer au rapport du projet pour les explications
@@ -496,22 +500,24 @@ Begin
   Destination_Rectangle.w := Passenger_Width;
   Destination_Rectangle.h := Passenger_Height;
 
-
-  For i := low(Station.Passengers) To high(Station.Passengers) Do
+  If (length(Station.Passengers) > 0) Then
     Begin
-      // - Determine x position
-      If (i < 3) Then
-        Destination_Rectangle.x := (Station.Position.X - (2 *
-                                   Passenger_Width))
-      Else
-        Destination_Rectangle.x := (Station.Position.X + Station_Width +
-                                   Passenger_Width);
-      // - Determine y position
-      Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
-                                 Passenger_Height + 4));
+      For i := low(Station.Passengers) To high(Station.Passengers) Do
+        Begin
+          // - Determine x position
+          If (i < 3) Then
+            Destination_Rectangle.x := (Station.Position.X - (2 *
+                                       Passenger_Width))
+          Else
+            Destination_Rectangle.x := (Station.Position.X + Station_Width +
+                                       Passenger_Width);
+          // - Determine y position
+          Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
+                                     Passenger_Height + 4));
 
-      SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Game.Window, @
-                      Destination_Rectangle);
+          SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Game.Window, @
+                          Destination_Rectangle);
+        End;
     End;
 End;
 

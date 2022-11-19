@@ -1,5 +1,7 @@
-fpc ./INSAtram.pas -FE"../Binaries"
+sh ./Compile.sh
 
 cd ../Binaries
 
 ./INSAtram
+
+rm ./INSAtram

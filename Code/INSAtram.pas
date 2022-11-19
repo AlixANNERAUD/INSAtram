@@ -5,7 +5,7 @@ Program INSAtram;
 
 Uses Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl, sdl_gfx;
 
-Var Game_Pointer : Type_Game_Pointer;
+Var Game : Type_Game;
   Timer : Type_Time;
   i : Byte;
   Quit : Boolean;
@@ -16,15 +16,20 @@ Var Game_Pointer : Type_Game_Pointer;
 Begin
 
 
-
-  Color.Red := 255;
+  Color.Red := 0;
   Color.Green := 0;
   Color.Blue := 0;
   Color.Alpha := 255;
 
+  writeln('Initializing SDL...');
 
   Logic_Load(Game);
+
+  writeln('Initializing SDL...');
+
   Graphics_Load(Game);
+
+
   Mouse_Load();
 
 
@@ -32,20 +37,25 @@ Begin
   For i := 0 To 1 Do
     Begin
       Station_Create(Game);
+    End;
+
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
     End;
 
-  Train_Create(Game.Lines[0]);
-  Game.Lines[0].Trains[0]^.Last_Station := Game.Lines[0].Stations[0];
-  Game.Lines[0].Trains[0]^.Distance := 0;
+  Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
+  
+  Game.Lines[0].Trains[0].Next_Station := Game.Lines[0].Stations[1];
 
-  For i := 0 To 2 Do
+  Game.Lines[0].Trains[0].Distance := 0;
+
+
+  {For i := 0 To 2 Do
     Begin
       Passenger_Create(Game);
     End;
-
-
-
+}
 
   Quit := False;
 
@@ -62,14 +72,19 @@ Begin
       Else If ((Event.type_ = SDL_MOUSEBUTTONDOWN)) Then
              Begin
                writeln('Mouse Button Down');
-               Game.Lines[0].Trains[0]^.Distance := Game.Lines[0].Trains[0]^.Distance + 3;
+               inc(Game.Lines[0].Trains[0].Distance);
+               inc(Game.Lines[0].Trains[0].Distance);
+               inc(Game.Lines[0].Trains[0].Distance);
+               
                //Quit := True;
              End;
 
       Mouse_Position := Mouse_Get_Position();
 
+
       Graphics_Refresh(Game);
 
+      writeln('!!!!Test!!!!!');
       //inc(Game.Lines[0].Trains[0]^.Distance);
 
 
