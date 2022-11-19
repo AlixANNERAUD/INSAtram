@@ -57,50 +57,46 @@ Begin
   Game.Window_Size.X := Video_Informations^.current_w;
   Game.Window_Size.Y := Video_Informations^.current_h;
 
-  // - Chargement des ressoureces.
+  // - Chargement des ressources.
 
   // - - Station
-  Game.Sprites.Station[0] := IMG_Load(Path_Image_Station_Circle);
-  Game.Sprites.Station[1] := IMG_Load(Path_Image_Station_Lozenge);
-  Game.Sprites.Station[2] := IMG_Load(Path_Image_Station_Pentagon);
-  Game.Sprites.Station[3] := IMG_Load(Path_Image_Station_Square);
-  Game.Sprites.Station[4] := IMG_Load(Path_Image_Station_Triangle);
+  Game.Sprites.Stations[0] := IMG_Load(Path_Image_Station_Circle);
+  Game.Sprites.Stations[1] := IMG_Load(Path_Image_Station_Lozenge);
+  Game.Sprites.Stations[2] := IMG_Load(Path_Image_Station_Pentagon);
+  Game.Sprites.Stations[3] := IMG_Load(Path_Image_Station_Square);
+  Game.Sprites.Stations[4] := IMG_Load(Path_Image_Station_Triangle);
 
   // - - Passenger
-  Game.Sprites.Passenger[0] := IMG_Load(Path_Image_Passenger_Circle);
-  Game.Sprites.Passenger[1] := IMG_Load(Path_Image_Passenger_Lozenge);
-  Game.Sprites.Passenger[2] := IMG_Load(Path_Image_Passenger_Pentagon);
-  Game.Sprites.Passenger[3] := IMG_Load(Path_Image_Passenger_Square);
-  Game.Sprites.Passenger[4] := IMG_Load(Path_Image_Passenger_Triangle);
+  Game.Sprites.Passengers[0] := IMG_Load(Path_Image_Passenger_Circle);
+  Game.Sprites.Passengers[1] := IMG_Load(Path_Image_Passenger_Lozenge);
+  Game.Sprites.Passengers[2] := IMG_Load(Path_Image_Passenger_Pentagon);
+  Game.Sprites.Passengers[3] := IMG_Load(Path_Image_Passenger_Square);
+  Game.Sprites.Passengers[4] := IMG_Load(Path_Image_Passenger_Triangle);
 
   // - - Véhicule (Locomotive et Wagon)
 
   Game.Sprites.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
-
   Game.Sprites.Vehicle_45_Degree := rotozoomSurface(Game.Sprites.Vehicle_0_Degree, 45, 1, 1);
-
   Game.Sprites.Vehicle_90_Degree := rotozoomSurface(Game.Sprites.Vehicle_0_Degree, 90, 1, 1);
-
   Game.Sprites.Vehicle_135_Degree := rotozoomSurface(Game.Sprites.Vehicle_0_Degree, 135, 1, 1);
-
 
   // - Fonts loading
   Game.Fonts[0] := TTF_OPENFONT(Path_Font, 12);
   Game.Fonts[0] := TTF_OPENFONT(Path_Font_Bold, 12);
 
-  Game.Stations_Count := 0;
-
   Graphics_Refresh(Game);
 End;
 
 Procedure Graphics_Unload(Var Game : Type_Game);
+
+Var i : Byte;
 Begin
-  // Free the sprites in memory.
-  SDL_FreeSurface(Game.Sprites.Station_Square);
-  SDL_FreeSurface(Game.Sprites.Station_Circle);
-  SDL_FreeSurface(Game.Sprites.Station_Triangle);
-  SDL_FreeSurface(Game.Sprites.Station_Pentagon);
-  SDL_FreeSurface(Game.Sprites.Station_Lozenge);
+  // - Unload sprites
+  For i := 0 To Shapes_Number - 1 Do
+    Begin
+      SDL_FreeSurface(Game.Sprites.Stations[i]);
+      SDL_FreeSurface(Game.Sprites.Passengers[i]);
+    End;
   // Free the window in memory.
   SDL_FreeSurface(Game.Window);
   Game.Window := Nil;
@@ -111,8 +107,6 @@ End;
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
 Var i, j:   Byte;
-
-Var Destination_Rectangle :  Type_Rectangle;
 Begin
 
   // - Rempli la fenêtre en blanc.
@@ -141,11 +135,6 @@ Begin
     Begin
       Station_Render(Game.Stations[i], Game);
     End;
-
-  // Destination_Rectangle.X := 200;
-  // Destination_Rectangle.Y := 200;
-
-  // SDL_BlitSurface(Game.Sprites.Vehicle_45_Degree, Nil, Game.Window, @Destination_Rectangle);
 
   SDL_Flip(Game.Window);
 End;
@@ -275,12 +264,12 @@ End;
 
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Var Game : Type_Game);
 
-Var Destination_Rectangle :   Type_Rectangle;
-  i :   Byte;
-  Intermediate_Position :   Type_Coordinates;
-  Intermediate_Position_Distance, Square_Side_Length :   Integer;
-  Direction :   Integer;
-  Norme :   Integer;
+Var Destination_Rectangle : Type_Rectangle;
+  i : Byte;
+  Intermediate_Position : Type_Coordinates;
+  Intermediate_Position_Distance : Integer;
+  Direction : Integer;
+  Norme : Integer;
   Centered_Position :   Type_Coordinates;
   Stations_Centered_Position : array[0..1] Of Type_Coordinates;
   // 0 : Station de départ, 2 : Station d'arrivée.
@@ -312,25 +301,25 @@ Begin
         Begin
           Centered_Position.X := Stations_Centered_Position[0].X + Train.Distance;
           Centered_Position.Y := Stations_Centered_Position[0].Y;
-          Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
+          Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_0_Degree;
         End
       Else If (Direction = 180) Then
              Begin
                Centered_Position.X := Stations_Centered_Position[0].X - Train.Distance;
                Centered_Position.Y := Stations_Centered_Position[0].Y;
-               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
+               Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_0_Degree;
              End
       Else If (Direction = 90) Then
              Begin
                Centered_Position.X := Stations_Centered_Position[0].X;
                Centered_Position.Y := Stations_Centered_Position[0].Y - Train.Distance;
-               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+               Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_90_Degree;
              End
       Else If (Direction = -90) Then
              Begin
                Centered_Position.X := Stations_Centered_Position[0].X;
                Centered_Position.Y := Stations_Centered_Position[0].Y + Train.Distance;
-               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+               Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_90_Degree;
              End
       Else
         Begin
@@ -341,12 +330,12 @@ Begin
               If (Direction = -45) Then
                 Begin
                   Centered_Position.X := Stations_Centered_Position[0].X + Norme;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
+                  Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_135_Degree;
                 End
               Else
                 Begin
                   Centered_Position.X := Stations_Centered_Position[0].X - Norme;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
+                  Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_45_Degree;
                 End;
             End
           Else  // Partie supérieur du cercle trigonométrique (sens des y négatifs).
@@ -355,12 +344,12 @@ Begin
               If (Direction = 45) Then
                 Begin
                   Centered_Position.X := Stations_Centered_Position[0].X + Norme;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
+                  Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_45_Degree;
                 End
               Else
                 Begin
                   Centered_Position.X := Stations_Centered_Position[0].X - Norme;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
+                  Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_135_Degree;
                 End;
             End;
         End;
@@ -378,25 +367,25 @@ Begin
         Begin
           Centered_Position.X := Intermediate_Position.X + (Train.Distance - Intermediate_Position_Distance);
           Centered_Position.Y := Intermediate_Position.Y;
-          Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
+          Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_0_Degree;
         End
       Else If (Direction = 180) Then
              Begin
                Centered_Position.X := Intermediate_Position.X - (Train.Distance - Intermediate_Position_Distance);
                Centered_Position.Y := Intermediate_Position.Y;
-               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_0_Degree;
+               Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_0_Degree;
              End
       Else If (Direction = 90) Then
              Begin
                Centered_Position.X := Intermediate_Position.X;
                Centered_Position.Y := Intermediate_Position.Y - (Train.Distance - Intermediate_Position_Distance);
-               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+               Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_90_Degree;
              End
       Else If (Direction = -90) Then
              Begin
                Centered_Position.X := Intermediate_Position.X;
                Centered_Position.Y := Intermediate_Position.Y + (Train.Distance - Intermediate_Position_Distance);
-               Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_90_Degree;
+               Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_90_Degree;
              End
       Else
         Begin
@@ -407,12 +396,12 @@ Begin
               If (Direction = -45) Then
                 Begin
                   Centered_Position.X := Intermediate_Position.X + Norme;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
+                  Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_135_Degree;
                 End
               Else
                 Begin
                   Centered_Position.X := Intermediate_Position.X - Norme;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
+                  Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_45_Degree;
                 End;
             End
           Else  // Partie supérieur du cercle trigonométrique (sens des y négatifs).
@@ -421,12 +410,12 @@ Begin
               If (Direction = 45) Then
                 Begin
                   Centered_Position.X := Intermediate_Position.X + Norme;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_45_Degree;
+                  Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_45_Degree;
                 End
               Else
                 Begin
                   Centered_Position.X := Intermediate_Position.X - Norme;
-                  Train.Vehicle[0].Sprite := Game.Sprites.Vehicle_135_Degree;
+                  Train.Vehicles[0].Sprite := Game.Sprites.Vehicle_135_Degree;
                 End;
             End;
         End;
@@ -462,6 +451,12 @@ Begin
 
 
 
+
+
+
+
+
+
 {
       Square_Side_Length := round(sqrt(sqr(Vehicle_Width)*0.5)+sqrt(sqr(Vehicle_Height)*0.5));
       //Se référer au rapport du projet pour les explications
@@ -474,7 +469,7 @@ Begin
 
 
   // - Affiche la locomotive.
-  SDL_BlitSurface(Train.Vehicle[0].Sprite, Nil, Game.Window, @Destination_Rectangle);
+  SDL_BlitSurface(Train.Vehicles[0].Sprite, Nil, Game.Window, @Destination_Rectangle);
   // - Affiche les passagers. 
   {If (Train.Passengers_Count > 0) Then
     Begin

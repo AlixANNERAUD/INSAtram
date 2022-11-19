@@ -5,7 +5,7 @@ Program INSAtram;
 
 Uses Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl, sdl_gfx;
 
-Var Game : Type_Game;
+Var Game_Pointer : Type_Game_Pointer;
   Timer : Type_Time;
   i : Byte;
   Quit : Boolean;
@@ -17,16 +17,22 @@ Begin
 
 
 
+  Color.Red := 255;
+  Color.Green := 0;
+  Color.Blue := 0;
+  Color.Alpha := 255;
+
+
   Logic_Load(Game);
   Graphics_Load(Game);
   Mouse_Load();
 
 
-  Line_Create(Game);
+  Line_Create(Color, Game);
   For i := 0 To 1 Do
     Begin
       Station_Create(Game);
-      Line_Add_Station(Game.Lines[0], Game.Stations[i]);
+      Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
     End;
 
   Train_Create(Game.Lines[0]);
@@ -42,11 +48,6 @@ Begin
 
 
   Quit := False;
-
-  Color.Red := 255;
-  Color.Green := 0;
-  Color.Blue := 0;
-  Color.Alpha := 255;
 
   While (Not(Quit)) Do
     Begin

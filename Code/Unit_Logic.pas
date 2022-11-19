@@ -22,9 +22,6 @@ Implementation
 Procedure Logic_Load(Var Game : Type_Game);
 Begin
   Randomize();
-  Game.Stations_Count := 0;
-  Game.Lines_Count := 0;
-
 End;
 
 // - - Fonctions et procédures relatives aux lignes.

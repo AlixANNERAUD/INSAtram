@@ -243,21 +243,25 @@ Type Type_Game = Record
   Lines : array Of Type_Line;
 End;
 
+Type Type_Game_Pointer = ^Type_Game;
+
 
 // - Function declaration
 
 // - - Object creation.
 
+Function Game_Create() : Type_Game_Pointer;
 Function Station_Create(Var Game: Type_Game) : Boolean;
-
-Procedure Passenger_Create(Var Station : Type_Station);
-Function Train_Create(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
-Function Vehicle_Create(Var Train : Type_Train) : Boolean;
+Function Line_Create(Color : Type_Color; Var Game : Type_Game) : Boolean;
+Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
+Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
+Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
 
 
 
 // - - Object deletion.
 
+Procedure Game_Delete(Var Game : Type_Game_Pointer);
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
@@ -280,6 +284,11 @@ Implementation
 // - Définition des fonctions et procédures
 
 // - Création
+
+Function Game_Create() : Type_Game_Pointer;
+Begin
+  Game_Create := GetMem(Sizeof(Type_Game));
+End;
 
 // Procédure qui alloue de la mémoire pour une station et le référence dans le tableau dynamique, détermine sa forme et position aléatoirement et defini ses attributs.
 Function Station_Create(Var Game : Type_Game) : Boolean;
@@ -391,14 +400,14 @@ Begin
       Line.Trains[high(Line.Trains)].Distance := 0;
       Line.Trains[high(Line.Trains)].Direction := Direction;
       Line.Trains[high(Line.Trains)].Last_Station := Start_Station;
-      Vehicle_Create(Line.Trains[high(Line.Trains)]);
+      Vehicle_Create(Line.Trains[high(Line.Trains)], Game);
       Train_Create := True;
     End
   Else
     Train_Create := False;
 End;
 
-Function Vehicle_Create(Var Train : Type_Train; Game : Type_Game) : Boolean;
+Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
 Begin
   If (length(Train.Vehicles) < Train_Maximum_Vehicles_Number) Then
     Begin
@@ -416,6 +425,12 @@ Begin
 End;
 
 // - - Object deletion.
+
+Procedure Game_Delete(Var Game_Pointer : Type_Game_Pointer);
+Begin
+  FreeMem(Game_Pointer);
+  Game_Pointer := nil;
+End;
 
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
