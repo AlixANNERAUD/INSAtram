@@ -16,4 +16,6 @@ fp.cfg
 fp.dsk
 *.res
 
+Binaries/
+
 # End of https://www.toptal.com/developers/gitignore/api/freepascal

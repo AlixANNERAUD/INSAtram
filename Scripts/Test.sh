@@ -1,7 +1,5 @@
 sh ./Compile.sh
 
-cd ../Binaries
+cd ../Binaries/Linux
 
 ./INSAtram
-
-rm ./INSAtram

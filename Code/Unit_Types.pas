@@ -18,43 +18,65 @@ Uses sdl, sdl_image, sdl_ttf, sysutils;
 
 Const Color_Depth =   32;
 
+Const Full_Screen =  False;
+
+Const Screen_Width =  960;
+
+Const Screen_Height =  720;
+
+Const Mask_Alpha =  $FF000000;
+Const Mask_Red =  $000000FF;
+Const Mask_Green =  $0000FF00;
+Const Mask_Blue =  $00FF0000;
+
   // - - Paths
 
   // - - - Images
 
-Const Path_Image_Station_Circle =   'Ressources/Images/Station_Circle.png';
+Const Path_Ressources =  'Resources/';
 
-Const Path_Image_Station_Square =   'Ressources/Images/Station_Square.png';
+Const Path_Images =  Path_Ressources + 'Images/';
 
-Const Path_Image_Station_Triangle =   'Ressources/Images/Station_Triangle.png';
+Const Path_Image_Station_Circle =   Path_Images + 'Station_Circle.png';
 
-Const Path_Image_Station_Pentagon =   'Ressources/Images/Station_Pentagon.png';
+Const Path_Image_Station_Square =   Path_Images + 'Station_Square.png';
 
-Const Path_Image_Station_Lozenge =   'Ressources/Images/Station_Lozenge.png';
+Const Path_Image_Station_Triangle =   Path_Images + 'Station_Triangle.png';
 
-Const Path_Image_Passenger_Circle =   'Ressources/Images/Passenger_Circle.png';
+Const Path_Image_Station_Pentagon =   Path_Images + 'Station_Pentagon.png';
 
-Const Path_Image_Passenger_Square =   'Ressources/Images/Passenger_Square.png';
+Const Path_Image_Station_Lozenge =   Path_Images + 'Station_Lozenge.png';
 
-Const Path_Image_Passenger_Triangle =   'Ressources/Images/Passenger_Triangle.png';
+Const Path_Image_Passenger_Circle =   Path_Images + 'Passenger_Circle.png';
 
-Const Path_Image_Passenger_Pentagon =   'Ressources/Images/Passenger_Pentagon.png';
+Const Path_Image_Passenger_Square =   Path_Images + 'Passenger_Square.png';
 
-Const Path_Image_Passenger_Lozenge =   'Ressources/Images/Passenger_Lozenge.png';
+Const Path_Image_Passenger_Triangle =   Path_Images + 'Passenger_Triangle.png';
 
-Const Path_Image_Vehicle =   'Ressources/Images/Vehicle.png';
+Const Path_Image_Passenger_Pentagon =   Path_Images + 'Passenger_Pentagon.png';
+
+Const Path_Image_Passenger_Lozenge =   Path_Images + 'Passenger_Lozenge.png';
+
+Const Path_Image_Vehicle =   Path_Images + 'Vehicle.png';
+
+Const Path_Image_People = Path_Images + 'People.png';
+
+Const Path_Image_Clock = Path_Images + 'Clock.png';
+
+Const Path_Image_Play = Path_Images + 'Play.png';
+
+Const Path_Image_Pause = Path_Images + 'Pause.png';
+
 
   // - - - Fonts
 
-Const Path_Font =   'Ressources/Fonts/FreeSans.ttf';
+Const Path_Fonts = Path_Ressources + 'Fonts/';
 
-Const Path_Font_Bold =   'Ressources/Fonts/FreeSansBold.ttf';
+Const Path_Font =   Path_Fonts + '/FreeSans.ttf';
+
+Const Path_Font_Bold = Path_Fonts + '/FreeSansBold.ttf';
 
   // - - Object constants
-
-  // - - - Font
-
-  Const Font_Size_Normal =  12;
 
   // - - - Game
 
@@ -109,8 +131,6 @@ Type Type_Time = Longword;
 
 Type Type_Surface = PSDL_Surface;
 
-Type Type_Rectangle = TSDL_Rect;
-
 Type Type_Font = pTTF_Font;
 
   // - - Graphics
@@ -121,15 +141,43 @@ End;
 
 // Structure contenant tous pointeurs des sprites du jeu.
 
-Type Type_Sprite_Table = Record
-  // Font
-  Font : Type_Font;
+Type Type_Font_Size = (Font_Small, Font_Medium, Font_Big);
+
+Type Type_Font_Weight = (Font_Normal, Font_Bold);
+
+Type Type_Color_Name = (Color_Black,
+                        Color_Red,
+                        Color_Purple,
+                        Color_Deep_Purple,
+                        Color_Indigo,
+                        Color_Blue,
+                        Color_Light_Blue,
+                        Color_Cyan,
+                        Color_Teal,
+                        Color_Green,
+                        Color_Light_Green,
+                        Color_Lime,
+                        Color_Yellow,
+                        Color_Amber,
+                        Color_Orange,
+                        Color_Deep_Orange,
+                        Color_Brown,
+                        Color_Grey,
+                        Color_Blue_Grey,
+                        Color_White
+                       );
+
+Type Type_Ressources = Record
+  // Fonts
+  Fonts : Array [Font_Small..Font_Big, Font_Normal..Font_Bold] Of Type_Font;
   // Stations (5 formes différentes).
   Stations : Array [0 .. (Shapes_Number - 1)] Of Type_Surface;
   // Passagers (5 formes différentes).
   Passengers : Array [0 .. (Shapes_Number - 1)] Of Type_Surface;
   // Vehicles (locomotive et wagon).
   Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : Type_Surface;
+  // Color palette [Color].
+  Palette : Array [Color_Black..Color_White] Of Type_Color;
 End;
 
 // - - Animation
@@ -228,19 +276,10 @@ Type Type_Player = Record
   Locomotive_Token : Byte;
   Wagon_Token : Byte;
   Tunnel_Token : Byte;
+  Show : Boolean;
 End;
 
 // - Interface graphique
-
-Type Type_Image = Record
-  Position, Size : Type_Coordinates;
-  Surface : Type_Surface;
-End;
-
-Type Type_Button = Record
-  Position, Size : Type_Coordinates;
-  Surface : Type_Surface;
-End;
 
 Type Type_Label = Record
   Position, Size : Type_Coordinates;
@@ -250,26 +289,56 @@ Type Type_Label = Record
   Surface : Type_Surface;
 End;
 
-Type Type_Interface = Record
-  Lines_Buttons : Array[0 .. (Game_Maximum_Lines_Number - 1)] Of Type_Button;
-  
-  Score : Type_Label;
+Type Type_Panel = Record
+  Position, Size : Type_Coordinates;
+  Surface : Type_Surface;
+  Color : Type_Color;
+End;
 
+Type Type_Image = Record
+  Position, Size : Type_Coordinates;
+  Surface : Type_Surface;
+End;
+
+Type Type_Button = Record
+  Position, Size : Type_Coordinates;
+  Pressed : Boolean;
+  Surface_Pressed : Type_Surface;
+  Surface_Released : Type_Surface;
 End;
 
 // - Game
 
 Type Type_Game = Record
   // Fenêtre du jeu.
-  Window : Type_Surface;
-  Window_Size : Type_Coordinates;
-  // Interface graphique.
-  Score : Type_Label;
-  
+  Window : Type_Panel;
+  // Panneau contenant le terrain de jeu. 
+  Panel_Right : Type_Panel;
+
+  // Panneau contenant l'interface du haut (score, heure ...).
+  Panel_Top : Type_Panel;
+  Play_Pause_Button : Type_Button;
+  Score_Label : Type_Label;
+  Score_Image : Type_Image;
+  Clock_Label : Type_Label;
+  Clock_Image : Type_Image;
+
+
+  // Panneau contenant l'interface du bas (selection des lignes).
+  Panel_Bottom : Type_Panel;
+  Lines_Buttons : array[0 .. (Game_Maximum_Lines_Number - 1)] Of Type_Button;
+
+  // Panneau contenant l'interface de gauche (train, wagon, tunnel).
+  Panel_Left : Type_Panel;
+  Locomotive_Label : Type_Label;
+  Locomotive_Button : Type_Button;
+  Wagon_Label : Type_Label;
+  Wagon_Button : Type_Button;
+  Tunnel_Label : Type_Label;
+  Tunnel_Button : Type_Button;
 
   // Structure contenant les sprites du jeu.
-  Sprites : Type_Sprite_Table;
-  Fonts : array[0..1] Of Type_Font;
+  Ressources : Type_Ressources;
   // Inventaire
   Player : Type_Player;
   // Stations
@@ -283,9 +352,12 @@ End;
 Type Type_Game_Pointer = ^Type_Game;
 
 
-// - Function declaration
+  // - Function declaration
 
-Function Get_Centered_Position(Position, Size : Type_Coordinates) : Type_Coordinates;
+Function Get_Center_Position(Position, Size : Type_Coordinates) : Type_Coordinates;
+
+Function Get_Centered_Position(Container_Size, Size : Integer) : Integer;
+
 
 // - - Object creation.
 
@@ -323,6 +395,7 @@ Implementation
 // - Function definition
 
 Function String_To_Characters(String_To_Convert : String) : pChar;
+
 Var Characters : pChar;
 Begin
   Characters := StrAlloc(length(String_To_Convert) + 1);
@@ -334,13 +407,17 @@ End;
 
 // - Création
 
-Function Get_Centered_Position(Position, Size : Type_Coordinates) : Type_Coordinates;
+Function Get_Center_Position(Position, Size : Type_Coordinates) : Type_Coordinates;
 Begin
   Position.X := Position.X + (Size.X Div 2);
   Position.Y := Position.Y + (Size.Y Div 2);
-  Get_Centered_Position := Position;
+  Get_Center_Position := Position;
 End;
 
+Function Get_Centered_Position(Container_Size, Size : Integer) : Integer;
+Begin
+  Get_Centered_Position := (Container_Size - Size) Div 2;
+End;
 
 // Procédure qui alloue de la mémoire pour une station et le référence dans le tableau dynamique, détermine sa forme et position aléatoirement et defini ses attributs.
 Function Station_Create(Var Game : Type_Game) : Boolean;
@@ -362,21 +439,20 @@ Begin
         Shape := Random(5);
 
       Game.Stations[high(Game.Stations)].Shape := Number_To_Shape(Shape);
-      Game.Stations[high(Game.Stations)].Sprite := Game.Sprites.Stations[Shape];
+      Game.Stations[high(Game.Stations)].Sprite := Game.Ressources.Stations[Shape];
 
 
       Game.Stations[high(Game.Stations)].Size.X := Station_Width;
       Game.Stations[high(Game.Stations)].Size.Y := Station_Height;
 
       Game.Stations[high(Game.Stations)].Position.X := Random(Game.
-                                                       Window_Size.X -
-                                                       Station_Width);
+                                                       Panel_Right
+                                                       .Size.X - Station_Width);
       Game.Stations[high(Game.Stations)].Position.Y := Random(Game.
-                                                       Window_Size.Y -
-                                                       Station_Height);
+                                                       Panel_Right.Size.Y - Station_Height);
 
       // Calcul les coordoonées centré de la station.
-      Game.Stations[high(Game.Stations)].Position_Centered := Get_Centered_Position(Game.Stations[high(Game.Stations)].Position, Game.Stations[high(Game.Stations)].Size);
+      Game.Stations[high(Game.Stations)].Position_Centered := Get_Center_Position(Game.Stations[high(Game.Stations)].Position, Game.Stations[high(Game.Stations)].Size);
 
       Station_Create := True;
     End
@@ -440,12 +516,14 @@ Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
 Var Shape : Byte;
 Begin
   SetLength(Station.Passengers, length(Station.Passengers) + 1);
+  // Allocation de la mémoire.
+  Station.Passengers[high(Station.Passengers)] := GetMem(SizeOf(Type_Passenger));
 
   Shape := Random(Shapes_Number - 1);
   // Set shape.
   Station.Passengers[high(Station.Passengers)]^.Shape := Number_To_Shape(Shape);
   // Set sprite.
-  Station.Passengers[high(Station.Passengers)]^.Sprite := Game.Sprites.Passengers[Shape];
+  Station.Passengers[high(Station.Passengers)]^.Sprite := Game.Ressources.Passengers[Shape];
 End;
 
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
@@ -473,7 +551,7 @@ Begin
       Train.Vehicles[high(Train.Vehicles)].Position.Y := 0;
       Train.Vehicles[high(Train.Vehicles)].Size.X := Vehicle_Width;
       Train.Vehicles[high(Train.Vehicles)].Size.Y := Vehicle_Height;
-      Train.Vehicles[high(Train.Vehicles)].Sprite := Game.Sprites.Vehicle_0_Degree;
+      Train.Vehicles[high(Train.Vehicles)].Sprite := Game.Ressources.Vehicle_0_Degree;
       Train.Vehicles[high(Train.Vehicles)].Driving := False;
       Vehicle_Create := True;
     End
