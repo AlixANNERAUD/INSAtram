@@ -242,18 +242,18 @@ Type Type_Button = Record
   Surface : Type_Surface;
 End;
 
-Type Type_Text = Record
+Type Type_Label = Record
   Position, Size : Type_Coordinates;
   Text : String;
+  Font : Type_Font;
   Color : Type_Color;
+  Surface : Type_Surface;
 End;
-
-Type Type_Text_Ponter = ^Type_Text;
 
 Type Type_Interface = Record
   Lines_Buttons : Array[0 .. (Game_Maximum_Lines_Number - 1)] Of Type_Button;
   
-  Score : Type_Text;
+  Score : Type_Label;
 
 End;
 
@@ -261,11 +261,12 @@ End;
 
 Type Type_Game = Record
   // Fenêtre du jeu.
-
-  
-
   Window : Type_Surface;
   Window_Size : Type_Coordinates;
+  // Interface graphique.
+  Score : Type_Label;
+  
+
   // Structure contenant les sprites du jeu.
   Sprites : Type_Sprite_Table;
   Fonts : array[0..1] Of Type_Font;
@@ -288,8 +289,6 @@ Function Get_Centered_Position(Position, Size : Type_Coordinates) : Type_Coordin
 
 // - - Object creation.
 
-Function Text_Create(Position, Size : Type_Coordinates; Texte : String; Color : Type_Color) : Type_Text_Pointer;
-
 Function Station_Create(Var Game: Type_Game) : Boolean;
 Function Line_Create(Color : Type_Color; Var Game : Type_Game) : Boolean;
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
@@ -300,7 +299,6 @@ Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
 
 // - - Object deletion.
 
-Procedure Text_Delete(Var Text : Type_Text_Pointer);
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
@@ -318,7 +316,19 @@ Function Time_Get_Elapsed(Start_Time : Type_Time) : Type_Time;
 
 Function Number_To_Shape(Number : Byte) : Type_Shape;
 
+Function String_To_Characters(String_To_Convert : String) : pChar;
+
 Implementation
+
+// - Function definition
+
+Function String_To_Characters(String_To_Convert : String) : pChar;
+Var Characters : pChar;
+Begin
+  Characters := StrAlloc(length(String_To_Convert) + 1);
+  StrPCopy(Characters, String_To_Convert);
+  String_To_Characters := Characters;
+End;
 
 // - Définition des fonctions et procédures
 
@@ -331,15 +341,6 @@ Begin
   Get_Centered_Position := Position;
 End;
 
-Function Text_Create(Position, Size : Type_Coordinates; Text : String; Color : Type_Color) : Type_Text_Pointer;
-Var Text : Type_Text_Pointer;
-Begin
-  Text := GetMem(SizeOf(Type_Text));
-  Text^.Position := Position;
-  Text^.Size := Size;
-  Text^.Text := Text;
-  Text^.Color := Color;
-End;
 
 // Procédure qui alloue de la mémoire pour une station et le référence dans le tableau dynamique, détermine sa forme et position aléatoirement et defini ses attributs.
 Function Station_Create(Var Game : Type_Game) : Boolean;

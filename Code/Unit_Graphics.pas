@@ -22,8 +22,6 @@ Procedure Graphics_Draw_Line(Var Game : Type_Game; Position_1, Position_2 :
                              Type_Color);
 Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
 
-Procedure Text_Render(Var Text : Type_Text; Var Game : Type_Game);
-
 // - - Entity
 
 Procedure Station_Render(Var Station : Type_Station; Var Game : Type_Game);
@@ -36,8 +34,76 @@ Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Co
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Var Game :
                        Type_Game);
 
+// - - Interface
+// - - - Label
+Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : Type_Font; Color : Type_Color);
+Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
+Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
+Procedure Label_Set_Font(Var Laabel : Type_Label; Font : Type_Font);
+Procedure Label_Pre_Render(Var Laabel : Type_Label);
+
+Procedure Label_Render(Var Laabel : Type_Label; Var Render_Surface : Type_Surface);
 
 Implementation
+
+// Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
+Procedure Label_Pre_Render(Var Laabel : Type_Label);
+Var Characters : pChar;
+    SDL_Color : PSDL_Color;
+Begin
+  new(SDL_Color);
+
+
+  SDL_Color^.r := Laabel.Color.Red;
+  SDL_Color^.g := Laabel.Color.Green;
+  SDL_Color^.b := Laabel.Color.Blue;
+
+  SDL_FreeSurface(Laabel.Surface);
+  // Conversion du string en pChar.
+  Characters := String_To_Characters(Laabel.Text);
+  Laabel.Surface := TTF_RENDERTEXT_BLENDED(Laabel.Font, Characters, 
+ SDL_Color^);
+  dispose(SDL_Color);
+  strDispose(Characters);
+  writeln('Label_Set');
+End;
+
+// Procédure qui définit tout les attributs d'un texte à la fois.
+Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : Type_Font; Color : Type_Color);
+Begin
+  Laabel.Font := Font;
+  Laabel.Color := Color;
+  Laabel.Text := Text_String;
+  Label_Pre_Render(Laabel);
+End;
+
+Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
+Begin
+  Laabel.Text := Text_String;
+  Label_Pre_Render(Laabel);
+End;
+
+Procedure Label_Set_Font(Var Laabel : Type_Label; Font : Type_Font);
+Begin
+  Laabel.Font := Font;
+  Label_Pre_Render(Laabel);
+End;
+
+Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
+Begin
+  Laabel.Color := Color;
+  Label_Pre_Render(Laabel);
+End;
+
+Procedure Label_Render(Var Laabel : Type_Label; Var Render_Surface : Type_Surface);
+Var Destionation_Rectangle : Type_Rectangle;
+Begin
+  Destionation_Rectangle.x := Laabel.Position.X;
+  Destionation_Rectangle.y := Laabel.Position.Y;
+  //Destionation_Rectangle.w := Laabel.Size.X;
+  //Destionation_Rectangle.h := Laabel.Size.Y;
+  SDL_BlitSurface(Laabel.Surface, NIL, Render_Surface, @Destionation_Rectangle);
+End;
 
 // - - Graphics
 
@@ -46,6 +112,7 @@ Procedure Graphics_Load(Var Game : Type_Game);
 Var Video_Informations :   PSDL_VideoInfo;
 Begin
   SDL_Init(SDL_INIT_EVERYTHING);
+  TTF_INIT();
   // - Initialisation de la SDL
   Game.Window := SDL_SetVideoMode(960, 720, Color_Depth, SDL_SWSURFACE);
   // - Création de la fenêtre
@@ -82,7 +149,7 @@ Begin
 
   // - Fonts loading
   Game.Fonts[0] := TTF_OPENFONT(Path_Font, Font_Size_Normal);
-  Game.Fonts[0] := TTF_OPENFONT(Path_Font_Bold, Font_Size_Normal);
+  Game.Fonts[1] := TTF_OPENFONT(Path_Font_Bold, Font_Size_Normal);
 
   Graphics_Refresh(Game);
 End;
@@ -107,6 +174,7 @@ End;
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
 Var i, j:   Byte;
+    Destionation_Rectangle : Type_Rectangle;
 Begin
   // - Rempli la fenêtre en blanc.
   SDL_FillRect(Game.Window, Nil, SDL_MapRGB(Game.Window^.format, 255, 255, 255));
@@ -136,8 +204,6 @@ Begin
         End;
     End;
 
-
-
   If (length(Game.Stations) > 0) Then
     Begin
       // - Affichage les stations.
@@ -146,6 +212,9 @@ Begin
           Station_Render(Game.Stations[i], Game);
         End;
     End;
+
+  // - Textes
+  Label_Render(Game.Score, Game.Window);
 
   SDL_Flip(Game.Window);
 End;

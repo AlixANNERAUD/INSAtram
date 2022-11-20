@@ -3,7 +3,7 @@ Program INSAtram;
 
 //Unit_Logic, Unit_Graphics, Unit_Types,
 
-Uses Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl, sdl_gfx;
+Uses sysutils, Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl, sdl_gfx;
 
 Var Game : Type_Game;
   Timer : Type_Time;
@@ -53,6 +53,10 @@ Begin
     End;
 }
 
+  Label_Set(Game.Score, 'Test !', Game.Fonts[1], Color);
+  Game.Score.Position.X := 100;
+  Game.Score.Position.Y := 100;
+
   Quit := False;
 
   While (Not(Quit)) Do
@@ -67,7 +71,7 @@ Begin
         Quit := True
       Else If ((Event.type_ = SDL_MOUSEBUTTONDOWN)) Then
              Begin
-               writeln('Mouse Button Down');
+               Label_Set_Text(Game.Score, IntToStr(Game.Lines[0].Trains[0].Distance));
                inc(Game.Lines[0].Trains[0].Distance);
                inc(Game.Lines[0].Trains[0].Distance);
                inc(Game.Lines[0].Trains[0].Distance);
