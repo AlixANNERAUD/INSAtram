@@ -67,6 +67,13 @@ Const Path_Image_Play = Path_Images + 'Play.png';
 
 Const Path_Image_Pause = Path_Images + 'Pause.png';
 
+Const Path_Image_Button_Locomotive = Path_Images + 'Locomotive.png';
+
+Const Path_Image_Button_Wagon = Path_Images + 'Wagon.png';
+
+Const Path_Image_Button_Tunnel = Path_Images + 'Tunnel.png';
+
+
 
   // - - - Fonts
 
@@ -76,7 +83,14 @@ Const Path_Font =   Path_Fonts + '/FreeSans.ttf';
 
 Const Path_Font_Bold = Path_Fonts + '/FreeSansBold.ttf';
 
+// - - - Sounds
+
+Const Path_Sounds = Path_Ressources + 'Sounds/';
+
+
   // - - Object constants
+
+
 
   // - - - Game
 
@@ -110,6 +124,16 @@ Const Passenger_Height =   8;
   // - - - Trains
 
 Const Train_Maximum_Vehicles_Number = 3;
+
+// Vitesse maximum d'un train en px/s.
+Const Train_Maximum_Speed = 4;
+
+// Acceleration d'un train.
+Const Train_Acceleration = 2;
+
+// Distance d'accélaration (equation horaires).
+Const Train_Acceleration_Distance = 0,5 * ((Train_Maximum_Speed*Train_Maximum_Speed) / Train_Acceleration);
+
 
   // - - - Lignes
 
@@ -237,26 +261,28 @@ Type Type_Vehicule_State = (Stopped, Driving);
 Type Type_Vehicle = Record
   Position, Size : Type_Coordinates;
   Sprite : Type_Surface;
-  Driving : Boolean;
+  Passengers : Array of Type_Passenger_Pointer;
 End;
 
 Type Type_Train = Record
-
+  Timer : Type_Time;
+  // - Détermine si le train est à l'arrêt ou non.
+  Driving : Boolean;
   // - Pointeur de la dernière station.
   Last_Station : Type_Station_Pointer;
   // - Pointeur de la prochaine station.
   Next_Station : Type_Station_Pointer;
   // - Distance parcourue depuis la dernière station en pixel.
   Distance : Integer;
+  // -
+  Intermediate_Position : Integer;
+  // - Distance maximum;
+  Maximum_Distance : Integer;
   // Direction directe ou indirecte du train (indexe des stations de la ligne croissant ou décroissant).
   Direction : Boolean;
-
   // - Vitesse du train.
   Speed : Integer;
-  // - Accélération du train.
-  Acceleration : Integer;
 
-  //  Nombre de wagons.
   Vehicles : array Of Type_Vehicle;
   //  Pointeur vers les wagons du train.
 End;
@@ -330,11 +356,8 @@ Type Type_Game = Record
 
   // Panneau contenant l'interface de gauche (train, wagon, tunnel).
   Panel_Left : Type_Panel;
-  Locomotive_Label : Type_Label;
   Locomotive_Button : Type_Button;
-  Wagon_Label : Type_Label;
   Wagon_Button : Type_Button;
-  Tunnel_Label : Type_Label;
   Tunnel_Button : Type_Button;
 
   // Structure contenant les sprites du jeu.
@@ -347,6 +370,24 @@ Type Type_Game = Record
   // Lignes
   // Tableau dynamque contenant les lignes.
   Lines : array Of Type_Line;
+End;
+
+// Menu principal du jeu.
+Type Type_Menu = Record
+  Logo : Type_Image;
+  Play_Label : Type_Label;
+  Play_Image : Type_Image;
+  
+  Options_Label : Type_Label;
+  Options_Image : Type_Image;
+
+End;
+
+// Options du jeu.
+Type Type_Options = Record
+
+  Sound_Button : Type_Button;
+
 End;
 
 Type Type_Game_Pointer = ^Type_Game;

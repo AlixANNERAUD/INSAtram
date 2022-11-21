@@ -86,6 +86,8 @@ Begin
 
       Graphics_Refresh(Game);
 
+      Logic_Refresh(Game);
+
       //inc(Game.Lines[0].Trains[0]^.Distance);
 
 

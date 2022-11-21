@@ -349,6 +349,23 @@ Begin
       Game.Lines_Buttons[i].Position.X := Game.Lines_Buttons[i - 1].Position.X + Game.Lines_Buttons[i - 1].Size.X + 16;
     End;
 
+  // Panneau de gauche
+
+  Button_Set(Game.Locomotive_Button, IMG_Load(Path_Image_Button_Locomotive), IMG_Load(Path_Image_Button_Locomotive));
+  Button_Set(Game.Wagon_Button, IMG_Load(Path_Image_Button_Wagon), IMG_Load(Path_Image_Button_Wagon));
+  Button_Set(Game.Tunnel_Button, IMG_Load(Path_Image_Button_Tunnel), IMG_Load(Path_Image_Button_Tunnel));
+
+  Game.Locomotive_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Locomotive_Button.Size.X);
+  Game.Locomotive_Button.Position.Y := Get_Centered_Position(Game.Panel_Left.Size.Y, Game.Locomotive_Button.Size.X * 3 + 2 * 16);
+  
+  Game.Wagon_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Wagon_Button.Size.X);
+  Game.Wagon_Button.Position.Y := Game.Locomotive_Button.Position.Y + Game.Locomotive_Button.Size.Y + 16;
+  
+  Game.Tunnel_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Tunnel_Button.Size.X);
+  Game.Tunnel_Button.Position.Y := Game.Wagon_Button.Position.Y + Game.Wagon_Button.Size.Y + 16;
+  
+
+
   Graphics_Refresh(Game);
 End;
 
@@ -445,7 +462,12 @@ Begin
   // - Panneau du bas.
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
     Button_Render(Game.Lines_Buttons[i], Game.Panel_Bottom);
+  
   // - Panneau de gauche.
+
+  Button_Render(Game.Locomotive_Button, Game.Panel_Left);
+  Button_Render(Game.Wagon_Button, Game.Panel_Left);
+  Button_Render(Game.Tunnel_Button, Game.Panel_Left);
 
   // Regroupement des surfaces.
 
@@ -578,6 +600,7 @@ Begin
   // Calcul des coordonnées centrée des stations de départ et d'arrivé.
 
   // - Détermination du point intermédiaire.
+
   Intermediate_Position := Station_Get_Intermediate_Position(Train.Last_Station^.Position_Centered, Train.Next_Station^.Position_Centered);
   Intermediate_Position_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Intermediate_Position);
 
