@@ -16,7 +16,7 @@ fpc "./Code/INSAtram.pas" -FE"./Binaries/Linux" -gh -gl
 # fpc "./Code/INSAtram.pas" -FE"./Binaries/Windows" -gh -Twin64
 
 # Copy resources and dynamic libraries (for windows).
-cp -a ./Librairies/* ./Binaries/Windows
+cp -a ./Libraries/* ./Binaries/Windows
 cp -a ./Resources/* ./Binaries/Linux/Resources
 
 

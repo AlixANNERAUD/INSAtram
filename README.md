@@ -15,7 +15,7 @@
 
 This game is a copy of Mini Metro developed by the studio Dinosaur Polo Club.
 This is a project carried out for the IT project requested by INSA Rouen in the 2nd year of preparatory class.
-Thus, **no intellectual property rights** were violated during the realization of this project. It was designed and developed **solely** from **observations** made on the game.
+Thus, **no intellectual property rights were violated** during the realization of this project. It was designed and developed **solely** from **observations** made on the game.
 
 ## 📦️ Installation
 
@@ -38,6 +38,8 @@ The project is structured in folder as follows:
 - `Binaries` : Contains compiled binaries (compiler output) as well as the resources (Fonts, Images).
 - `Code` : Contains the project code as well as the scripts allowing the compilation and the launching.
 - `Documentation` : Contains project documentation (specifications, top-down analysis, final report).
+- `Librairies` : Contains libraries for Windows.
+- `Scripts` : Contains script for testing and compiling the code automatically.
 
 ## ℹ️ About
 
@@ -47,6 +49,7 @@ This project is under MIT Licence.
 
 ### 📃 Credits
 
-This project uses the following 
-- SDL 1.2
-- Free Pascal Compiler
+This project uses the following resources :
+- [SDL 1.2](https://www.libsdl.org/index.php)
+- [Free Pascal Compiler](https://www.freepascal.org/)
+- [Font Awesome](https://fontawesome.com/)
