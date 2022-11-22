@@ -123,6 +123,10 @@ Const Passenger_Height =   8;
 
   // - - - Trains
 
+  // - - - - Vehicles
+
+  Const Vehicle_Maximum_Passengers_Number = 6;
+
 Const Train_Maximum_Vehicles_Number = 3;
 
 // Vitesse maximum d'un train en px/s.
@@ -256,12 +260,10 @@ Type Type_Station_Pointer = ^Type_Station;
 
   // - - Train
 
-Type Type_Vehicule_State = (Stopped, Driving);
-
 Type Type_Vehicle = Record
   Position, Size : Type_Coordinates;
   Sprite : Type_Surface;
-  Passengers : Array of Type_Passenger_Pointer;
+  Passengers : Array[0 .. (Vehicle_Maximum_Passengers_Number - 1)] of Type_Passenger_Pointer;
 End;
 
 Type Type_Train = Record
@@ -419,6 +421,8 @@ Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : 
 Function Passenger_Delete(Var Passenger : Type_Passenger; Var Station : Type_Station) : Boolean;
 //Function Train_Delete(Var Train : Type_Train; Var Line : Type_Train) : Boolean;
 //Function Vehicle_Delete(Var Vehicle : Type_Vehicle; Var Train : Type_Train) : Boolean;
+
+Function Passenger_Delete(Var Passenger : Type_Passenger_Pointer) : Boolean;
 
 // - - Time
 
@@ -584,6 +588,7 @@ Begin
 End;
 
 Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
+Var i : Byte;
 Begin
   If (length(Train.Vehicles) < Train_Maximum_Vehicles_Number) Then
     Begin
@@ -595,6 +600,8 @@ Begin
       Train.Vehicles[high(Train.Vehicles)].Sprite := Game.Ressources.Vehicle_0_Degree;
       Train.Vehicles[high(Train.Vehicles)].Driving := False;
       Vehicle_Create := True;
+      For i := 0 to Vehicle_Maximum_Passengers_Number - 1 Do
+        Train.Vehicles[high(Train.Vehicles)].Passengers[i] := nil;
     End
   Else
     Vehicle_Create := False;
@@ -623,8 +630,19 @@ Begin
     Line_Delete := False;
 End;
 
-Function Passenger_Delete(Var Passenger : Type_Passenger; Var Station : Type_Station) : Boolean;
+Function Passenger_Delete(Var Passenger : Type_Passenger_Pointer) : Boolean;
+Begin
+  If (Passenger <> nil) Then
+    Begin
+      FreeMem(Passenger);
+      Passenger := nil;
+      Passenger_Delete := True;
+    End
+  Else
+    Passenger_Delete := False;
+End;
 
+Function Passenger_Delete(Var Passenger : Type_Passenger; Var Station : Type_Station) : Boolean;
 Var i : Byte;
 Begin
   If (length(Station.Passengers) > 0) Then
