@@ -110,7 +110,7 @@ Begin
           Else
             Train.Next_Station := Line.Stations[i - 1];
  
-          Train.Maximum_Distance :=
+          Train_Distance := Train_Distance + round(sqrt(sqr(Train.Next_Station^.Position.X - Train.Last_Station^.Position.X)+sqr(Train.Next_Station^.Position.Y - Train.Last_Station^.Position.Y)));
                                     // On quitte la boucle.
                                     Break;
         End;
