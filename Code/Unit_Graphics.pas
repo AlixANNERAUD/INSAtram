@@ -66,7 +66,7 @@ Implementation
 Function Surface_Create(Width, Height : Integer) : PSDL_Surface;
 Begin
     // Création d'une surface SDL avec les masques de couleurs aproriés.
-    SDL_CreateRGBSurface(0, Width, Height, Color_Depth, Mask_Red, Mask_Green, Mask_Blue,Mask_Alpha)
+    Surface_Create := SDL_CreateRGBSurface(0, Width, Height, Color_Depth, Mask_Red, Mask_Green, Mask_Blue,Mask_Alpha);
 End;
 
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
@@ -151,10 +151,6 @@ Begin
   SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
 
-
-
-
-
 // Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
@@ -162,7 +158,6 @@ Var Characters : pChar;
   SDL_Color : PSDL_Color;
 Begin
   new(SDL_Color);
-
 
   SDL_Color^.r := Laabel.Color.Red;
   SDL_Color^.g := Laabel.Color.Green;

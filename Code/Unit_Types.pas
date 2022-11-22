@@ -136,7 +136,7 @@ Const Train_Maximum_Speed = 4;
 Const Train_Acceleration = 2;
 
 // Distance d'accélaration (equation horaires).
-Const Train_Acceleration_Distance = 0,5 * ((Train_Maximum_Speed*Train_Maximum_Speed) / Train_Acceleration);
+Const Train_Acceleration_Distance = 0.5 * ((Train_Maximum_Speed*Train_Maximum_Speed) / Train_Acceleration);
 
 
   // - - - Lignes
@@ -580,6 +580,7 @@ Begin
       Line.Trains[high(Line.Trains)].Distance := 0;
       Line.Trains[high(Line.Trains)].Direction := Direction;
       Line.Trains[high(Line.Trains)].Last_Station := Start_Station;
+      Line.Trains[high(Line.Trains)].Driving := False;
       Vehicle_Create(Line.Trains[high(Line.Trains)], Game);
       Train_Create := True;
     End
@@ -598,7 +599,6 @@ Begin
       Train.Vehicles[high(Train.Vehicles)].Size.X := Vehicle_Width;
       Train.Vehicles[high(Train.Vehicles)].Size.Y := Vehicle_Height;
       Train.Vehicles[high(Train.Vehicles)].Sprite := Game.Ressources.Vehicle_0_Degree;
-      Train.Vehicles[high(Train.Vehicles)].Driving := False;
       Vehicle_Create := True;
       For i := 0 to Vehicle_Maximum_Passengers_Number - 1 Do
         Train.Vehicles[high(Train.Vehicles)].Passengers[i] := nil;

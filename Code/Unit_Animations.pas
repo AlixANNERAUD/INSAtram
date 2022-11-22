@@ -12,27 +12,39 @@ Implementation
 // Fonction appelée tout les 1/60 ème de seoncde pour annimer
 Procedure Animation_Refresh(Var Game : Type_Game);
 
-Var i : Byte;
+Var i, j : Byte;
 Begin
 
-  // Anime les trains
-  If length(Game.Trains) > 0 Then
+  // Vérifie si des lignes existent.
+  If (length(Game.Lines) > 0) Then
+  Begin
+    // Itère sur chaque ligne.
+    For i := low(Game.Lines) To high(Game.Lines) Do
     Begin
-      For i := low(Game.Trains) To high(Game.Trains) Do
+      // Vérifie si des trains existent sur la ligne.
+      If length(Game.Lines[i].Trains) > 0 Then
         Begin
-          If (Game.Trains[i].Driving := True) Then
+          // Itère sur chaque train.
+          For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
             Begin
-                Game.Trains[i].Distance := Game.Trains[i].Distance + ((1 / 60) * Train_Maximum_Speed);
-            
-                If (Game.Trains[i].Distance >= Game.Trains[i].Distance_Maximum) Then
+              // Vérifie si le train est en mouvement.
+              If (Game.Lines[i].Trains[j].Driving = True) Then
                 Begin
-                    Game.Trains[i].Driving := False;
-                    Game.Trains[i].Distance := Game.Trains[i].Distance_Maximum;
+                    // Fait progresser le train sur la ligne.
+                    // TODO : Remplacer avec des équations horaire et des intégrales à partir de la vitesse max et de l'accélération (distance en fonction de t).
+                    Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Distance + round(((1 / 60) * Train_Maximum_Speed));
+                    // Si le train est arrivé.
+                    If (Game.Lines[i].Trains[j].Distance >= Game.Lines[i].Trains[j].Maximum_Distance) Then
+                    Begin
+                        Game.Lines[i].Trains[j].Driving := False;
+                        Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Maximum_Distance;
+                    End;
                 End;
+                
             End;
-            
         End;
     End;
+  End;
 End;
 
 End.
