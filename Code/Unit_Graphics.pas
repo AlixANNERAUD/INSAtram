@@ -69,18 +69,20 @@ Implementation
 
 // Fonction qui détecte si un rectangle et une ligne sont en colision.
 Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
-
 Var 
-  Left, Right, Top, Bottom : Boolean;
   Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
 Begin
+  // Les quatres côtés du rectangles sont décomposés en 4 lignes.
+  // La détection se fait ensuite ligne par ligne.
+  // Les détections sont imbriqués afin de ne pas faire de calculs inutiles.
+  
   // Côté gauche du rectangle.
   Temporary_Line[0].X := Rectangle_Position.X;
   Temporary_Line[0].Y := Rectangle_Position.Y;
   Temporary_Line[1].X := Rectangle_Position.X;
   Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
 
-  If (Graphics_Lines_Colliding(Line_A, Line_B, Rectangle_Position, Temporary_Line[0], Temporary_Line[1]) = False) Then
+  If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
     Begin
       // Côté droit du rectangle.
       Temporary_Line[0].X := Rectangle_Position.X+Rectangle_Size.X;
@@ -98,37 +100,27 @@ Begin
           Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
           Temporary_Line[1].Y := Rectangle_Position.Y;
 
-          If (Graphics_Lines_Colliding(Line_A, Line_B, Rectangle_Position,Temporary_Line[0], Temporary_Line[1]) = False) Then
+          If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
             Begin
+              // Coté en bas du rectangle.
               Temporary_Line[0].X := Rectangle_Position.X;
               Temporary_Line[0].Y := Rectangle_Position.Y+Rectangle_Size.Y;
               Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
               Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
 
-                If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) Then
-                  Graphics_Lines_Colliding := True
+                If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+                  Graphics_Line_Rectangle_Colling := False
                 Else
-                  Graphics_Lines_Colliding := False;
-            End;
+                  Graphics_Line_Rectangle_Colling := True;
+            End
           Else
             Graphics_Line_Rectangle_Colling := True;
-        End;
+        End
         Else
           Graphics_Line_Rectangle_Colling := True;
-    End;
+    End
     Else
       Graphics_Line_Rectangle_Colling := True;
-
-
-
-  // Côté en bas du rectangle.
-
-
-  If (Left Or Right Or Top Or Bottom) Then
-    Graphics_Line_Rectangle_Colling := True
-  Else
-    Graphics_Line_Rectangle_Colling := False;
-
 End;
 
 // Fonction qui détecte si deux lignes sont sécantes.
@@ -143,9 +135,9 @@ Begin
                   ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X - Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
 
   If ((Coeffcient_A  >= 0) And (Coeffcient_A <= 1) And (Coeffcient_B >= 0) And (Coeffcient_B <= 1)) Then
-    Graphics_Line_Colliding := true
+    Graphics_Lines_Colliding := true
   Else
-    Graphics_Line_Colliding := false;
+    Graphics_Lines_Colliding := false;
 End;
 
 
