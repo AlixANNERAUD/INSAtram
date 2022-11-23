@@ -25,8 +25,11 @@ Const Screen_Width =  960;
 Const Screen_Height =  720;
 
 Const Mask_Alpha =  $FF000000;
+
 Const Mask_Red =  $000000FF;
+
 Const Mask_Green =  $0000FF00;
+
 Const Mask_Blue =  $00FF0000;
 
   // - - Paths
@@ -83,7 +86,7 @@ Const Path_Font =   Path_Fonts + '/FreeSans.ttf';
 
 Const Path_Font_Bold = Path_Fonts + '/FreeSansBold.ttf';
 
-// - - - Sounds
+  // - - - Sounds
 
 Const Path_Sounds = Path_Ressources + 'Sounds/';
 
@@ -125,17 +128,20 @@ Const Passenger_Height =   8;
 
   // - - - - Vehicles
 
-  Const Vehicle_Maximum_Passengers_Number = 6;
+Const Vehicle_Maximum_Passengers_Number = 6;
 
 Const Train_Maximum_Vehicles_Number = 3;
 
-// Vitesse maximum d'un train en px/s.
+  // Vitesse maximum d'un train en px/s.
+
 Const Train_Maximum_Speed = 4;
 
-// Acceleration d'un train.
+  // Acceleration d'un train.
+
 Const Train_Acceleration = 2;
 
-// Distance d'accélaration (equation horaires).
+  // Distance d'accélaration (equation horaires).
+
 Const Train_Acceleration_Distance = 0.5 * ((Train_Maximum_Speed*Train_Maximum_Speed) / Train_Acceleration);
 
 
@@ -236,34 +242,35 @@ Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
 
   // - - Passengers
 
-Type Type_Passenger = Record
-  // Forme du passager (et donc sa station de destination).
-  Shape : Type_Shape;
-  // Pointeur vers le sprite du passager.
-  Sprite : Type_Surface;
-  // Itinéraire du passager.
-  //Itinerary : Array of Type_Station_Pointer;
-End;
+Type Type_Station_Pointer = ^Type_Station;
 
-Type Type_Passenger_Pointer = ^Type_Passenger;
+  Type_Passenger = Record
+    // Forme du passager (et donc sa station de destination).
+    Shape : Type_Shape;
+    // Pointeur vers le sprite du passager.
+    Sprite : Type_Surface;
+    // Itinéraire du passager.
+    Itinerary : Array Of Type_Station_Pointer;
+  End;
+
+  Type_Passenger_Pointer = ^Type_Passenger;
 
   // - - Station
 
-Type Type_Station = Record
-  Position, Size, Position_Centered : Type_Coordinates;
-  Shape : Type_Shape;
-  Sprite : Type_Surface;
-  Passengers : array Of Type_Passenger_Pointer;
-End;
+  Type_Station = Record
+    Position, Size, Position_Centered : Type_Coordinates;
+    Shape : Type_Shape;
+    Sprite : Type_Surface;
+    Passengers : array Of Type_Passenger_Pointer;
+  End;
 
-Type Type_Station_Pointer = ^Type_Station;
 
   // - - Train
 
 Type Type_Vehicle = Record
   Position, Size : Type_Coordinates;
   Sprite : Type_Surface;
-  Passengers : Array[0 .. (Vehicle_Maximum_Passengers_Number - 1)] of Type_Passenger_Pointer;
+  Passengers : Array[0 .. (Vehicle_Maximum_Passengers_Number - 1)] Of Type_Passenger_Pointer;
 End;
 
 Type Type_Train = Record
@@ -375,17 +382,19 @@ Type Type_Game = Record
 End;
 
 // Menu principal du jeu.
+
 Type Type_Menu = Record
   Logo : Type_Image;
   Play_Label : Type_Label;
   Play_Image : Type_Image;
-  
+
   Options_Label : Type_Label;
   Options_Image : Type_Image;
 
 End;
 
 // Options du jeu.
+
 Type Type_Options = Record
 
   Sound_Button : Type_Button;
@@ -589,6 +598,7 @@ Begin
 End;
 
 Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
+
 Var i : Byte;
 Begin
   If (length(Train.Vehicles) < Train_Maximum_Vehicles_Number) Then
@@ -600,8 +610,8 @@ Begin
       Train.Vehicles[high(Train.Vehicles)].Size.Y := Vehicle_Height;
       Train.Vehicles[high(Train.Vehicles)].Sprite := Game.Ressources.Vehicle_0_Degree;
       Vehicle_Create := True;
-      For i := 0 to Vehicle_Maximum_Passengers_Number - 1 Do
-        Train.Vehicles[high(Train.Vehicles)].Passengers[i] := nil;
+      For i := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+        Train.Vehicles[high(Train.Vehicles)].Passengers[i] := Nil;
     End
   Else
     Vehicle_Create := False;
@@ -632,10 +642,10 @@ End;
 
 Function Passenger_Delete(Var Passenger : Type_Passenger_Pointer) : Boolean;
 Begin
-  If (Passenger <> nil) Then
+  If (Passenger <> Nil) Then
     Begin
       FreeMem(Passenger);
-      Passenger := nil;
+      Passenger := Nil;
       Passenger_Delete := True;
     End
   Else
@@ -643,6 +653,7 @@ Begin
 End;
 
 Function Passenger_Delete(Var Passenger : Type_Passenger; Var Station : Type_Station) : Boolean;
+
 Var i : Byte;
 Begin
   If (length(Station.Passengers) > 0) Then

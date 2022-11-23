@@ -23,6 +23,10 @@ Procedure Graphics_Draw_Line(Position_1, Position_2 :
 
 Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
 
+Function Graphics_Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
+
+Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+
 // - - Entity
 
 Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
@@ -63,10 +67,92 @@ Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released
 
 Implementation
 
+// Fonction qui détecte si un rectangle et une ligne sont en colision.
+Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+
+Var 
+  Left, Right, Top, Bottom : Boolean;
+  Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
+Begin
+  // Côté gauche du rectangle.
+  Temporary_Line[0].X := Rectangle_Position.X;
+  Temporary_Line[0].Y := Rectangle_Position.Y;
+  Temporary_Line[1].X := Rectangle_Position.X;
+  Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
+
+  If (Graphics_Lines_Colliding(Line_A, Line_B, Rectangle_Position, Temporary_Line[0], Temporary_Line[1]) = False) Then
+    Begin
+      // Côté droit du rectangle.
+      Temporary_Line[0].X := Rectangle_Position.X+Rectangle_Size.X;
+      Temporary_Line[0].Y := Rectangle_Position.Y;
+      Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
+      Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
+
+      If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+        Begin
+
+          // Côté en haut du rectangle.
+
+          Temporary_Line[0].X := Rectangle_Position.X;
+          Temporary_Line[0].Y := Rectangle_Position.Y;
+          Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
+          Temporary_Line[1].Y := Rectangle_Position.Y;
+
+          If (Graphics_Lines_Colliding(Line_A, Line_B, Rectangle_Position,Temporary_Line[0], Temporary_Line[1]) = False) Then
+            Begin
+              Temporary_Line[0].X := Rectangle_Position.X;
+              Temporary_Line[0].Y := Rectangle_Position.Y+Rectangle_Size.Y;
+              Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
+              Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
+
+                If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) Then
+                  Graphics_Lines_Colliding := True
+                Else
+                  Graphics_Lines_Colliding := False;
+            End;
+          Else
+            Graphics_Line_Rectangle_Colling := True;
+        End;
+        Else
+          Graphics_Line_Rectangle_Colling := True;
+    End;
+    Else
+      Graphics_Line_Rectangle_Colling := True;
+
+
+
+  // Côté en bas du rectangle.
+
+
+  If (Left Or Right Or Top Or Bottom) Then
+    Graphics_Line_Rectangle_Colling := True
+  Else
+    Graphics_Line_Rectangle_Colling := False;
+
+End;
+
+// Fonction qui détecte si deux lignes sont sécantes.
+Function Graphics_Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
+
+Var Coeffcient_A, Coeffcient_B : Real;
+Begin
+  Coeffcient_A := ((Line_2_B.X - Line_2_A.X)*(Line_1_A.Y - Line_2_A.Y) - (Line_2_B.Y - Line_2_A.Y)*(Line_1_A.X - Line_2_A.X)) / ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X -
+                  Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
+
+  Coeffcient_B := ((Line_1_B.X - Line_1_A.X)*(Line_1_A.Y - Line_2_A.Y)) /
+                  ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X - Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
+
+  If ((Coeffcient_A  >= 0) And (Coeffcient_A <= 1) And (Coeffcient_B >= 0) And (Coeffcient_B <= 1)) Then
+    Graphics_Line_Colliding := true
+  Else
+    Graphics_Line_Colliding := false;
+End;
+
+
 Function Surface_Create(Width, Height : Integer) : PSDL_Surface;
 Begin
-    // Création d'une surface SDL avec les masques de couleurs aproriés.
-    Surface_Create := SDL_CreateRGBSurface(0, Width, Height, Color_Depth, Mask_Red, Mask_Green, Mask_Blue,Mask_Alpha);
+  // Création d'une surface SDL avec les masques de couleurs aproriés.
+  Surface_Create := SDL_CreateRGBSurface(0, Width, Height, Color_Depth, Mask_Red, Mask_Green, Mask_Blue,Mask_Alpha);
 End;
 
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
@@ -151,6 +237,13 @@ Begin
   SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
 
+
+
+
+
+
+
+
 // Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
@@ -218,7 +311,7 @@ End;
 Procedure Graphics_Load(Var Game : Type_Game);
 
 Var Video_Informations :   PSDL_VideoInfo;
-    i : Byte;
+  i : Byte;
 Begin
   // - Initialisation de la SDL
   SDL_Init(SDL_INIT_EVERYTHING);
@@ -326,8 +419,8 @@ Begin
       Button_Set(Game.Lines_Buttons[i], Surface_Create(32, 32), Surface_Create(32, 32));
     End;
 
- 
-  FilledCircleColor(Game.Lines_Buttons[0].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Red])); 
+
+  FilledCircleColor(Game.Lines_Buttons[0].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Red]));
   FilledcircleColor(Game.Lines_Buttons[1].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Purple]));
   FilledcircleColor(Game.Lines_Buttons[2].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Deep_Purple]));
   FilledcircleColor(Game.Lines_Buttons[3].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Indigo]));
@@ -352,13 +445,13 @@ Begin
 
   Game.Locomotive_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Locomotive_Button.Size.X);
   Game.Locomotive_Button.Position.Y := Get_Centered_Position(Game.Panel_Left.Size.Y, Game.Locomotive_Button.Size.X * 3 + 2 * 16);
-  
+
   Game.Wagon_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Wagon_Button.Size.X);
   Game.Wagon_Button.Position.Y := Game.Locomotive_Button.Position.Y + Game.Locomotive_Button.Size.Y + 16;
-  
+
   Game.Tunnel_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Tunnel_Button.Size.X);
   Game.Tunnel_Button.Position.Y := Game.Wagon_Button.Position.Y + Game.Wagon_Button.Size.Y + 16;
-  
+
 
 
   Graphics_Refresh(Game);
@@ -457,7 +550,7 @@ Begin
   // - Panneau du bas.
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
     Button_Render(Game.Lines_Buttons[i], Game.Panel_Bottom);
-  
+
   // - Panneau de gauche.
 
   Button_Render(Game.Locomotive_Button, Game.Panel_Left);
