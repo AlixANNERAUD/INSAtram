@@ -342,9 +342,19 @@ Type Type_Button = Record
   Surface_Released : Type_Surface;
 End;
 
+// - Mouse
+
+Type Type_Mouse = Record
+  Press_Position, Release_Position : Type_Coordinates;
+  Left_Button_State : Boolean;
+End;
+
 // - Game
 
 Type Type_Game = Record
+  Quit : Boolean;
+  // Souri
+  Mouse : Type_Mouse;
   // Fenêtre du jeu.
   Window : Type_Panel;
   // Panneau contenant le terrain de jeu. 
@@ -588,7 +598,7 @@ Begin
 
       Line.Trains[high(Line.Trains)].Distance := 0;
       Line.Trains[high(Line.Trains)].Direction := Direction;
-      Line.Trains[high(Line.Trains)].Last_Station := Start_Station;
+      Line.Trains[high(Line.Trains)].Next_Station := Start_Station;
       Line.Trains[high(Line.Trains)].Driving := False;
       Vehicle_Create(Line.Trains[high(Line.Trains)], Game);
       Train_Create := True;
