@@ -7,26 +7,19 @@ Uses sysutils, Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl
 
 Var Game : Type_Game;
   Timer : Type_Time;
-  Quit : Boolean;
 
 Begin
 
+  Graphics_Load(Game);
   Logic_Load(Game);
   Mouse_Load(Game);
-  Graphics_Load(Game);
 
-  Quit := False;
-
-  While (Not(Quit)) Do
+  While (Not(Game.Quit)) Do
     Begin
 
       Timer := Time_Get_Current();
 
-      writeln('Gpx refresh');
-
       Logic_Refresh(Game);
-
-
 
       Graphics_Refresh(Game);
 
@@ -38,5 +31,7 @@ Begin
     End;
 
   Graphics_Unload(Game);
+
+  Logic_Unload(Game);
 
 End.

@@ -39,6 +39,10 @@ Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources 
 
 Function Surface_Create(Width, Height : Integer) : PSDL_Surface;
 
+Procedure Lines_Compute_Intermediate_Positions(Var Game : Type_Game);
+
+Procedure Train_Compute_Maximum_Position(Var Train : Type_Train; Line : Type_Line);
+
 // - - Interface
 // - - - Label
 
@@ -67,15 +71,65 @@ Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released
 
 Implementation
 
+Procedure Train_Compute_Maximum_Position(Var Train : Type_Train; Line : Type_Line);
+
+Var i : Byte;
+Begin
+  // Vérifie si le tableau n'est pas vide.
+  If (length(Line.Stations) > 0) Then
+    Begin
+      // Itère parmi les stations.
+      For i := low(Line.Stations) To high(Line.Stations) Do
+        Begin
+      writeln('Train compute', i); 
+          // Détermination de l'indice de la station de départ du train dans la ligne.
+          If (Line.Stations[i] = Train.Last_Station) Then
+            Begin
+              // Calcul de la distance maximale du train.
+              Train.Maximum_Distance := Graphics_Get_Distance(Train.Next_Station^.Position, Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)]) + Graphics_Get_Distance(Line.
+                                        Intermediate_Positions[i + low(Line.Intermediate_Positions)], Train.Last_Station^.Position);
+              Break;
+            End;
+        End;
+    End;
+End;
+
+Procedure Lines_Compute_Intermediate_Positions(Var Game : Type_Game);
+
+Var i, j : Byte;
+Begin
+  // Vérifie qu'il y a bien des lignes.
+  If (length(Game.Lines) > 0) Then
+    Begin
+      // Itère parmi les lignes.
+      For i := low(Game.Lines) To high(Game.Lines) Do
+        Begin
+          // Définition de la taille du tableau.
+          SetLength(Game.Lines[i].Intermediate_Positions, length(Game.Lines[i].Stations) - 1);
+          // Vérifie qu'il y a bien des stations dans la ligne.
+          If (length(Game.Lines[i].Stations) > 0) Then
+            Begin
+              // Itère parmi les stations.
+              For j := low(Game.Lines[i].Stations) To (high(Game.Lines[i].Stations) - 1) Do
+                Begin
+                  Game.Lines[i].Intermediate_Positions[j + low(Game.Lines[i].Intermediate_Positions)] := Station_Get_Intermediate_Position(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Stations[j + 1]^.Position);
+                End;
+            End;
+        End;
+    End;
+
+End;
+
 // Fonction qui détecte si un rectangle et une ligne sont en colision.
 Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+
 Var 
   Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
 Begin
   // Les quatres côtés du rectangles sont décomposés en 4 lignes.
   // La détection se fait ensuite ligne par ligne.
   // Les détections sont imbriqués afin de ne pas faire de calculs inutiles.
-  
+
   // Côté gauche du rectangle.
   Temporary_Line[0].X := Rectangle_Position.X;
   Temporary_Line[0].Y := Rectangle_Position.Y;
@@ -108,19 +162,19 @@ Begin
               Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
               Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
 
-                If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
-                  Graphics_Line_Rectangle_Colling := False
-                Else
-                  Graphics_Line_Rectangle_Colling := True;
+              If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+                Graphics_Line_Rectangle_Colling := False
+              Else
+                Graphics_Line_Rectangle_Colling := True;
             End
           Else
             Graphics_Line_Rectangle_Colling := True;
         End
-        Else
-          Graphics_Line_Rectangle_Colling := True;
+      Else
+        Graphics_Line_Rectangle_Colling := True;
     End
-    Else
-      Graphics_Line_Rectangle_Colling := True;
+  Else
+    Graphics_Line_Rectangle_Colling := True;
 End;
 
 // Fonction qui détecte si deux lignes sont sécantes.
@@ -228,6 +282,11 @@ Begin
 
   SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
+
+
+
+
+
 
 
 
@@ -449,21 +508,20 @@ Procedure Graphics_Unload(Var Game : Type_Game);
 
 Var i : Byte;
 Begin
+  // Libération de la mémoire des sprites.
+  SDL_FreeSurface(Game.Ressources.Vehicle_0_Degree);
+  SDL_FreeSurface(Game.Ressources.Vehicle_45_Degree);
+  SDL_FreeSurface(Game.Ressources.Vehicle_90_Degree);
+  SDL_FreeSurface(Game.Ressources.Vehicle_135_Degree);
 
-  Panel_Delete(Game.Panel_Top);
-  Panel_Delete(Game.Panel_Bottom);
-  Panel_Delete(Game.Panel_Left);
-  Panel_Delete(Game.Panel_Right);
-
-  // - Unload sprites
   For i := 0 To Shapes_Number - 1 Do
     Begin
       SDL_FreeSurface(Game.Ressources.Stations[i]);
       SDL_FreeSurface(Game.Ressources.Passengers[i]);
     End;
 
-  // Free font surfaces.
 
+  // Libération des polices de caractères.
   TTF_CloseFont(Game.Ressources.Fonts[Font_Small][Font_Normal]);
   TTF_CloseFont(Game.Ressources.Fonts[Font_Medium][Font_Normal]);
   TTF_CloseFont(Game.Ressources.Fonts[Font_Big][Font_Normal]);
@@ -471,8 +529,13 @@ Begin
   TTF_CloseFont(Game.Ressources.Fonts[Font_Medium][Font_Bold]);
   TTF_CloseFont(Game.Ressources.Fonts[Font_Big][Font_Bold]);
 
-  // Free the window in memory.
-  SDL_FreeSurface(Game.Window.Surface);
+  // Libération de la mémoire des surfaces.
+
+  Panel_Delete(Game.Panel_Top);
+  Panel_Delete(Game.Panel_Bottom);
+  Panel_Delete(Game.Panel_Left);
+  Panel_Delete(Game.Panel_Right);
+  Panel_Delete(Game.Window);
 
   SDL_Quit();
 End;
@@ -553,6 +616,8 @@ Begin
   Panel_Render(Game.Panel_Right, Game.Window);
 
   SDL_Flip(Game.Window.Surface);
+
+  Animation_Refresh(Game);
 End;
 
 Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
@@ -891,7 +956,7 @@ Begin
             Destination_Rectangle.x := (Station.Position.X - (2 *
                                        Passenger_Width))
           Else
-            Destination_Rectangle.x := (Station.Position.X + Station_Width +
+            Destination_Rectangle.x := (Station.Position.X + Station.Size.X +
                                        Passenger_Width);
           // - Determine y position
           Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (

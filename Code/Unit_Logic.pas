@@ -12,6 +12,8 @@ Uses Unit_Types, Unit_Graphics, sdl;
 // - - Logique générale.
 Procedure Logic_Load(Var Game : Type_Game);
 
+Procedure Logic_Unload(Var Game : Type_Game);
+
 Procedure Logic_Refresh(Var Game : Type_Game);
 
 Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train);
@@ -137,7 +139,7 @@ Begin
   
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      For j := 0 To 5 {Random(5)} Do
+      For j := 0 To Random(5) Do
         Begin
           Passenger_Create(Game.Stations[i], Game);
         End;
@@ -151,6 +153,18 @@ Begin
   Game.Lines[0].Trains[0].Driving := true;
 
   Game.Lines[0].Trains[0].Distance := 0;
+
+  Train_Compute_Maximum_Position(Game.Lines[0].Trains[0], Game.Lines[0]);
+
+  Lines_Compute_Intermediate_Positions(Game);
+
+
+End;
+
+// Procédure qui décharge la logique en libérant la mémoire des objets alloués.
+Procedure Logic_Unload(Var Game : Type_Game);
+Begin
+
 
 End;
 
@@ -166,6 +180,7 @@ Begin
   // Si l'utilisateur demande la fermeture du programme.
 
   If (Event.type_ = SDL_QUITEV) Then
+    
     Game.Quit := True
   // Si la souris est pressé.
   Else If ((Event.type_ = SDL_MOUSEBUTTONDOWN) Or (Event.type_ = SDL_MOUSEBUTTONUP)) Then
@@ -187,6 +202,7 @@ Begin
               // Si le train est arrivé à quais.
               If (Game.Lines[i].Trains[j].Driving = false) Then
                 Begin
+                  writeln('Train arrivé à quais.');
                   // Effectue la correspondance du train arrivé à quais.
                   Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j]);
                 End;
@@ -304,5 +320,7 @@ Begin
   // Le train peut repartir.
   Train.Driving := true;
 End;
+
+
 
 End.

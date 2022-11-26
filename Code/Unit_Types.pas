@@ -107,11 +107,6 @@ Const Shapes_Number = 5;
 
   // - - - Station
 
-
-Const Station_Width =   32;
-
-Const Station_Height =   32;
-
   // - - - Véhicules (locomotive et wagon).
 
 Const Vehicle_Width =   32;
@@ -202,7 +197,7 @@ Type Type_Color_Name = (Color_Black,
                        );
 
 Type Type_Ressources = Record
-  // Fonts
+  // Polices de caractères.
   Fonts : Array [Font_Small..Font_Big, Font_Normal..Font_Bold] Of Type_Font;
   // Stations (5 formes différentes).
   Stations : Array [0 .. (Shapes_Number - 1)] Of Type_Surface;
@@ -302,6 +297,8 @@ Type Type_Line = Record
   Color : Type_Color;
   // Tableau dynamique de pointeur vers les stations.
   Stations : array Of Type_Station_Pointer;
+  // Tableau dynamique des positions intermédiaires pré-calculées.
+  Intermediate_Positions : Array Of Type_Coordinates;
   // Tableau dynamique contenant les trains.
   Trains : array Of Type_Train;
 End;
@@ -433,6 +430,7 @@ Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
 
 // - - Object deletion.
 
+Procedure Station_Delete(Var Station : Type_Station; Var Game : Type_Game);
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
@@ -456,7 +454,31 @@ Function String_To_Characters(String_To_Convert : String) : pChar;
 
 Implementation
 
-// - Function definition
+// - Définition des fonctions et procédures.
+
+Procedure Station_Delete(Var Station : Type_Station; Var Game : Type_Game);
+
+Var 
+  i : Byte;
+Begin
+
+{ 
+  For i := low(Station.Passengers) To high(Station.Passengers) Do
+    Passenger_Delete(Station.Passengers[i]^, Station);
+
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
+      If Game.Stations[i] = Station Then
+        Begin
+          Game.Stations[i] := Game.Stations[high(Game.Stations)];
+          SetLength(Game.Stations, Length(Game.Stations) - 1);
+          Break;
+        End;
+
+
+    End;
+}
+End;
 
 Function String_To_Characters(String_To_Convert : String) : pChar;
 
@@ -506,14 +528,15 @@ Begin
       Game.Stations[high(Game.Stations)].Sprite := Game.Ressources.Stations[Shape];
 
 
-      Game.Stations[high(Game.Stations)].Size.X := Station_Width;
-      Game.Stations[high(Game.Stations)].Size.Y := Station_Height;
+      Game.Stations[high(Game.Stations)].Size.X := Game.Stations[high(Game.Stations)].Sprite^.w;
+
+      Game.Stations[high(Game.Stations)].Size.Y := Game.Stations[high(Game.Stations)].Sprite^.h;
 
       Game.Stations[high(Game.Stations)].Position.X := Random(Game.
                                                        Panel_Right
-                                                       .Size.X - Station_Width);
+                                                       .Size.X - Game.Stations[high(Game.Stations)].Size.X);
       Game.Stations[high(Game.Stations)].Position.Y := Random(Game.
-                                                       Panel_Right.Size.Y - Station_Height);
+                                                       Panel_Right.Size.Y - Game.Stations[high(Game.Stations)].Size.Y);
 
       // Calcul les coordoonées centré de la station.
       Game.Stations[high(Game.Stations)].Position_Centered := Get_Center_Position(Game.Stations[high(Game.Stations)].Position, Game.Stations[high(Game.Stations)].Size);
