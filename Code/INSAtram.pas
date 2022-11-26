@@ -8,8 +8,6 @@ Uses sysutils, Unit_Types, Unit_Mouse, Unit_Graphics, Unit_Logic, sdl_image, sdl
 Var Game : Type_Game;
   Timer : Type_Time;
   Quit : Boolean;
-  Event : TSDL_Event;
-  Color : Type_Color;
 
 Begin
 
@@ -24,8 +22,11 @@ Begin
 
       Timer := Time_Get_Current();
 
+      writeln('Gpx refresh');
 
       Logic_Refresh(Game);
+
+
 
       Graphics_Refresh(Game);
 

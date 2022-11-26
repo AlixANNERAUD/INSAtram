@@ -5,7 +5,7 @@ Interface
 
 // - Inclut les unités internes au projet. 
 
-Uses Unit_Types, Unit_Graphics;
+Uses Unit_Types, Unit_Graphics, sdl;
 
 // - Déclaration des fonctions et procédures.
 
@@ -26,6 +26,7 @@ Implementation
 
 // - - Fonctions et procédures relatives au passagers 
 
+{
 program dijkstra;
 
 Type Type_Dijkstra_Cell = Record
@@ -36,7 +37,6 @@ Type Type_Dijkstra_Cell = Record
     weight : Real;
     isValidated : Boolean;
 End;
-
 
 procedure Connect_Stations(rowToFill : Integer; indexStationToConnect : Integer; GraphTable : TypeGraphTable; Var DijkstraTable : Array Of Type_Dijkstra_Cell) // TypeGraphTable plutot que Type_Line parce que dans chaque case il y aura une record avec plusieurs lignes + la station avec laquelle la premiere station est reliée
 Var i : Integer;
@@ -97,6 +97,7 @@ begin
                 end;
         end;
 end;
+}
 
 Function Passenger_Get_Off(Passenger : Type_Passenger; Var Current_Station : Type_Station) : Boolean;
 
@@ -119,6 +120,7 @@ End;
 
 // Procédure qui charge la logique.
 Procedure Logic_Load(Var Game : Type_Game);
+Var i,j : Byte;
 Begin
   Randomize();
 
@@ -143,11 +145,10 @@ Begin
 
     End;
 
-
-
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
 
   Game.Lines[0].Trains[0].Next_Station := Game.Lines[0].Stations[1];
+  Game.Lines[0].Trains[0].Driving := true;
 
   Game.Lines[0].Trains[0].Distance := 0;
 
@@ -163,12 +164,13 @@ Begin
   SDL_PollEvent(@Event);
 
   // Si l'utilisateur demande la fermeture du programme.
+
   If (Event.type_ = SDL_QUITEV) Then
     Game.Quit := True
   // Si la souris est pressé.
   Else If ((Event.type_ = SDL_MOUSEBUTTONDOWN) Or (Event.type_ = SDL_MOUSEBUTTONUP)) Then
          Begin
-           Mouse_Event_Handler(Event, Game);
+           //Mouse_Event_Handler(Event, Game);
          End;
 
 

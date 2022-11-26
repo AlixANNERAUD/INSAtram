@@ -4,17 +4,15 @@ Interface
 
 Uses Unit_Types, sdl;
 
-Procedure Mouse_Load();
+Procedure Mouse_Load(Game : Type_Game);
 
 Function Mouse_Get_Position() : Type_Coordinates;
 
-Function Mouse_Is_Pressed() : Boolean;
-
-Function Mouse_Is_Released() : Boolean;
-
+Function Mouse_Is_Pressed(Game : Type_Game) : Boolean;
 
 Implementation
 
+{
 Procedure Mouse_Event_Handler(Mouse_Event : SDL_MouseButtonEvent, Var Game : Type_Game);
 Begin
     If Mouse_Event.Button = SDL_BUTTON_LEFT Then
@@ -30,6 +28,7 @@ Begin
         End;
     End;
 End;
+}
 
 Procedure Mouse_Load(Game : Type_Game);
 Begin

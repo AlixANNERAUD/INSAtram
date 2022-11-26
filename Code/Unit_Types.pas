@@ -598,7 +598,7 @@ Begin
 
       Line.Trains[high(Line.Trains)].Distance := 0;
       Line.Trains[high(Line.Trains)].Direction := Direction;
-      Line.Trains[high(Line.Trains)].Next_Station := Start_Station;
+      Line.Trains[high(Line.Trains)].Last_Station := Start_Station;
       Line.Trains[high(Line.Trains)].Driving := False;
       Vehicle_Create(Line.Trains[high(Line.Trains)], Game);
       Train_Create := True;

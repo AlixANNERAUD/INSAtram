@@ -443,10 +443,6 @@ Begin
 
   Game.Tunnel_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Tunnel_Button.Size.X);
   Game.Tunnel_Button.Position.Y := Game.Wagon_Button.Position.Y + Game.Wagon_Button.Size.Y + 16;
-
-
-
-  Graphics_Refresh(Game);
 End;
 
 Procedure Graphics_Unload(Var Game : Type_Game);
