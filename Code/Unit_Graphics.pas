@@ -13,7 +13,7 @@ Procedure Graphics_Load(Var Game : Type_Game);
 Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
-Function Graphics_Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
+
 Function Graphics_Get_Direction(Angle : Real) : Integer;
 
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
@@ -31,7 +31,6 @@ Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rec
 
 Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
 
-Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
 
 Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Color; Var Panel : Type_Panel);
 
@@ -39,7 +38,7 @@ Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources 
 
 Function Surface_Create(Width, Height : Integer) : PSDL_Surface;
 
-Procedure Lines_Compute_Intermediate_Positions(Var Game : Type_Game);
+
 
 Procedure Train_Compute_Maximum_Position(Var Train : Type_Train; Line : Type_Line);
 
@@ -81,12 +80,13 @@ Begin
       // Itère parmi les stations.
       For i := low(Line.Stations) To high(Line.Stations) Do
         Begin
-      writeln('Train compute', i); 
           // Détermination de l'indice de la station de départ du train dans la ligne.
           If (Line.Stations[i] = Train.Last_Station) Then
             Begin
               // Calcul de la distance maximale du train.
-              Train.Maximum_Distance := Graphics_Get_Distance(Train.Next_Station^.Position, Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)]) + Graphics_Get_Distance(Line.
+              Train.Maximum_Distance := Graphics_Get_Distance(Train.Next_Station^.Position, Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)]);
+              
+              Train.Maximum_Distance := Train.Maximum_Distance +  Graphics_Get_Distance(Line.
                                         Intermediate_Positions[i + low(Line.Intermediate_Positions)], Train.Last_Station^.Position);
               Break;
             End;
@@ -94,31 +94,6 @@ Begin
     End;
 End;
 
-Procedure Lines_Compute_Intermediate_Positions(Var Game : Type_Game);
-
-Var i, j : Byte;
-Begin
-  // Vérifie qu'il y a bien des lignes.
-  If (length(Game.Lines) > 0) Then
-    Begin
-      // Itère parmi les lignes.
-      For i := low(Game.Lines) To high(Game.Lines) Do
-        Begin
-          // Définition de la taille du tableau.
-          SetLength(Game.Lines[i].Intermediate_Positions, length(Game.Lines[i].Stations) - 1);
-          // Vérifie qu'il y a bien des stations dans la ligne.
-          If (length(Game.Lines[i].Stations) > 0) Then
-            Begin
-              // Itère parmi les stations.
-              For j := low(Game.Lines[i].Stations) To (high(Game.Lines[i].Stations) - 1) Do
-                Begin
-                  Game.Lines[i].Intermediate_Positions[j + low(Game.Lines[i].Intermediate_Positions)] := Station_Get_Intermediate_Position(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Stations[j + 1]^.Position);
-                End;
-            End;
-        End;
-    End;
-
-End;
 
 // Fonction qui détecte si un rectangle et une ligne sont en colision.
 Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
@@ -625,11 +600,6 @@ Begin
   Graphics_Get_Distance := round(sqrt(sqr(Position_2.X-Position_1.X)+sqr(Position_2.Y-Position_1.Y)));
 End;
 
-Function Graphics_Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
-Begin
-  Graphics_Get_Angle := ArcTan2(-Position_2.Y + Position_1.Y,
-                        Position_2.X - Position_1.X);
-End;
 
 // Fonction qui calcule les coordonnées centrée d'un objet à partir de sa position dans le repère et sa taille.
 
@@ -693,40 +663,7 @@ Begin
   Graphics_Draw_Line(Intermediate_Position, Position_2, 0, Color, Panel);
 End;
 
-Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
 
-Var Angle :   Real;
-Begin
-  Angle := Graphics_Get_Angle(Position_1, Position_2);
-
-  If ((Angle >= (Pi/4)) And (Angle <= ((3*Pi)/4))) Then
-    Begin
-      Station_Get_Intermediate_Position.X := Position_1.X;
-      Station_Get_Intermediate_Position.Y := Position_2.Y + abs(Position_2.X - Position_1.X)
-      ;
-    End
-    // - Angle between -45° and -135° (included)
-  Else If ((Angle <= (-Pi/4)) And (Angle >= ((-3*Pi)/4))) Then
-         Begin
-           Station_Get_Intermediate_Position.X := Position_1.X;
-           Station_Get_Intermediate_Position.Y := Position_2.Y - abs(Position_2.X -
-                                                  Position_1.X);
-         End
-         // - Angle between -45° and 45° (excluded)
-  Else If (((Angle > (-Pi/4)) And (Angle < 0)) Or ((Angle < (Pi/4)) And (Angle
-          >= 0))) Then
-         Begin
-           Station_Get_Intermediate_Position.Y := Position_1.Y;
-           Station_Get_Intermediate_Position.X := Position_2.X - abs(Position_2.Y -
-                                                  Position_1.Y);
-         End
-         // - Angle between 135° and -135° (excluded)
-  Else
-    Begin
-      Station_Get_Intermediate_Position.Y := Position_1.Y;
-      Station_Get_Intermediate_Position.X := Position_2.X + abs(Position_2.Y - Position_1.Y);
-    End;
-End;
 
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
@@ -751,7 +688,7 @@ Begin
     Begin
 
       // Determination de l'angle et de la direction (arrondissement de l'angle).
-      Direction := Graphics_Get_Direction(Graphics_Get_Angle(Train.Last_Station^.Position_Centered, Intermediate_Position));
+      Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Intermediate_Position));
 
 
       //writeln('Dis < Inter, Direction : ', Direction, ' Intermediate :', Intermediate_Position_Distance, ' Distance : ', Train.Distance);
@@ -834,7 +771,7 @@ Begin
     Begin
 
       // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
-      Direction := Graphics_Get_Direction(Graphics_Get_Angle(Intermediate_Position, Train.Next_Station^.Position_Centered));
+      Direction := Graphics_Get_Direction(Get_Angle(Intermediate_Position, Train.Next_Station^.Position_Centered));
 
       //writeln('Dis > Inter, Direction : ', Direction, ' Intermediate :', Intermediate_Position_Distance, ' Distance : ', Train.Distance);
 

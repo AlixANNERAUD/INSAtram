@@ -135,10 +135,13 @@ Begin
     End;
 
   // Création de la première ligne
-  Line_Create(Game.Ressources.Palette[Color_Black], Game);
+  Line_Create(Game.Ressources.Palette[Color_Black], Game, Game.Stations[low(Game.Stations)], Game.Stations[low(Game.Stations)+1]);
+
+
   
-  For i := low(Game.Stations) To high(Game.Stations) Do
+  For i := low(Game.Stations) + 2 To high(Game.Stations) Do
     Begin
+    
       For j := 0 To Random(5) Do
         Begin
           Passenger_Create(Game.Stations[i], Game);
@@ -150,15 +153,14 @@ Begin
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
 
   Game.Lines[0].Trains[0].Next_Station := Game.Lines[0].Stations[1];
+
+  Game.Lines[0].Trains[0].Last_Station := Game.Lines[0].Stations[0];
+
   Game.Lines[0].Trains[0].Driving := true;
 
   Game.Lines[0].Trains[0].Distance := 0;
 
   Train_Compute_Maximum_Position(Game.Lines[0].Trains[0], Game.Lines[0]);
-
-  Lines_Compute_Intermediate_Positions(Game);
-
-
 End;
 
 // Procédure qui décharge la logique en libérant la mémoire des objets alloués.

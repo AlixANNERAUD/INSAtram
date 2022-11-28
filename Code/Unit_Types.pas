@@ -10,7 +10,7 @@ Interface
 
 // - Libraries inclusion.
 
-Uses sdl, sdl_image, sdl_ttf, sysutils;
+Uses sdl, sdl_image, sdl_ttf, sysutils, Math;
 
 // - Constants declaration.
 
@@ -421,7 +421,7 @@ Function Get_Centered_Position(Container_Size, Size : Integer) : Integer;
 // - - Object creation.
 
 Function Station_Create(Var Game: Type_Game) : Boolean;
-Function Line_Create(Color : Type_Color; Var Game : Type_Game) : Boolean;
+Function Line_Create(Color : Type_Color; Var Game : Type_Game; Var First_Station, Second_Station : Type_Station) : Boolean;
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
@@ -431,6 +431,11 @@ Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
 // - - Object deletion.
 
 Procedure Station_Delete(Var Station : Type_Station; Var Game : Type_Game);
+
+Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
+
+Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
+
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
@@ -452,16 +457,80 @@ Function Number_To_Shape(Number : Byte) : Type_Shape;
 
 Function String_To_Characters(String_To_Convert : String) : pChar;
 
+Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
+
 Implementation
 
 // - Définition des fonctions et procédures.
 
-Procedure Station_Delete(Var Station : Type_Station; Var Game : Type_Game);
+// Fonction qui renvoi l'angle entre deux points.
+Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
+Begin
+  Get_Angle := ArcTan2(-Position_2.Y + Position_1.Y,
+                        Position_2.X - Position_1.X);
+End;
 
+// Fonction qui calcule les positions intermédiaires spérant les stations d'une ligne.
+Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
+
+Var i : Byte;
+Begin
+  // Définition de la taille du tableau.
+  SetLength(Line.Intermediate_Positions, length(Line.Stations) - 1);
+  // Vérifie qu'il y a bien des stations dans la ligne.
+  If (length(Line.Stations) > 0) Then
+    Begin
+      // Itère parmi les stations.
+      For i := low(Line.Stations) To (high(Line.Stations) - 1) Do
+        Begin
+          // Calcule la position intermédiaire.
+          Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)] := Station_Get_Intermediate_Position(Line.Stations[i]^.Position, Line.Stations[i + 1]^.
+                                                                                                 Position);
+        End;
+    End;
+
+End;
+
+// Fonction qui calcule la position intermédiaire entre deux stations.
+Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
+
+Var Angle :   Real;
+Begin
+  Angle := Get_Angle(Position_1, Position_2);
+
+  If ((Angle >= (Pi/4)) And (Angle <= ((3*Pi)/4))) Then
+    Begin
+      Station_Get_Intermediate_Position.X := Position_1.X;
+      Station_Get_Intermediate_Position.Y := Position_2.Y + abs(Position_2.X - Position_1.X)
+      ;
+    End
+    // - Angle between -45° and -135° (included)
+  Else If ((Angle <= (-Pi/4)) And (Angle >= ((-3*Pi)/4))) Then
+         Begin
+           Station_Get_Intermediate_Position.X := Position_1.X;
+           Station_Get_Intermediate_Position.Y := Position_2.Y - abs(Position_2.X -
+                                                  Position_1.X);
+         End
+         // - Angle between -45° and 45° (excluded)
+  Else If (((Angle > (-Pi/4)) And (Angle < 0)) Or ((Angle < (Pi/4)) And (Angle
+          >= 0))) Then
+         Begin
+           Station_Get_Intermediate_Position.Y := Position_1.Y;
+           Station_Get_Intermediate_Position.X := Position_2.X - abs(Position_2.Y -
+                                                  Position_1.Y);
+         End
+         // - Angle between 135° and -135° (excluded)
+  Else
+    Begin
+      Station_Get_Intermediate_Position.Y := Position_1.Y;
+      Station_Get_Intermediate_Position.X := Position_2.X + abs(Position_2.Y - Position_1.Y);
+    End;
+End;
+
+Procedure Station_Delete(Var Station : Type_Station; Var Game : Type_Game);
 Var 
   i : Byte;
 Begin
-
 { 
   For i := low(Station.Passengers) To high(Station.Passengers) Do
     Passenger_Delete(Station.Passengers[i]^, Station);
@@ -548,7 +617,7 @@ Begin
 End;
 
 // Procédure qui créer une ligne.
-Function Line_Create(Color : Type_Color; Var Game : Type_Game) : Boolean;
+Function Line_Create(Color : Type_Color; Var Game : Type_Game; Var First_Station, Second_Station : Type_Station) : Boolean;
 Begin
   If (length(Game.Lines) < Game_Maximum_Lines_Number) Then
     Begin
@@ -557,18 +626,27 @@ Begin
       // Détermination des valeurs par défaut.
       Game.Lines[high(Game.Lines)].Color := Color;
 
+      Line_Add_Station(@First_Station, Game.Lines[high(Game.Lines)]);
+      Line_Add_Station(@Second_Station, Game.Lines[high(Game.Lines)]);
+    
+
       Line_Create := True;
     End
   Else
     Line_Create := False;
 End;
 
+// Fonction qui ajoute une station à une ligne.
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 Begin
   If (length(Line.Stations) < Lines_Maximum_Number_Stations) Then
     Begin
+      // Agrandissement du tableau dynamique des stations de la ligne.
       SetLength(Line.Stations, length(Line.Stations) + 1);
+      // Ajout du pointeur de la station.
       Line.Stations[high(Line.Stations)] := Station_Pointer;
+      // Recalcul des positions intermédiaires de la ligne.
+      Line_Compute_Intermediate_Positions(Line);
       Line_Add_Station := True;
     End
   Else
