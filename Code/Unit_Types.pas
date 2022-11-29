@@ -240,6 +240,8 @@ Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
 Type Type_Station_Pointer = ^Type_Station;
 
   Type_Passenger = Record
+    // Taille du passager.
+    Size : Type_Coordinates;
     // Forme du passager (et donc sa station de destination).
     Shape : Type_Shape;
     // Pointeur vers le sprite du passager.
@@ -343,7 +345,7 @@ End;
 
 Type Type_Mouse = Record
   Press_Position, Release_Position : Type_Coordinates;
-  Left_Button_State : Boolean;
+  State : Boolean;
 End;
 
 // - Game
@@ -477,8 +479,8 @@ Var i : Byte;
 Begin
   // Définition de la taille du tableau.
   SetLength(Line.Intermediate_Positions, length(Line.Stations) - 1);
-  // Vérifie qu'il y a bien des stations dans la ligne.
-  If (length(Line.Stations) > 0) Then
+  // Vérifie qu'il y a bien au moins une stations dans la ligne.
+  If (length(Line.Stations) > 1) Then
     Begin
       // Itère parmi les stations.
       For i := low(Line.Stations) To (high(Line.Stations) - 1) Do
@@ -685,10 +687,13 @@ Begin
   Station.Passengers[high(Station.Passengers)] := GetMem(SizeOf(Type_Passenger));
 
   Shape := Random(Shapes_Number - 1);
-  // Set shape.
+  // Définition de la forme du passager.
   Station.Passengers[high(Station.Passengers)]^.Shape := Number_To_Shape(Shape);
-  // Set sprite.
+  // Définition du sprite du passager.
   Station.Passengers[high(Station.Passengers)]^.Sprite := Game.Ressources.Passengers[Shape];
+  // Définition de la taille du passager.
+  Station.Passengers[high(Station.Passengers)]^.Size.X := Station.Passengers[high(Station.Passengers)]^.Sprite^.w;
+  Station.Passengers[high(Station.Passengers)]^.Size.Y := Station.Passengers[high(Station.Passengers)]^.Sprite^.h;
 End;
 
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;

@@ -5,7 +5,7 @@ Interface
 
 // - Inclut les unités internes au projet. 
 
-Uses Unit_Types, Unit_Graphics, sdl;
+Uses Unit_Types, Unit_Graphics, sdl, Unit_Mouse;
 
 // - Déclaration des fonctions et procédures.
 
@@ -18,15 +18,17 @@ Procedure Logic_Refresh(Var Game : Type_Game);
 
 Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train);
 
-Function Passenger_Get_Off(Passenger : Type_Passenger; Var Current_Station : Type_Station) : Boolean;
+Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
 
-Function Passenger_Get_On(Passenger : Type_Passenger; Var Next_Station : Type_Station) : Boolean;
+Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
 
 // - Définition des fonctions et des procédures.
 
 Implementation
 
 // - - Fonctions et procédures relatives au passagers 
+
+
 
 {
 program dijkstra;
@@ -101,7 +103,7 @@ begin
 end;
 }
 
-Function Passenger_Get_Off(Passenger : Type_Passenger; Var Current_Station : Type_Station) : Boolean;
+Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
 
 Begin
   If random(2) = 0 Then
@@ -110,7 +112,7 @@ Begin
     Passenger_Get_Off := False;
 End;
 
-Function Passenger_Get_On(Passenger : Type_Passenger; Var Next_Station : Type_Station) : Boolean;
+Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
 Begin
   If random(2) = 0 Then
     Passenger_Get_On := True
@@ -122,6 +124,7 @@ End;
 
 // Procédure qui charge la logique.
 Procedure Logic_Load(Var Game : Type_Game);
+
 Var i,j : Byte;
 Begin
   Randomize();
@@ -138,16 +141,18 @@ Begin
   Line_Create(Game.Ressources.Palette[Color_Black], Game, Game.Stations[low(Game.Stations)], Game.Stations[low(Game.Stations)+1]);
 
 
-  
+
   For i := low(Game.Stations) + 2 To high(Game.Stations) Do
     Begin
-    
+      Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
+    End;
+
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
       For j := 0 To Random(5) Do
         Begin
           Passenger_Create(Game.Stations[i], Game);
         End;
-      Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
-
     End;
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
@@ -160,7 +165,8 @@ Begin
 
   Game.Lines[0].Trains[0].Distance := 0;
 
-  Train_Compute_Maximum_Position(Game.Lines[0].Trains[0], Game.Lines[0]);
+  Train_Compute_Maximum_Distance(Game.Lines[0].Trains[0], Game.Lines[0]);
+
 End;
 
 // Procédure qui décharge la logique en libérant la mémoire des objets alloués.
@@ -174,21 +180,27 @@ End;
 Procedure Logic_Refresh(Var Game : Type_Game);
 
 Var i, j : Integer;
-    Event : TSDL_Event;
+  Event : TSDL_Event;
 Begin
   // Vérifie les évènements.
   SDL_PollEvent(@Event);
 
   // Si l'utilisateur demande la fermeture du programme.
 
-  If (Event.type_ = SDL_QUITEV) Then
-    
-    Game.Quit := True
-  // Si la souris est pressé.
-  Else If ((Event.type_ = SDL_MOUSEBUTTONDOWN) Or (Event.type_ = SDL_MOUSEBUTTONUP)) Then
-         Begin
-           //Mouse_Event_Handler(Event, Game);
-         End;
+  Case Event.type_ Of 
+    SDL_QUITEV :
+                 Game.Quit := True;
+    SDL_MOUSEBUTTONDOWN :
+                          //Mouse_Event_Handler(Event, Game);
+        
+                          Mouse_Event_Handler(Event.button, Game);
+                          
+
+    SDL_MOUSEBUTTONUP :
+                       // writeln('click released');
+              Mouse_Event_Handler(Event.button, Game);
+  End;
+
 
 
   // Détecte les trains arrivés à quais.
@@ -204,13 +216,14 @@ Begin
               // Si le train est arrivé à quais.
               If (Game.Lines[i].Trains[j].Driving = false) Then
                 Begin
-                  writeln('Train arrivé à quais.');
                   // Effectue la correspondance du train arrivé à quais.
                   Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j]);
                 End;
             End;
         End;
     End;
+
+  Graphics_Refresh(Game);
 End;
 
 // Fonction qui effectue la correspondance du train arrivé à quais et change les attributs du trains pour sa prochaine destination.
@@ -232,6 +245,8 @@ Begin
       // Cherche la station actuelle du train dans les stations d'une ligne.
       If (Train.Last_Station = Line.Stations[i]) Then
         Begin
+          writeln('Last station', i);
+
           // Si la station est la dernière ou la première station d'une ligne.
           If ((i = high(Line.Stations)) Or (i = low(Line.Stations))) Then
             // On inverse la direction.
@@ -244,13 +259,15 @@ Begin
           Else
             Train.Next_Station := Line.Stations[i - 1];
 
-          Train.Maximum_Distance := Train.Maximum_Distance + Graphics_Get_Distance(Train.Last_Station^.Position, Station_Get_Intermediate_Position(Train.Last_Station^.Position, Train.Next_Station^.
-                                    Position)) + Graphics_Get_Distance(Train.Next_Station^.Position, Station_Get_Intermediate_Position(Train.Last_Station^.Position, Train.Next_Station^.Position));
           // On quitte la boucle.
           Break;
         End;
     End;
 
+  // Calcul de la distance maximale.
+  Train_Compute_Maximum_Distance(Train, Line);
+
+  // Itère parmis les véhicules du train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do
     Begin
       // Déchargement des passagers qui doivent descendre du train dans le tampon.
@@ -260,7 +277,7 @@ Begin
             Begin
 
               // Si le passager doit descendre du train, son pointeur est déplacé dans le tampon.
-              If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j]^, Train.Last_Station^)) Then
+              If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j], Train.Last_Station^)) Then
                 Begin
                   // Copie du pointeur du passager dans le tampon.
                   SetLength(Passengers_Queue, length(Passengers_Queue) + 1);
@@ -289,20 +306,15 @@ Begin
                   // Itère parmis les passagers de la station.
                   For k := low(Train.Last_Station^.Passengers) To high(Train.Last_Station^.Passengers) Do
                     Begin
-                      writeln('length(Train.Last_Station^.Passengers) : ', length(Train.Last_Station^.Passengers));
-                      writeln('k : ', k);
-                      If (Train.Last_Station <> Nil) Then
-                        writeln('Station');
-                      If (Train.Last_Station^.Passengers[k] <> Nil) Then
-                        writeln('Passager');
+                      writeln('Passengers :', length(Train.Last_Station^.Passengers));
                       // Si le passager doit monter dans le train, son pointeur est déplacé dans le train.
-                      If (Passenger_Get_On(Train.Last_Station^.Passengers[k]^, Train.Last_Station^)) Then
+                      If (Passenger_Get_On(Train.Last_Station^.Passengers[k], Train.Next_Station^)) Then
                         Begin
-                          writeln('Passager monte dans le train');
                           // Copie du pointeur du passager dans le train.
                           Train.Vehicles[i].Passengers[j] := Train.Last_Station^.Passengers[k];
                           // Réinitialisation du pointeur du passager dans la station.
                           Train.Last_Station^.Passengers[k] := Train.Last_Station^.Passengers[high(Train.Last_Station^.Passengers)];
+
                           SetLength(Train.Last_Station^.Passengers, length(Train.Last_Station^.Passengers) - 1);
                         End;
                     End;
@@ -312,12 +324,18 @@ Begin
     End;
 
   // Déchargement de la queue dans la station.
-  For i := low(Train.Last_Station^.Passengers) To high(Train.Last_Station^.Passengers) Do
+  If (Length(Passengers_Queue) > 0) Then
     Begin
-      SetLength(Train.Last_Station^.Passengers, length(Train.Last_Station^.Passengers) + 1);
-      Train.Last_Station^.Passengers[high(Train.Last_Station^.Passengers)] := Passengers_Queue[i];
-      SetLength(Passengers_Queue, length(Passengers_Queue) - 1);
+      For i := low(Passengers_Queue) To high(Passengers_Queue) Do
+        Begin
+          // Ajout d'une place dans le tableau des passagers de la station.
+          SetLength(Train.Last_Station^.Passengers, length(Train.Last_Station^.Passengers) + 1);
+          // Déplacement du pointeur du passager dans la station.
+          Train.Last_Station^.Passengers[high(Train.Last_Station^.Passengers)] := Passengers_Queue[i];
+        End;
     End;
+  // Désallocation de la queue.
+  SetLength(Passengers_Queue, 0);
 
   // Le train peut repartir.
   Train.Driving := true;

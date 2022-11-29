@@ -40,7 +40,7 @@ Function Surface_Create(Width, Height : Integer) : PSDL_Surface;
 
 
 
-Procedure Train_Compute_Maximum_Position(Var Train : Type_Train; Line : Type_Line);
+Procedure Train_Compute_Maximum_Distance(Var Train : Type_Train; Line : Type_Line);
 
 // - - Interface
 // - - - Label
@@ -70,7 +70,7 @@ Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released
 
 Implementation
 
-Procedure Train_Compute_Maximum_Position(Var Train : Type_Train; Line : Type_Line);
+Procedure Train_Compute_Maximum_Distance(Var Train : Type_Train; Line : Type_Line);
 
 Var i : Byte;
 Begin
@@ -84,10 +84,14 @@ Begin
           If (Line.Stations[i] = Train.Last_Station) Then
             Begin
               // Calcul de la distance maximale du train.
+         
               Train.Maximum_Distance := Graphics_Get_Distance(Train.Next_Station^.Position, Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)]);
               
+        
               Train.Maximum_Distance := Train.Maximum_Distance +  Graphics_Get_Distance(Line.
                                         Intermediate_Positions[i + low(Line.Intermediate_Positions)], Train.Last_Station^.Position);
+
+                                  
               Break;
             End;
         End;
@@ -858,6 +862,7 @@ Begin
 
   // - Affiche la locomotive.
   SDL_BlitSurface(Train.Vehicles[0].Sprite, Nil, Panel.Surface, @Destination_Rectangle);
+  
   // - Affiche les passagers. 
   {If (Train.Passengers_Count > 0) Then
     Begin
@@ -891,13 +896,13 @@ Begin
           // - Determine x position
           If (i < 3) Then
             Destination_Rectangle.x := (Station.Position.X - (2 *
-                                       Passenger_Width))
+                                       Station.Passengers[i]^.Size.X))
           Else
             Destination_Rectangle.x := (Station.Position.X + Station.Size.X +
                                        Passenger_Width);
           // - Determine y position
           Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
-                                     Passenger_Height + 4));
+                                      Station.Passengers[i]^.Size.Y + 4));
 
           SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Panel.Surface, @
                           Destination_Rectangle);

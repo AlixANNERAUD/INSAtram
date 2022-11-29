@@ -21,8 +21,6 @@ Begin
 
       Logic_Refresh(Game);
 
-      Graphics_Refresh(Game);
-
       // Limit fps to 60.
       If (Time_Get_Elapsed(Timer) < 1000/60) Then
         Begin
