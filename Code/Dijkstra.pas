@@ -10,7 +10,8 @@ Type Type_Dijkstra_Cell = Record
 End;
 
 procedure Build_Graph_Table(Game : Type_Game);
-var iteration, jiteration, kiteration : Integer;
+var iteration, jiteration, kiteration, absolute_Index_First_Station, absolute_Index_Second_Station : Integer;
+    couple_Stations : array[0..1] of Type_Station_Pointer; // Tableau temporaire dans lequel stocker les pointeurs des stations à relier dans la table une fois prélevées dans le tableau de pointeur de station de chaque ligne.
     graph_Table : Array of Array of Array[0..Game_Maximum_Lines_Number-1]; // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.
 Begin
     // Définit les dimensions de la graph_Table
@@ -22,22 +23,33 @@ Begin
 
     for iteration := low(Game.Lines) to high(Game.Lines) do // Pour chacune des lignes :
         begin
-            for jiteration:= low(Game.Lines.Stations) to high(Game.Lines.Stations) do
+            for jiteration:= low(Game.Lines.Stations) to (high(Game.Lines.Stations)-1) do // Pour chacune des stations consécutivement connectées contenues dans le tableau :
                 begin
-                    
-                end;
-        end;
+                    if Game.Lines.Stations[jiteration] <> NIL then // Au début de la partie il y a des chances pour que certaines lignes soient vides, il ne faut pas accéder à cet emplacement mémoire s'il ne contient pas un pointeur sur station.
+                    begin
+                    couple_Stations[0]:=Game.Lines.Stations[jiteration];
+                    couple_Stations[1]:=Game.Lines.Stations[jiteration+1];
+                    kiteration := low(Game.Start_Stations);
+                    repeat
+                        if couple_Stations[0] = @Game.Stations[kiteration] then
+                            begin
+                                absolute_Index_First_Station := kiteration;
+                            end;
+                        kiteration := kiteration+1;
+                    until (couple_Stations[0] = @Game.Stations[kiteration]) or (kiteration = high(Game.Stations)) // Recherche l'index absolue (qui est donc l'index dans la graphTable puisqu'elle fait la taille meme taille que games.Stations) de la premiere station du couple à lié dans la graphe table.
 
-    for iteration := low(Game.Stations) to high(Game.Stations) do
-        begin
-            for jiteration := low(Game.Stations) to high(Game.Stations) do
-                begin
-                    for kiteration := 0 to Game_Maximum_Lines_Number-1 do
-                        begin
-                            if 
-                                graph_Table[iteration][jiteration][kiteration] :=                            
-                        end;
- 
+                    kiteration := low(Game.Start_Stations)
+                    repeat
+                        if couple_Stations[1] = @Game.Stations[kiteration] then
+                            begin
+                                absolute_Index_Second_Station := kiteration;
+                            end;
+                        kiteration := kiteration+1;
+                    until (couple_Stations[1] = @Game.Stations[kiteration]) or (kiteration = high(Game.Stations)) // Recherche l'index absolue (qui est donc l'index dans la graphTable puisqu'elle fait la taille meme taille que games.Stations) de la seconde station du couple à lié dans la graphe table.
+
+                    graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := Game.Lines[iteration];
+                    graph_Table[absolute_Index_Second_Station][absolute_Index_First_Station][iteration] := Game.Lines[iteration]; // La graphTable est symétrique (l'axe étant sa diagonale)
+                    end;
                 end;
         end;
 
