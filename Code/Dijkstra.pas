@@ -9,6 +9,19 @@ Type Type_Dijkstra_Cell = Record
     isValidated : Boolean;
 End;
 
+function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : array Of Type_Station):integer;
+var iteration : Integer;
+begin
+    iteration := low(stations_Table);
+    repeat
+        if station_Pointer = @stations_Table[iteration] then
+            begin
+                get_Absolute_Index_From_Station_Pointer := iteration;
+            end;
+        iteration := iteration+1;
+    until (station_Pointer = @stations_Table[iteration]) or (iteration = high(stations_Table));
+end;
+
 procedure Build_Graph_Table(Game : Type_Game);
 var iteration, jiteration, kiteration, absolute_Index_First_Station, absolute_Index_Second_Station : Integer;
     couple_Stations : array[0..1] of Type_Station_Pointer; // Tableau temporaire dans lequel stocker les pointeurs des stations à relier dans la table une fois prélevées dans le tableau de pointeur de station de chaque ligne.
@@ -40,24 +53,8 @@ Begin
                     begin
                     couple_Stations[0]:=Game.Lines.Stations[jiteration];
                     couple_Stations[1]:=Game.Lines.Stations[jiteration+1];
-                    kiteration := low(Game.Start_Stations);
-                    repeat
-                        if couple_Stations[0] = @Game.Stations[kiteration] then
-                            begin
-                                absolute_Index_First_Station := kiteration;
-                            end;
-                        kiteration := kiteration+1;
-                    until (couple_Stations[0] = @Game.Stations[kiteration]) or (kiteration = high(Game.Stations)) // Recherche l'index absolue (qui est donc l'index dans la graphTable puisqu'elle fait la taille meme taille que games.Stations) de la premiere station du couple à lié dans la graphe table.
-
-                    kiteration := low(Game.Start_Stations)
-                    repeat
-                        if couple_Stations[1] = @Game.Stations[kiteration] then
-                            begin
-                                absolute_Index_Second_Station := kiteration;
-                            end;
-                        kiteration := kiteration+1;
-                    until (couple_Stations[1] = @Game.Stations[kiteration]) or (kiteration = high(Game.Stations)) // Recherche l'index absolue (qui est donc l'index dans la graphTable puisqu'elle fait la taille meme taille que games.Stations) de la seconde station du couple à lié dans la graphe table.
-
+                    absolute_Index_First_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[0], Game.Stations); // Je pense qu'on pourrait directement mettre la fonction en tant qu'index pour graph_Table mais pour la compréhension je trouve ca mieux comme ca, surtout si on relit le code dans longtemps.
+                    absolute_Index_Second_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[1], Game.Stations);
                     graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := Game.Lines[iteration];
                     graph_Table[absolute_Index_Second_Station][absolute_Index_First_Station][iteration] := Game.Lines[iteration]; // La graphTable est symétrique (l'axe étant sa diagonale)
                     end;
@@ -88,6 +85,13 @@ begin
                 iteration_Lines=iteration_Lines+1;
             until (GraphTable[indexStationToConnect][i][iteration_Lines] <> NIL) or (iteration_Lines = high(Game.Lines));
         end;
+end;
+
+function get_Weight(first_Station_Pointer : Type_Station_Pointer; second_Station_Pointer : Type_Station_Pointer; Game : Type_Game):Integer; // pas besoin de la graph table qui donne des infos sur les lignes uniquement, et deux lignes qui desservent la meme station ont la meme longueur (elles sont parallèles)
+var iteration : Integer;
+begin
+//jsp ce que j'ai écrit là, je prefere pas effacer mais je crois que ces des conneries    for iteration := low(graph_Table) to high(graph_Table) do // peut tres certainement etre substitué en low(Game.Stations) to high(Game.Stations) si cette facon de faire pose un probleme étant donné que graph table est en 3D.
+    get_Weight := Graphics_Get_Distance(^first_Station_Pointer.Position, Station_Get_Intermediate_Position(^first_Station_Pointer.Position, ^second_Station_Pointer.Position)) + Graphics_Get_Distance(Station_Get_Intermediate_Position(^first_Station_Pointer.Position, ^second_Station_Pointer.Position), ^second_Station_Pointer); //!\\ probleme ici : Station_Get_Intermediate_Position ne semble pas exister malgré son usage dans l'Unit_Graphics.
 end;
 
 procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var DijkstraTable : Array Of Type_Dijkstra_Cell; GraphTable : TypeGraphTable)
