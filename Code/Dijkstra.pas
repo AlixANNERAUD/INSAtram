@@ -21,6 +21,17 @@ Begin
             SetLength(graph_Table[i], length(Game.stations));        
         end;
 
+    for iteration := low(Game.Stations) to high(Game.Stations) do // Initialise toutes les connections à NIL
+        begin
+            for jiteration := low(Game.Stations) to high(Game.Stations) do
+                begin
+                    for kiteration := low(Game.Lines) to high(Game.Lines) do
+                        begin
+                            graph_Table[iteration][jiteration][kiteration] := NIL;
+                        end;
+                end;
+        end;
+
     for iteration := low(Game.Lines) to high(Game.Lines) do // Pour chacune des lignes :
         begin
             for jiteration:= low(Game.Lines.Stations) to (high(Game.Lines.Stations)-1) do // Pour chacune des stations consécutivement connectées contenues dans le tableau :
@@ -56,23 +67,26 @@ Begin
 End;
 
 procedure Connect_Stations(rowToFill : Integer; indexStationToConnect : Integer; GraphTable : TypeGraphTable; Var DijkstraTable : Array Of Type_Dijkstra_Cell) // TypeGraphTable plutot que Type_Line parce que dans chaque case il y aura une record avec plusieurs lignes + la station avec laquelle la premiere station est reliée
-Var i : Integer;
+Var i, iteration_Lines : Integer;
 begin
     for i := low(GraphTable) to high(GraphTable) do
         begin
-            if GraphTable[indexStationToConnect][i] <> NIL then     // Vérifie qu'une ligne relie bien les deux stations, i étant l'index de la deuxieme station.
-                begin
-                    if DijkstraTable[rowToFill][i].isAvailable = True then      // Vérifie que Dijkstra n'a pas interdit de retourner sur cette case.
-                        begin
-                            DijkstraTable[rowToFill][i].isConnected := True;        // Permet à Dijkstra de savoir s'il doit considérer cette station en particulier dans son calcul d'itinéraire.
-//                          DijkstraTable[rowToFill][i].connected_Station := GraphTable[indexStationToConnect][i].connected_Station         (je crois que c'est inutile en fait)
-                        end;
-                end
-            else
-                begin
-                    DijkstraTable[rowToFill][i].isConnected := False;
-                end;
-            i := i+1;
+            iteration_Lines := low(Game.Lines);
+            repeat
+                if GraphTable[indexStationToConnect][i][iteration_Lines] <> NIL then     // Vérifie qu'une ligne relie bien les deux stations, i étant l'index de la deuxieme station.
+                    begin
+                        if DijkstraTable[rowToFill][i].isAvailable = True then      // Vérifie que Dijkstra n'a pas interdit de retourner sur cette case.
+                            begin
+                                DijkstraTable[rowToFill][i].isConnected := True;        // Permet à Dijkstra de savoir s'il doit considérer cette station en particulier dans son calcul d'itinéraire.
+                            end;
+                    end
+                else
+                    begin
+                        DijkstraTable[rowToFill][i].isConnected := False;
+                    end;
+                i := i+1;
+                iteration_Lines=iteration_Lines+1;
+            until (GraphTable[indexStationToConnect][i][iteration_Lines] <> NIL) or (iteration_Lines = high(Game.Lines));
         end;
 end;
 
