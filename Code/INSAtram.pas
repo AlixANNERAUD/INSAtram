@@ -28,8 +28,6 @@ Begin
         End;
     End;
 
-  Graphics_Unload(Game);
-
   Logic_Unload(Game);
 
 End.

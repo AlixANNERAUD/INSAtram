@@ -432,8 +432,6 @@ Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
 
 // - - Object deletion.
 
-Procedure Station_Delete(Var Station : Type_Station; Var Game : Type_Game);
-
 Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
 
 Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
@@ -442,7 +440,6 @@ Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 
-Function Passenger_Delete(Var Passenger : Type_Passenger; Var Station : Type_Station) : Boolean;
 //Function Train_Delete(Var Train : Type_Train; Var Line : Type_Train) : Boolean;
 //Function Vehicle_Delete(Var Vehicle : Type_Vehicle; Var Train : Type_Train) : Boolean;
 
@@ -529,7 +526,8 @@ Begin
     End;
 End;
 
-Procedure Station_Delete(Var Station : Type_Station; Var Game : Type_Game);
+// Fonction supprimant une station
+Procedure Stations_Delete(Var Station : Type_Station; Var Game : Type_Game);
 Var 
   i : Byte;
 Begin
@@ -768,28 +766,6 @@ Begin
     Passenger_Delete := False;
 End;
 
-Function Passenger_Delete(Var Passenger : Type_Passenger; Var Station : Type_Station) : Boolean;
-
-Var i : Byte;
-Begin
-  If (length(Station.Passengers) > 0) Then
-    Begin
-      For i := low(Station.Passengers) To high(Station.Passengers) Do
-        Begin
-          If (@Station.Passengers[i] = @Passenger) Then
-            Begin
-              Station.Passengers[i] := Station.Passengers[high(Station.Passengers)];
-              SetLength(Station.Passengers, length(Station.Passengers) - 1);
-              Passenger_Delete := True;
-              Break;
-            End;
-        End;
-    End
-  Else
-    Begin
-      Passenger_Delete := False;
-    End;
-End;
 // - - Time
 
 Function Time_Get_Current(): Type_Time;

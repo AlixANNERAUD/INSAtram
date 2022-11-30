@@ -5,7 +5,7 @@ Interface
 
 // - Inclut les unités internes au projet. 
 
-Uses Unit_Types, Unit_Graphics, sdl, Unit_Mouse;
+Uses Unit_Types, Unit_Graphics, sdl, Unit_Mouse, sysutils;
 
 // - Déclaration des fonctions et procédures.
 
@@ -16,7 +16,7 @@ Procedure Logic_Unload(Var Game : Type_Game);
 
 Procedure Logic_Refresh(Var Game : Type_Game);
 
-Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train);
+Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train; Var Game : Type_Game);
 
 Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
 
@@ -27,6 +27,9 @@ Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station :
 Implementation
 
 // - - Fonctions et procédures relatives au passagers 
+
+
+
 
 
 
@@ -134,15 +137,14 @@ Begin
   Game.Quit := False;
 
   // Création des 5 premères stations
-  For i := 1 To 5 Do
+  For i := 1 To 3 Do
     Begin
       Station_Create(Game);
     End;
 
   // Création de la première ligne
   Line_Create(Game.Ressources.Palette[Color_Black], Game, Game.Stations[low(Game.Stations)], Game.Stations[low(Game.Stations)+1]);
-
-
+  
 
   For i := low(Game.Stations) + 2 To high(Game.Stations) Do
     Begin
@@ -173,9 +175,64 @@ End;
 
 // Procédure qui décharge la logique en libérant la mémoire des objets alloués.
 Procedure Logic_Unload(Var Game : Type_Game);
+
+Var i,j,k,l : Byte;
 Begin
+  Graphics_Unload(Game);
 
+  // Suppresion des passagers des stations.
+  // Itère parmis les stations
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
+      // Itère parmis les passagers de la station.
+      For j := low(Game.Stations[i].Passengers) To high(Game.Stations[i].Passengers) Do
+        Begin
+          FreeMem(Game.Stations[i].Passengers[j]);
+        End;
+      // Vidage du tableau.
+      SetLength(Game.Stations[i].Passengers, 0);
+    End;
 
+  // Suppresion des passagers dans les véhicules des trains.
+  // Vérifie qu'il y a bien des lignes.
+  If (length(Game.Lines) > 0) Then
+    // Itère parmis les lignes
+    For i := low(Game.Lines) To high(Game.Lines) Do
+      Begin
+        // Vérifie qu'il y a bien des trains sur la ligne.
+        If (length(Game.Lines[i].Trains) > 0) Then
+          Begin
+            // Itère parmis les trains de la ligne
+            For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+              Begin
+                // Itère parmis les véhicules du train
+                For k := low(Game.Lines[i].Trains[j].Vehicles) To high(Game.Lines[i].Trains[j].Vehicles) Do
+                  Begin
+                    // Itère parmis les passagers du véhicule.
+                    For l := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+                      Begin
+                        If (Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] <> Nil) Then
+                          Begin
+                            FreeMem(Game.Lines[i].Trains[j].Vehicles[k].Passengers[l]);
+                            Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] := Nil;
+                          End;
+                      End;
+                  End;
+              End;
+          End;
+      End;
+
+  // Suppression des panneaux de l'interface graphique.
+  Panel_Delete(Game.Panel_Left);
+  Panel_Delete(Game.Panel_Right);
+  Panel_Delete(Game.Panel_Top);
+  Panel_Delete(Game.Panel_Bottom);
+  Panel_Delete(Game.Window);
+
+  // Pas besoin de supprimer les autres objets, ils seront automatiquements détruit lors de la suppression de l'objet Game.
+
+  // Fermeture de la SDL.
+  SDL_Quit();
 End;
 
 // Rafraichissement de la logique.
@@ -194,7 +251,7 @@ Begin
                  Game.Quit := True;
     SDL_MOUSEBUTTONDOWN :
                           //Mouse_Event_Handler(Event, Game);
-                Mouse_Event_Handler(Event.button, Game);
+                          Mouse_Event_Handler(Event.button, Game);
     SDL_MOUSEBUTTONUP :
                         // writeln('click released');
                         Mouse_Event_Handler(Event.button, Game);
@@ -216,7 +273,7 @@ Begin
               If (Game.Lines[i].Trains[j].Driving = false) Then
                 Begin
                   // Effectue la correspondance du train arrivé à quais.
-                  Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j]);
+                  Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j], Game);
                 End;
             End;
         End;
@@ -226,7 +283,7 @@ Begin
 End;
 
 // Fonction qui effectue la correspondance du train arrivé à quais et change les attributs du trains pour sa prochaine destination.
-Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train);
+Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train; Var Game : Type_Game);
 
 Var i, j, k : Byte;
   Passengers_Queue : Array Of Type_Passenger_Pointer;
@@ -272,50 +329,50 @@ Begin
         Begin
           If (Train.Vehicles[i].Passengers[j] <> Nil) Then
             Begin
-
-              // Si le passager doit descendre du train, son pointeur est déplacé dans le tampon.
-              If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j], Train.Last_Station^)) Then
-                Begin
-                  // Copie du pointeur du passager dans le tampon.
-                  SetLength(Passengers_Queue, length(Passengers_Queue) + 1);
-                  Passengers_Queue[high(Passengers_Queue)] := Train.Vehicles[i].Passengers[j];
-                  // Réinitialisation du pointeur du passager dans le train.
-                  Train.Vehicles[i].Passengers[j] := Nil;
-                End;
               // Suppression des passagers arrivés à destination.
               If (Train.Vehicles[i].Passengers[j]^.Shape = Train.Last_Station^.Shape) Then
-                Passenger_Delete(Train.Vehicles[i].Passengers[j]);
+                Begin
+                  Passenger_Delete(Train.Vehicles[i].Passengers[j]);
+                  // Incrémentation du score.
+                  Game.Player.Score := Game.Player.Score + 1;
+                  // Mise à jour de l'étiquette.
+                  Label_Set_Text(Game.Score_Label, IntToStr(Game.Player.Score));
+                End
+                // Si le passager doit descendre du train, son pointeur est déplacé dans le tampon.
+              Else If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j], Train.Last_Station^)) Then
+                     Begin
+                       // Copie du pointeur du passager dans le tampon.
+                       SetLength(Passengers_Queue, length(Passengers_Queue) + 1);
+                       Passengers_Queue[high(Passengers_Queue)] := Train.Vehicles[i].Passengers[j];
+                       // Réinitialisation du pointeur du passager dans le train.
+                       Train.Vehicles[i].Passengers[j] := Nil;
+                     End;
             End;
         End;
     End;
 
-  // Vérifie si la station contient des passagers.
-  If (length(Train.Last_Station^.Passengers) > 0) Then
+  //  Chargement des passagers de la station dans le train.
+  For i := low(Train.Vehicles) To high(Train.Vehicles) Do
     Begin
-      //  Chargement des passagers de la station dans le train.
-      For i := low(Train.Vehicles) To high(Train.Vehicles) Do
+      // Itère parmis les places du véhicule.
+      For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
         Begin
-          For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+          // Le pointeur (donc la place) est vide.
+          If (Train.Vehicles[i].Passengers[j] = Nil) Then
             Begin
-              // Le pointeur (donc la place) est vide.
-              If (Train.Vehicles[i].Passengers[j] = Nil) Then
+              // Vérifie si la station contient des passagers.
+              If (length(Train.Last_Station^.Passengers) > 0) Then
                 Begin
-                  // Itère parmis les passagers de la station.
-                  writeln('j : ', j);
                   For k := low(Train.Last_Station^.Passengers) To high(Train.Last_Station^.Passengers) Do
                     Begin
-                      writeln('k  : ', k);
-                      //writeln('Passengers shape :', Train.Last_Station^.Passengers[k]^.Shape);
                       // Si le passager doit monter dans le train, son pointeur est déplacé dans le train.
                       If (Passenger_Get_On(Train.Last_Station^.Passengers[k], Train.Next_Station^)) Then
                         Begin
-                          writeln('Passenger shape : ', Train.Last_Station^.Passengers[k]^.Shape);
                           // Copie du pointeur du passager dans le train.
                           Train.Vehicles[i].Passengers[j] := Train.Last_Station^.Passengers[k];
-                          // Remplacement du pointeur du passager avec le dernier afin de diminuer la taille du tableau.
-                          Train.Last_Station^.Passengers[k] := Train.Last_Station^.Passengers[high(Train.Last_Station^.Passengers)];
-                          // Diminution de la taille du tableau.
-                          SetLength(Train.Last_Station^.Passengers, length(Train.Last_Station^.Passengers) - 1);
+                          // Suppresion du pointeur du passager de la station.
+                          delete(Train.Last_Station^.Passengers, k, 1);
+                          // On quitte la boucle.
                           Break;
                         End;
                     End;
