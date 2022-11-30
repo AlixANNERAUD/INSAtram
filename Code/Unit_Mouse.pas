@@ -13,9 +13,23 @@ Function Mouse_Is_Pressed(Game : Type_Game) : Boolean;
 
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
 
+Function Mouse_On_Object(Mouse_Position, Object_Position, Object_Size : Type_Coordinates) : Boolean;
+
+Function Mouse_Get_Press_Position(Game : Type_Game) : Type_Coordinates;
+Function Mouse_Get_Release_Position(Game : Type_Game) : Type_Coordinates;
+
 Implementation
 
+Function Mouse_On_Object(Mouse_Position, Object_Position, Object_Size : Type_Coordinates) : Boolean;
+Begin
+  If (Mouse_Position.X >= Object_Position.X) And (Mouse_Position.X <= Object_Position.X + Object_Size.X) And (Mouse_Position.Y >= Object_Position.Y) And (Mouse_Position.Y <= Object_Position.Y +
+     Object_Size.Y) Then
+    Mouse_On_Object := True
+  Else
+    Mouse_On_Object := False;
+End;
 
+// Procedure qui gère les interractions avec la souris.
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
 Begin
   If (Mouse_Event.Button = SDL_BUTTON_LEFT) Then
@@ -33,6 +47,22 @@ Begin
           Game.Mouse.Release_Position.Y := Mouse_Event.y;
         End;
     End;
+
+  // Si la souris est pressé.
+  If (Mouse_Is_Pressed(Game)) Then
+    Begin
+      // Si la souris se trouve dans le panneau de gauche.
+      If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Panel_Left.Position, Game.Panel_Left.Size)) Then
+        writeln('Mouse on panel left');
+    End
+  // Si la souris est relachée.
+  Else
+    Begin
+      // Si la souris se trouve sur le panneau de droite.
+      If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Panel_Right.Position, Game.Panel_Right.Size)) Then
+        writeln('Mouse on panel right');
+    End;
+
 End;
 
 

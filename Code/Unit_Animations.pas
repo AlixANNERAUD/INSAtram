@@ -32,7 +32,7 @@ Begin
                 Begin
                     // Fait progresser le train sur la ligne.
                     // TODO : Remplacer avec des équations horaire et des intégrales à partir de la vitesse max et de l'accélération (distance en fonction de t).
-                    //Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Distance + 3;
+                    Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Distance + 2;
                     // Si le train est arrivé.
                     If (Game.Lines[i].Trains[j].Distance >= Game.Lines[i].Trains[j].Maximum_Distance) Then
                     Begin           

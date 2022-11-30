@@ -30,6 +30,8 @@ Implementation
 
 
 
+
+
 {
 program dijkstra;
 
@@ -192,13 +194,10 @@ Begin
                  Game.Quit := True;
     SDL_MOUSEBUTTONDOWN :
                           //Mouse_Event_Handler(Event, Game);
-        
-                          Mouse_Event_Handler(Event.button, Game);
-                          
-
+                Mouse_Event_Handler(Event.button, Game);
     SDL_MOUSEBUTTONUP :
-                       // writeln('click released');
-              Mouse_Event_Handler(Event.button, Game);
+                        // writeln('click released');
+                        Mouse_Event_Handler(Event.button, Game);
   End;
 
 
@@ -245,8 +244,6 @@ Begin
       // Cherche la station actuelle du train dans les stations d'une ligne.
       If (Train.Last_Station = Line.Stations[i]) Then
         Begin
-          writeln('Last station', i);
-
           // Si la station est la dernière ou la première station d'une ligne.
           If ((i = high(Line.Stations)) Or (i = low(Line.Stations))) Then
             // On inverse la direction.
@@ -304,18 +301,22 @@ Begin
               If (Train.Vehicles[i].Passengers[j] = Nil) Then
                 Begin
                   // Itère parmis les passagers de la station.
+                  writeln('j : ', j);
                   For k := low(Train.Last_Station^.Passengers) To high(Train.Last_Station^.Passengers) Do
                     Begin
-                      writeln('Passengers :', length(Train.Last_Station^.Passengers));
+                      writeln('k  : ', k);
+                      //writeln('Passengers shape :', Train.Last_Station^.Passengers[k]^.Shape);
                       // Si le passager doit monter dans le train, son pointeur est déplacé dans le train.
                       If (Passenger_Get_On(Train.Last_Station^.Passengers[k], Train.Next_Station^)) Then
                         Begin
+                          writeln('Passenger shape : ', Train.Last_Station^.Passengers[k]^.Shape);
                           // Copie du pointeur du passager dans le train.
                           Train.Vehicles[i].Passengers[j] := Train.Last_Station^.Passengers[k];
-                          // Réinitialisation du pointeur du passager dans la station.
+                          // Remplacement du pointeur du passager avec le dernier afin de diminuer la taille du tableau.
                           Train.Last_Station^.Passengers[k] := Train.Last_Station^.Passengers[high(Train.Last_Station^.Passengers)];
-
+                          // Diminution de la taille du tableau.
                           SetLength(Train.Last_Station^.Passengers, length(Train.Last_Station^.Passengers) - 1);
+                          Break;
                         End;
                     End;
                 End;
