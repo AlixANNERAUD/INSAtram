@@ -161,7 +161,7 @@ Begin
 
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      For j := 0 To Random(5) Do
+      For j := 0 To 11 Do
         Begin
           Passenger_Create(Game.Stations[i], Game);
         End;
@@ -335,8 +335,16 @@ Begin
   Train.Intermediate_Position_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
 
   // Calcul de la distance entre la station de départ et d'arrivée.
-  Train.Maximum_Distance := Graphics_Get_Distance(Train.Last_Station^.Position, Train.Intermediate_Position);
-  Train.Maximum_Distance := Train.Maximum_Distance +  Graphics_Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position);
+
+
+
+  Train.Maximum_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
+
+
+  Train.Maximum_Distance := Train.Maximum_Distance +  Graphics_Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered);
+
+    writeln('D1 : ', Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position), ' D2 : ',Graphics_Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered));
+
 
   // Itère parmis les véhicules du train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do

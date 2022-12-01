@@ -255,6 +255,11 @@ End;
 
 
 
+
+
+
+
+
 // Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
@@ -765,16 +770,41 @@ Begin
     Begin
       For i := low(Station.Passengers) To high(Station.Passengers) Do
         Begin
-          // - Determine x position
-          If (i < 3) Then
-            Destination_Rectangle.x := (Station.Position.X - (2 *
-                                       Station.Passengers[i]^.Size.X))
-          Else
-            Destination_Rectangle.x := (Station.Position.X + Station.Size.X +
-                                       Passenger_Width);
-          // - Determine y position
-          Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
-                                     Station.Passengers[i]^.Size.Y + 4));
+
+          If (i < (low(Station.Passengers) + 3)) Then
+            Begin
+              Destination_Rectangle.x := (Station.Position.X - (2 *
+                                         Station.Passengers[i]^.Size.X));
+              Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
+                                         Station.Passengers[i]^.Size.Y + 4));
+            End
+          Else If (i < (low(Station.Passengers) + 6)) Then
+                 Begin
+                   Destination_Rectangle.x := (Station.Position.X + Station.Size.X +
+                                              Passenger_Width);
+
+                   Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
+                                              Station.Passengers[i]^.Size.Y + 4));
+                 End
+          Else If (i < (low(Station.Passengers) + 9)) Then
+                 Begin
+                   Destination_Rectangle.x := Station.Position.X + ((i Mod 3) * (
+                                              Station.Passengers[i]^.Size.X + 4));
+
+                   Destination_Rectangle.y := (Station.Position.Y - (2 *
+                                              Station.Passengers[i]^.Size.Y));
+                 End
+          Else If (i < (low(Station.Passengers) + 12)) Then
+                 Begin
+                   Destination_Rectangle.x := Station.Position.X + ((i Mod 3) * (
+                                              Station.Passengers[i]^.Size.X + 4));
+
+                   Destination_Rectangle.y := (Station.Position.Y + Station.Size.Y +
+                                              Passenger_Width);
+                 End;
+
+
+
 
           SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Panel.Surface, @
                           Destination_Rectangle);
