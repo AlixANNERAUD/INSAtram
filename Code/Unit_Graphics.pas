@@ -260,6 +260,10 @@ End;
 
 
 
+
+
+
+
 // Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
@@ -621,8 +625,51 @@ End;
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Coordinates; Width : Integer; Color :
                              Type_Color; Var Panel : Type_Panel);
+
+Var Direction : Integer;
+  i : Integer;
 Begin
-  aalineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+
+  Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
+
+  Case Direction Of 
+    0, 180 :
+             Begin
+               For i := -3 To 3 Do
+                 aalineRGBA(Panel.Surface, Position_1.X, Position_1.Y  + i, Position_2.X, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+             End;
+    45, -135 :
+               Begin
+                 For i := -2 To 0 Do
+                   Begin
+                     aalineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     aalineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i - 1, Position_2.X, Position_2.Y + i - 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+                 For i := 0 To 2 Do
+                   Begin
+                     aalineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     aalineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y + i, Position_2.X + i + 1, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+               End;
+    90, -90 :
+              Begin
+                For i := -3 To 3 Do
+                  aalineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y, Position_2.X + i, Position_2.Y, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+              End;
+    135, -45 :
+               Begin
+                 For i := -2 To 0 Do
+                   Begin
+                     aalineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     aalineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i + 1, Position_2.X, Position_2.Y - i + 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+                 For i := 0 To 2 Do
+                   Begin
+                     aalineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     aalineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y - i, Position_2.X + i + 1, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+               End;
+  End;
 
 End;
 
@@ -658,7 +705,7 @@ Begin
       If ((Direction = 0) Or (Direction = 190) Or (Direction = 90) Or (Direction = -90)) Then
         Norme := Train.Distance
       Else
-        Norme := round(sqrt(sqr(Train.Distance * 0.5)));
+        Norme := round(sqrt(sqr(Train.Distance) * 0.5));
     End
   Else  // Si le train se trouve après le point intermédiaire.
     Begin
@@ -670,7 +717,7 @@ Begin
       If ((Direction = 0) Or (Direction = 190) Or (Direction = 90) Or (Direction = -90)) Then
         Norme := Train.Distance - Train.Intermediate_Position_Distance
       Else
-        Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance) * 0.5)));
+        Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance)) * 0.5));
 
     End;
 
@@ -738,10 +785,15 @@ Begin
 
   End;
 
+
   Destination_Rectangle.x := round(Centered_Position.X - (Train.Vehicles[0].Size.X*0.5));
   Destination_Rectangle.y := round(Centered_Position.Y - (Train.Vehicles[0].Size.X*0.5));
 
+
+
   // - Affiche la locomotive.
+
+
   SDL_BlitSurface(Train.Vehicles[0].Sprite, Nil, Panel.Surface, @Destination_Rectangle);
 
   // - Affiche le nombre de passager dans un véhicule.
@@ -802,8 +854,6 @@ Begin
                    Destination_Rectangle.y := (Station.Position.Y + Station.Size.Y +
                                               Passenger_Width);
                  End;
-
-
 
 
           SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Panel.Surface, @

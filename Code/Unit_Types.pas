@@ -759,8 +759,11 @@ Begin
                                                                        Intermediate_Position);
 
       // Calcul de la distance maximale du train.
+
+
       Line.Trains[high(Line.Trains)].Maximum_Distance := Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position);
-      Line.Trains[high(Line.Trains)].Maximum_Distance := Line.Trains[high(Line.Trains)].Maximum_Distance +  Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
+      Line.Trains[high(Line.Trains)].Maximum_Distance := Line.Trains[high(Line.Trains)].Maximum_Distance 
+      +  Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
                                                          (Line.Trains)].Next_Station^.Position_Centered);
 
       Line.Trains[high(Line.Trains)].Driving := True;
