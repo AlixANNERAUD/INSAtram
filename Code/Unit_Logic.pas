@@ -35,6 +35,14 @@ Implementation
 
 
 
+
+
+
+
+
+
+
+
 {
 program dijkstra;
 
@@ -144,7 +152,7 @@ Begin
 
   // Création de la première ligne
   Line_Create(Game.Ressources.Palette[Color_Black], Game, Game.Stations[low(Game.Stations)], Game.Stations[low(Game.Stations)+1]);
-  
+
 
   For i := low(Game.Stations) + 2 To high(Game.Stations) Do
     Begin
@@ -161,15 +169,7 @@ Begin
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
 
-  Game.Lines[0].Trains[0].Next_Station := Game.Lines[0].Stations[1];
 
-  Game.Lines[0].Trains[0].Last_Station := Game.Lines[0].Stations[0];
-
-  Game.Lines[0].Trains[0].Driving := true;
-
-  Game.Lines[0].Trains[0].Distance := 0;
-
-  Train_Compute_Maximum_Distance(Game.Lines[0].Trains[0], Game.Lines[0]);
 
 End;
 
@@ -306,20 +306,37 @@ Begin
             // On inverse la direction.
             Train.Direction := Not(Train.Direction);
 
+
+
           // Si le train est dans le sens direct (index des stations croissant).
           If (Train.Direction = true) Then
-            Train.Next_Station := Line.Stations[i + 1]
-                                  // Si le train est dans le sens indirect (index des stations décroissant).
+            Begin
+              Train.Next_Station := Line.Stations[i + 1];
+              // Calcul du point intermédiaire.
+              Train.Intermediate_Position := Station_Get_Intermediate_Position(Train.Last_Station^.Position_Centered, Train.Next_Station^.Position_Centered);
+            
+            End
+            // Si le train est dans le sens indirect (index des stations décroissant).
           Else
-            Train.Next_Station := Line.Stations[i - 1];
-
+            Begin
+              Train.Next_Station := Line.Stations[i - 1];
+              // Calcul du point intermédiaire.
+              Train.Intermediate_Position := Station_Get_Intermediate_Position(Train.Next_Station^.Position_Centered, Train.Last_Station^.Position_Centered);
+            End;
           // On quitte la boucle.
           Break;
         End;
     End;
 
-  // Calcul de la distance maximale.
-  Train_Compute_Maximum_Distance(Train, Line);
+  writeln('Intermediaite pos : ', Train.Intermediate_Position.X, ' - ', Train.Intermediate_Position.Y);
+
+
+  // Calcul de la distance du point intermédiaire.
+  Train.Intermediate_Position_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
+
+  // Calcul de la distance entre la station de départ et d'arrivée.
+  Train.Maximum_Distance := Graphics_Get_Distance(Train.Last_Station^.Position, Train.Intermediate_Position);
+  Train.Maximum_Distance := Train.Maximum_Distance +  Graphics_Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position);
 
   // Itère parmis les véhicules du train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do

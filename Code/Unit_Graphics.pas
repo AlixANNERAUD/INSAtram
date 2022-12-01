@@ -21,8 +21,6 @@ Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Color; Var Panel : Type_Panel);
 
 
-Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
-
 Function Graphics_Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
 
 Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
@@ -37,10 +35,6 @@ Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Co
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
 Function Surface_Create(Width, Height : Integer) : PSDL_Surface;
-
-
-
-Procedure Train_Compute_Maximum_Distance(Var Train : Type_Train; Line : Type_Line);
 
 // - - Interface
 // - - - Label
@@ -69,34 +63,6 @@ Function Color_To_Longword(Color : Type_Color) : Longword;
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
 
 Implementation
-
-Procedure Train_Compute_Maximum_Distance(Var Train : Type_Train; Line : Type_Line);
-
-Var i : Byte;
-Begin
-  // Vérifie si le tableau n'est pas vide.
-  If (length(Line.Stations) > 0) Then
-    Begin
-      // Itère parmi les stations.
-      For i := low(Line.Stations) To high(Line.Stations) Do
-        Begin
-          // Détermination de l'indice de la station de départ du train dans la ligne.
-          If (Line.Stations[i] = Train.Last_Station) Then
-            Begin
-              // Calcul de la distance maximale du train.
-
-              Train.Maximum_Distance := Graphics_Get_Distance(Train.Next_Station^.Position, Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)]);
-
-
-              Train.Maximum_Distance := Train.Maximum_Distance +  Graphics_Get_Distance(Line.
-                                        Intermediate_Positions[i + low(Line.Intermediate_Positions)], Train.Last_Station^.Position);
-
-
-              Break;
-            End;
-        End;
-    End;
-End;
 
 
 // Fonction qui détecte si un rectangle et une ligne sont en colision.
@@ -261,6 +227,10 @@ Begin
 
   SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
+
+
+
+
 
 
 
@@ -600,10 +570,7 @@ Begin
   Animation_Refresh(Game);
 End;
 
-Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
-Begin
-  Graphics_Get_Distance := round(sqrt(sqr(Position_2.X-Position_1.X)+sqr(Position_2.Y-Position_1.Y)));
-End;
+
 
 
 // Fonction qui calcule les coordonnées centrée d'un objet à partir de sa position dans le repère et sa taille.
@@ -668,74 +635,71 @@ Begin
   Graphics_Draw_Line(Intermediate_Position, Position_2, 0, Color, Panel);
 End;
 
-
-
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
   i : Byte;
-  Intermediate_Position : Type_Coordinates;
-  Intermediate_Position_Distance : Integer;
   Direction : Integer;
   Norme : Integer;
   Centered_Position : Type_Coordinates;
 Begin
 
-  // Calcul des coordonnées centrée des stations de départ et d'arrivé.
-  Intermediate_Position := Station_Get_Intermediate_Position(Train.Last_Station^.Position_Centered, Train.Next_Station^.Position_Centered);
-
-  Intermediate_Position_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Intermediate_Position);
-
-  If (Train.Distance <= Intermediate_Position_Distance) Then // Si le train se trouve avant le point intermédiaire.
+  If (Train.Distance <= Train.Intermediate_Position_Distance) Then // Si le train se trouve avant le point intermédiaire.
     Begin
-      // Determination de l'angle et de la direction (arrondissement de l'angle).
-      Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Intermediate_Position));
+      // Calcul de l'angle et de la direction (arrondissement de l'angle à 45 degré près).
+      Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Train.Intermediate_Position));
       Centered_Position := Train.Last_Station^.Position_Centered;
+
+      If ((Direction = 0) Or (Direction = 190) Or (Direction = 90) Or (Direction = -90)) Then
+        Norme := Train.Distance
+      Else
+        Norme := round(sqrt(sqr(Train.Distance * 0.5)));
     End
   Else  // Si le train se trouve après le point intermédiaire.
     Begin
       // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
-      Direction := Graphics_Get_Direction(Get_Angle(Intermediate_Position, Train.Next_Station^.Position_Centered));
+      Direction := Graphics_Get_Direction(Get_Angle(Train.Intermediate_Position, Train.Next_Station^.Position_Centered));
 
-      Centered_Position := Intermediate_Position;
+      Centered_Position := Train.Intermediate_Position;
+
+      If ((Direction = 0) Or (Direction = 190) Or (Direction = 90) Or (Direction = -90)) Then
+        Norme := Train.Distance - Train.Intermediate_Position_Distance
+      Else
+        Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance) * 0.5)));
+
     End;
 
   Case Direction Of 
     0 :
         Begin
-          Centered_Position.X := Centered_Position.X + Train.Distance;
-          Centered_Position.Y := Centered_Position.Y;
+          Centered_Position.X := Centered_Position.X + Norme;
           Train.Vehicles[0].Sprite := Ressources.Vehicle_0_Degree;
           Train.Vehicles[0].Size.X := Ressources.Vehicle_0_Degree^.w;
           Train.Vehicles[0].Size.Y := Ressources.Vehicle_0_Degree^.h;
         End;
     180 :
           Begin
-            Centered_Position.X := Centered_Position.X - Train.Distance;
-            Centered_Position.Y := Centered_Position.Y;
+            Centered_Position.X := Centered_Position.X - Norme;
             Train.Vehicles[0].Sprite := Ressources.Vehicle_0_Degree;
             Train.Vehicles[0].Size.X := Ressources.Vehicle_0_Degree^.w;
             Train.Vehicles[0].Size.Y := Ressources.Vehicle_0_Degree^.h;
           End;
     90 :
          Begin
-           Centered_Position.X := Centered_Position.X;
-           Centered_Position.Y := Centered_Position.Y - Train.Distance;
+           Centered_Position.Y := Centered_Position.Y - Norme;
            Train.Vehicles[0].Sprite := Ressources.Vehicle_90_Degree;
            Train.Vehicles[0].Size.X := Ressources.Vehicle_90_Degree^.w;
            Train.Vehicles[0].Size.Y := Ressources.Vehicle_90_Degree^.h;
          End;
     -90 :
           Begin
-            Centered_Position.X := Centered_Position.X;
-            Centered_Position.Y := Centered_Position.Y + Train.Distance;
+            Centered_Position.Y := Centered_Position.Y + Norme;
             Train.Vehicles[0].Sprite := Ressources.Vehicle_90_Degree;
             Train.Vehicles[0].Size.X := Ressources.Vehicle_90_Degree^.w;
             Train.Vehicles[0].Size.Y := Ressources.Vehicle_90_Degree^.h;
           End;
     -45 :
           Begin
-            Norme := round(sqrt(sqr((Train.Distance - Intermediate_Position_Distance) * 0.5)));
             Centered_Position.X := Centered_Position.X + Norme;
             Centered_Position.Y := Centered_Position.Y + Norme;
             Train.Vehicles[0].Sprite := Ressources.Vehicle_135_Degree;
@@ -744,7 +708,6 @@ Begin
           End;
     -135 :
            Begin
-             Norme := round(sqrt(sqr((Train.Distance - Intermediate_Position_Distance)*0.5)));
              Centered_Position.X := Centered_Position.X - Norme;
              Centered_Position.Y := Centered_Position.Y + Norme;
              Train.Vehicles[0].Sprite := Ressources.Vehicle_45_Degree;
@@ -753,7 +716,6 @@ Begin
            End;
     45:
         Begin
-          Norme := round(sqrt(sqr((Train.Distance - Intermediate_Position_Distance)*0.5)));
           Centered_Position.X := Centered_Position.X + Norme;
           Centered_Position.Y := Centered_Position.Y - Norme;
           Train.Vehicles[0].Sprite := Ressources.Vehicle_45_Degree;
@@ -762,7 +724,6 @@ Begin
         End;
     135:
          Begin
-           Norme := round(sqrt(sqr((Train.Distance - Intermediate_Position_Distance)*0.5)));
            Centered_Position.X := Centered_Position.X - Norme;
            Centered_Position.Y := Centered_Position.Y - Norme;
            Train.Vehicles[0].Sprite := Ressources.Vehicle_135_Degree;

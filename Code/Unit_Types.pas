@@ -276,12 +276,14 @@ Type Type_Train = Record
   Driving : Boolean;
   // - Pointeur de la dernière station.
   Last_Station : Type_Station_Pointer;
+  // - Copie de la position intermédiaire actuelle entre les stations.
+  Intermediate_Position : Type_Coordinates;
   // - Pointeur de la prochaine station.
   Next_Station : Type_Station_Pointer;
   // - Distance parcourue depuis la dernière station en pixel.
   Distance : Integer;
   // -
-  Intermediate_Position : Integer;
+  Intermediate_Position_Distance : Integer;
   // - Distance maximum;
   Maximum_Distance : Integer;
   // Direction directe ou indirecte du train (indexe des stations de la ligne croissant ou décroissant).
@@ -458,7 +460,15 @@ Function String_To_Characters(String_To_Convert : String) : pChar;
 
 Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
 
+Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates) : Integer;
+
 Implementation
+
+
+Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
+Begin
+  Graphics_Get_Distance := round(sqrt(sqr(Position_2.X-Position_1.X)+sqr(Position_2.Y-Position_1.Y)));
+End;
 
 // - Définition des fonctions et procédures.
 
@@ -466,7 +476,7 @@ Implementation
 Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
 Begin
   Get_Angle := ArcTan2(-Position_2.Y + Position_1.Y,
-                        Position_2.X - Position_1.X);
+               Position_2.X - Position_1.X);
 End;
 
 // Fonction qui calcule les positions intermédiaires spérant les stations d'une ligne.
@@ -484,7 +494,7 @@ Begin
         Begin
           // Calcule la position intermédiaire.
           Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)] := Station_Get_Intermediate_Position(Line.Stations[i]^.Position, Line.Stations[i + 1]^.
-                                                                                                 Position);
+                                                                               Position);
         End;
     End;
 
@@ -528,9 +538,19 @@ End;
 
 // Fonction supprimant une station
 Procedure Stations_Delete(Var Station : Type_Station; Var Game : Type_Game);
+
 Var 
   i : Byte;
 Begin
+
+
+
+
+
+
+
+
+
 { 
   For i := low(Station.Passengers) To high(Station.Passengers) Do
     Passenger_Delete(Station.Passengers[i]^, Station);
@@ -628,7 +648,7 @@ Begin
 
       Line_Add_Station(@First_Station, Game.Lines[high(Game.Lines)]);
       Line_Add_Station(@Second_Station, Game.Lines[high(Game.Lines)]);
-    
+
 
       Line_Create := True;
     End
@@ -695,16 +715,58 @@ Begin
 End;
 
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
+
+Var i : Byte;
 Begin
   If (length(Line.Trains) < Lines_Maximum_Number_Trains) Then
     Begin
+      // Création d'un nouveau train dans le tableau.
       SetLength(Line.Trains, length(Line.Trains) + 1);
 
       Line.Trains[high(Line.Trains)].Distance := 0;
       Line.Trains[high(Line.Trains)].Direction := Direction;
       Line.Trains[high(Line.Trains)].Last_Station := Start_Station;
-      Line.Trains[high(Line.Trains)].Driving := False;
+
+      If (length(Line.Stations) > 0) Then
+        Begin
+          // Itère parmis les stations de la ligne.
+          For i := low(Line.Stations) To high(Line.Stations) Do
+            Begin
+              If (Line.Stations[i] = Start_Station) Then
+                Begin
+                  If (Line.Trains[high(Line.Trains)].Direction = true) Then
+                    Begin
+                      Line.Trains[high(Line.Trains)].Next_Station := Line.Stations[i + 1];
+                      // Calcul du point intermédiaire.
+                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.
+                                                                              Trains)].Next_Station^.Position_Centered);
+                    End
+                  Else
+                    Begin
+                      Line.Trains[high(Line.Trains)].Next_Station := Line.Stations[i - 1];
+
+                      // Calcul du point intermédiaire.
+                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered, Line.Trains[high(Line.
+                                                                              Trains)].Last_Station^.Position_Centered);
+                    End;
+                  Break;
+                End;
+            End;
+        End;
+
+      // Calcul de la distance du point intermédiaire.
+      Line.Trains[high(Line.Trains)].Intermediate_Position_Distance := Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].
+                                                                       Intermediate_Position);
+
+      // Calcul de la distance maximale du train.
+      Line.Trains[high(Line.Trains)].Maximum_Distance := Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position, Line.Trains[high(Line.Trains)].Intermediate_Position);
+      Line.Trains[high(Line.Trains)].Maximum_Distance := Line.Trains[high(Line.Trains)].Maximum_Distance +  Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
+                                                         (Line.Trains)].Next_Station^.Position);
+
+      Line.Trains[high(Line.Trains)].Driving := True;
+
       Vehicle_Create(Line.Trains[high(Line.Trains)], Game);
+
       Train_Create := True;
     End
   Else
