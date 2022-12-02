@@ -1,7 +1,6 @@
 program dijkstra;
 
 Type Type_Dijkstra_Cell = Record
-//  connected_Station : Type_Station_Pointer;           (je crois que c'est inutile en fait)
     isConnected : Boolean;
     isAvailable : Boolean;
     comingFromStationIndex : Type_Station_Pointer;
@@ -30,13 +29,12 @@ end;
 procedure Build_Graph_Table(Game : Type_Game);
 var iteration, jiteration, kiteration, absolute_Index_First_Station, absolute_Index_Second_Station : Integer;
     couple_Stations : array[0..1] of Type_Station_Pointer; // Tableau temporaire dans lequel stocker les pointeurs des stations à relier dans la table une fois prélevées dans le tableau de pointeur de station de chaque ligne.
-    graph_Table : Array of Array of Array[0..Game_Maximum_Lines_Number-1]; // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.
 Begin
     // Définit les dimensions de la graph_Table
-    SetLength(graph_Table, length(Game.Stations));
-    for iteration := low(graph_Table) to high(graph_Table) do
+    SetLength(Game.graph_Table, length(Game.Stations));
+    for iteration := low(Game.graph_Table) to high(Game.graph_Table) do
         begin
-            SetLength(graph_Table[i], length(Game.stations));        
+            SetLength(Game.graph_Table[i], length(Game.stations));        
         end;
 
     for iteration := low(Game.Stations) to high(Game.Stations) do // Initialise toutes les connections à NIL
@@ -45,7 +43,7 @@ Begin
                 begin
                     for kiteration := low(Game.Lines) to high(Game.Lines) do
                         begin
-                            graph_Table[iteration][jiteration][kiteration] := NIL;
+                            Game.graph_Table[iteration][jiteration][kiteration] := NIL;
                         end;
                 end;
         end;
@@ -60,8 +58,8 @@ Begin
                     couple_Stations[1]:=Game.Lines.Stations[jiteration+1];
                     absolute_Index_First_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[0], Game.Stations); // Je pense qu'on pourrait directement mettre la fonction en tant qu'index pour graph_Table mais pour la compréhension je trouve ca mieux comme ca, surtout si on relit le code dans longtemps.
                     absolute_Index_Second_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[1], Game.Stations);
-                    graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := Game.Lines[iteration];
-                    graph_Table[absolute_Index_Second_Station][absolute_Index_First_Station][iteration] := Game.Lines[iteration]; // La graphTable est symétrique (l'axe étant sa diagonale)
+                    Game.graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := Game.Lines[iteration];
+                    Game.graph_Table[absolute_Index_Second_Station][absolute_Index_First_Station][iteration] := Game.Lines[iteration]; // La graphTable est symétrique (l'axe étant sa diagonale)
                     end;
                 end;
         end;

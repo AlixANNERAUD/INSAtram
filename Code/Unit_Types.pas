@@ -236,8 +236,6 @@ End;
 
 Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
 
-
-
   // - Interface graphique
 
 Type Type_Label = Record
@@ -349,6 +347,8 @@ Type Type_Line = Record
   Trains : array Of Type_Train;
 End;
 
+Type Type_Line_Pointer = ^Type_Line;
+
 Type Type_Player = Record
   Score : Integer;
   Locomotive_Token : Byte;
@@ -356,6 +356,18 @@ Type Type_Player = Record
   Tunnel_Token : Byte;
   Show : Boolean;
 End;
+
+  // - Itineraries
+
+  Type Type_Graph_Table = Array of Array of Array[0..Game_Maximum_Lines_Number-1] of Type_Line_Pointer;
+
+  Type Type_Dijkstra_Cell = Record
+    isConnected : Boolean;
+    isAvailable : Boolean;
+    comingFromStationIndex : Type_Station_Pointer;
+    weight : Real;
+    isValidated : Boolean;
+  End;
 
 
 // - Mouse
@@ -402,6 +414,8 @@ Type Type_Game = Record
   // Stations
   // Tableau dymamique contenant les stations.
   Stations : array Of Type_Station;
+  // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.  
+  graph_Table : Type_Graph_Table;
   // Carte des stations.
   Stations_Map : Array Of Array Of Boolean;
   // Lignes
