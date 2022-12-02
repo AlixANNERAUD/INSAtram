@@ -14,8 +14,10 @@ Procedure Animation_Refresh(Var Game : Type_Game);
 
 Var i, j : Byte;
 Begin
+  // Vérifie si le jeu n'est pas en pause.
   If (Game.Play_Pause_Button.State = true) Then
     Begin
+          
       // Vérifie si des lignes existent.
       If (length(Game.Lines) > 0) Then
         Begin

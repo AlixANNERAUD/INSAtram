@@ -221,11 +221,15 @@ Begin
 
   Randomize();
 
+  Game.Start_Time := Time_Get_Current();
+
   Game.Quit := False;
 
   Game.Play_Pause_Button.State := true;
 
-   // Défintion de la carte d'occupation des stations..
+  Game.Day := Day_Monday;
+
+  // Défintion de la carte d'occupation des stations..
   SetLength(Game.Stations_Map, Game.Panel_Right.Size.X Div 64);
   For i := low(Game.Stations_Map) To high(Game.Stations_Map) Do
     Begin
@@ -347,6 +351,16 @@ Begin
                         // writeln('click released');
                         Mouse_Event_Handler(Event.button, Game);
   End;
+
+  // Vérifie si le jour affiché est différent du jour actuel.
+  If (Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7)) <> Game.Day) Then
+    Begin
+      // Mise à jour de la variable du jour.
+      Game.Day := Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7));
+      // Mise à jour de l'étiquette du jour.
+      Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
+    End;
+
 
 
 

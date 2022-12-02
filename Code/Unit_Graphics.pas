@@ -409,7 +409,7 @@ Begin
   Game.Ressources.Palette[Color_Blue_Grey] := Get_Color(96, 125, 139, 255);
   Game.Ressources.Palette[Color_White] := Get_Color(255, 255, 255, 255);
 
-  // - Top panel
+  // - Panneau de haut.
 
   Image_Set(Game.Score_Image, IMG_Load(Path_Image_People));
   Game.Score_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Score_Image.Size.Y);
@@ -419,20 +419,21 @@ Begin
   Game.Score_Label.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Score_Label.Size.Y);
   Game.Score_Label.Position.X := Game.Score_Image.Position.X + Game.Score_Image.Size.X + 16;
 
-  Label_Set(Game.Clock_Label, '00:00', Game.Ressources.Fonts[Font_Medium][Font_Normal], Game.Ressources.Palette[Color_Black]);
+  Label_Set(Game.Clock_Label, 'Wednesday', Game.Ressources.Fonts[Font_Medium][Font_Normal], Game.Ressources.Palette[Color_Black]);
   Game.Clock_Label.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Label.Size.Y);
   Game.Clock_Label.Position.X := Game.Panel_Top.Size.X Div 2 - 16 - Game.Clock_Label.Size.X;
+  Label_Set_Text(Game.Clock_Label, 'Monday');
 
   Image_Set(Game.Clock_Image, IMG_Load(Path_Image_Clock));
   Game.Clock_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Image.Size.Y);
   Game.Clock_Image.Position.X := Game.Clock_Label.Position.X - 16 - Game.Clock_Image.Size.X;
 
-  Dual_State_Button_Set(Game.Play_Pause_Button, IMG_Load(Path_Image_Play),IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause), IMG_Load(Path_Image_Pause));
+  Dual_State_Button_Set(Game.Play_Pause_Button, IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause), IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause));
 
   Game.Play_Pause_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Play_Pause_Button.Size.Y);
   Game.Play_Pause_Button.Position.X := 16;
 
-  // - Bottom panel
+  // - Panneau du bas.
 
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
     Begin

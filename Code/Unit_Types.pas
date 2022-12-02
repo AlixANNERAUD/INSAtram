@@ -101,6 +101,8 @@ Const Game_Maximum_Lines_Number = 8;
 
 Const Maximum_Number_Stations = 200;
 
+Const Game_Day_Duration =  10;
+
   // - - - Shapes
 
 Const Shapes_Number = 5;
@@ -197,6 +199,15 @@ Type Type_Color_Name = (Color_Black,
                         Color_Blue_Grey,
                         Color_White
                        );
+
+Type Type_Day = (Day_Monday,
+                  Day_Tuesday,
+                  Day_Wednesday,
+                  Day_Thursday,
+                  Day_Friday,
+                  Day_Saturday,
+                  Day_Sunday
+                 );
 
 Type Type_Ressources = Record
   // Polices de caractères.
@@ -380,6 +391,11 @@ End;
 // - Game
 
 Type Type_Game = Record
+  
+  Start_Time : Type_Time;
+
+  Day : Type_Day;
+
   Quit : Boolean;
   // Souri
   Mouse : Type_Mouse;
@@ -493,8 +509,37 @@ Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
 
 Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates) : Integer;
 
+Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
+
+Function Day_To_String(Day : Type_Day) : String;
+
 Implementation
 
+Function Day_To_String(Day : Type_Day) : String;
+Begin
+  Case Day Of
+    Day_Monday : Day_To_String := 'Monday';
+    Day_Tuesday : Day_To_String := 'Tuesday';
+    Day_Wednesday : Day_To_String := 'Wednesday';
+    Day_Thursday : Day_To_String := 'Thursday';
+    Day_Friday : Day_To_String := 'Friday';
+    Day_Saturday : Day_To_String := 'Saturday';
+    Day_Sunday : Day_To_String := 'Sunday';
+  End;
+End;
+
+Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
+Begin
+  Case Day_Index Of
+    0 : Time_Index_To_Day := Day_Monday;
+    1 : Time_Index_To_Day := Day_Tuesday;
+    2 : Time_Index_To_Day := Day_Wednesday;
+    3 : Time_Index_To_Day := Day_Thursday;
+    4 : Time_Index_To_Day := Day_Friday;
+    5 : Time_Index_To_Day := Day_Saturday;
+    6 : Time_Index_To_Day := Day_Sunday;
+  End;
+End;
 
 Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
 Begin
