@@ -56,14 +56,49 @@ Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
 
 Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
 
+Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
+
 Function Get_Color(Red,Green,Blue,Alpha : Byte) : Type_Color;
 
 Function Color_To_Longword(Color : Type_Color) : Longword;
 
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
 
+Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
+
 Implementation
 
+// Fonction qui rend un button à double état.
+Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+  Destination_Rectangle.x := Button.Position.X;
+  Destination_Rectangle.y := Button.Position.Y;
+  Destination_Rectangle.w := Button.Size.X;
+  Destination_Rectangle.h := Button.Size.Y;
+
+  If Button.Pressed Then
+    If (Button.State = False) Then
+      SDL_BlitSurface(Button.Surface_Pressed[0], Nil, Destination_Panel.Surface, @Destination_Rectangle)
+    Else
+       SDL_BlitSurface(Button.Surface_Pressed[1], Nil, Destination_Panel.Surface, @Destination_Rectangle)
+  Else
+    If (Button.State = True) Then
+      SDL_BlitSurface(Button.Surface_Released[0], Nil, Destination_Panel.Surface, @Destination_Rectangle)
+    Else
+      SDL_BlitSurface(Button.Surface_Released[1], Nil, Destination_Panel.Surface, @Destination_Rectangle);
+End;
+
+
+Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
+Begin
+  Dual_State_Button.Surface_Pressed[0] := Surface_Pressed_Disabled;
+  Dual_State_Button.Surface_Pressed[1] := Surface_Pressed_Enabled;
+  Dual_State_Button.Surface_Released[0] := Surface_Released_Disabled;
+  Dual_State_Button.Surface_Released[1] := Surface_Released_Enable;
+  Dual_State_Button.Size.X := Surface_Released_Disabled^.w;
+  Dual_State_Button.Size.Y := Surface_Released_Disabled^.h;
+End;
 
 // Fonction qui détecte si un rectangle et une ligne sont en colision.
 Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
@@ -228,42 +263,6 @@ Begin
   SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
@@ -338,9 +337,9 @@ Begin
   TTF_INIT();
   // - Création du panneau fenêtre.
   If Full_Screen Then
-    Game.Window.Surface := SDL_SetVideoMode(0, 0, Color_Depth, SDL_SWSURFACE Or SDL_FULLSCREEN)
+    Game.Window.Surface := SDL_SetVideoMode(0, 0, Color_Depth, SDL_HWSURFACE Or SDL_FULLSCREEN)
   Else
-    Game.Window.Surface := SDL_SetVideoMode(Screen_Width, Screen_Height, Color_Depth, SDL_SWSURFACE);
+    Game.Window.Surface := SDL_SetVideoMode(Screen_Width, Screen_Height, Color_Depth, SDL_HWSURFACE);
 
   // - Obtention des informations de la fenêtre.
   Video_Informations := SDL_GetVideoInfo();
@@ -428,7 +427,8 @@ Begin
   Game.Clock_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Image.Size.Y);
   Game.Clock_Image.Position.X := Game.Clock_Label.Position.X - 16 - Game.Clock_Image.Size.X;
 
-  Button_Set(Game.Play_Pause_Button, IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause));
+  Dual_State_Button_Set(Game.Play_Pause_Button, IMG_Load(Path_Image_Play),IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause), IMG_Load(Path_Image_Pause));
+
   Game.Play_Pause_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Play_Pause_Button.Size.Y);
   Game.Play_Pause_Button.Position.X := 16;
 
@@ -555,7 +555,7 @@ Begin
   Image_Render(Game.Score_Image, Game.Panel_Top);
   Label_Render(Game.Clock_Label, Game.Panel_Top);
   Image_Render(Game.Clock_Image, Game.Panel_Top);
-  Button_Render(Game.Play_Pause_Button, Game.Panel_Top);
+  Dual_State_Button_Render(Game.Play_Pause_Button, Game.Panel_Top);
 
   // - Panneau du bas.
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
@@ -702,7 +702,7 @@ Begin
       Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Train.Intermediate_Position));
       Centered_Position := Train.Last_Station^.Position_Centered;
 
-      If ((Direction = 0) Or (Direction = 190) Or (Direction = 90) Or (Direction = -90)) Then
+      If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
         Norme := Train.Distance
       Else
         Norme := round(sqrt(sqr(Train.Distance) * 0.5));
@@ -714,7 +714,7 @@ Begin
 
       Centered_Position := Train.Intermediate_Position;
 
-      If ((Direction = 0) Or (Direction = 190) Or (Direction = 90) Or (Direction = -90)) Then
+      If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
         Norme := Train.Distance - Train.Intermediate_Position_Distance
       Else
         Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance)) * 0.5));
@@ -785,19 +785,16 @@ Begin
 
   End;
 
-
   Destination_Rectangle.x := round(Centered_Position.X - (Train.Vehicles[0].Size.X*0.5));
   Destination_Rectangle.y := round(Centered_Position.Y - (Train.Vehicles[0].Size.X*0.5));
 
-
-
-  // - Affiche la locomotive.
-
-
   SDL_BlitSurface(Train.Vehicles[0].Sprite, Nil, Panel.Surface, @Destination_Rectangle);
 
-  // - Affiche le nombre de passager dans un véhicule.
+  // Affichage de l'étiquette du train.
+  Destination_Rectangle.x := Destination_Rectangle.x + Get_Centered_Position(Train.Vehicles[0].Size.X, Train.Passengers_Label.Size.X);
+  Destination_Rectangle.y := Destination_Rectangle.y + Get_Centered_Position(Train.Vehicles[0].Size.Y, Train.Passengers_Label.Size.Y);
 
+  SDL_BlitSurface(Train.Passengers_Label.Surface, Nil, Panel.Surface, @Destination_Rectangle);
 End;
 
 Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);

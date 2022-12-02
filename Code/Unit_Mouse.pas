@@ -51,11 +51,19 @@ Begin
   // Si la souris est pressé.
   If (Mouse_Is_Pressed(Game)) Then
     Begin
+      // Si il y a un clic dans le panneau du haut.
+      If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Panel_Top.Position, Game.Panel_Top.Size)) Then
+        Begin
+          // Vérifie si le clic est sur le bouton play pause.
+          If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Play_Pause_Button.Position, Game.Play_Pause_Button.Size)) Then
+              Game.Play_Pause_Button.State := Not(Game.Play_Pause_Button.State);
+        End;
+
       // Si la souris se trouve dans le panneau de gauche.
       If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Panel_Left.Position, Game.Panel_Left.Size)) Then
         writeln('Mouse on panel left');
     End
-  // Si la souris est relachée.
+    // Si la souris est relachée.
   Else
     Begin
       // Si la souris se trouve sur le panneau de droite.

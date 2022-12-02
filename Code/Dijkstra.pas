@@ -22,6 +22,11 @@ begin
     until (station_Pointer = @stations_Table[iteration]) or (iteration = high(stations_Table));
 end;
 
+function get_Pointer_From_Absolute_Index(Index : Integer; Stations : Array of Type_Station_Pointer);
+begin
+    get_Pointer_From_Absolute_Index := @Stations[Index];
+end;
+
 procedure Build_Graph_Table(Game : Type_Game);
 var iteration, jiteration, kiteration, absolute_Index_First_Station, absolute_Index_Second_Station : Integer;
     couple_Stations : array[0..1] of Type_Station_Pointer; // Tableau temporaire dans lequel stocker les pointeurs des stations à relier dans la table une fois prélevées dans le tableau de pointeur de station de chaque ligne.
@@ -90,12 +95,12 @@ end;
 function get_Weight(first_Station_Pointer : Type_Station_Pointer; second_Station_Pointer : Type_Station_Pointer; Game : Type_Game):Integer; // pas besoin de la graph table qui donne des infos sur les lignes uniquement, et deux lignes qui desservent la meme station ont la meme longueur (elles sont parallèles)
 var iteration : Integer;
 begin
-//jsp ce que j'ai écrit là, je prefere pas effacer mais je crois que ces des conneries    for iteration := low(graph_Table) to high(graph_Table) do // peut tres certainement etre substitué en low(Game.Stations) to high(Game.Stations) si cette facon de faire pose un probleme étant donné que graph table est en 3D.
     get_Weight := Graphics_Get_Distance(^first_Station_Pointer.Position, Station_Get_Intermediate_Position(^first_Station_Pointer.Position, ^second_Station_Pointer.Position)) + Graphics_Get_Distance(Station_Get_Intermediate_Position(^first_Station_Pointer.Position, ^second_Station_Pointer.Position), ^second_Station_Pointer); //!\\ probleme ici : Station_Get_Intermediate_Position ne semble pas exister malgré son usage dans l'Unit_Graphics.
 end;
 
-procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var DijkstraTable : Array Of Type_Dijkstra_Cell; GraphTable : TypeGraphTable)
-Var row, column, iteration, indexStationToConnect, comingFromStationIndex : Integer;
+procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var DijkstraTable : Array Of Type_Dijkstra_Cell; var Itinerary_Indexes : Array of Integer; GraphTable : TypeGraphTable; Game : Type_Game)
+Var row, column, iteration, indexStationToConnect, comingFromStationIndex, minimum_Weight, lightest_Station_Index, i, j : Integer;
+   
 begin
     indexStationToConnect := Starting_Station_Index;
 
@@ -104,12 +109,12 @@ begin
             for column := low(DijkstraTable) to high(DijkstraTable) do
                 begin
                     DijkstraTable[i][j].isAvailable := True;            // Les cases sont a priori toutes disponibles avant d'être passé dessus.
-                    column := column +1;
+            
                 end;
-            row := row +1;
+           
         end;
     
-    comingFromStationIndex := Starting_Station_Index
+    comingFromStationIndex := Starting_Station_Index;
     DijkstraTable[low(DijkstraTable)][Starting_Station_Index].weight := 0;
     DijkstraTable[low(DijkstraTable)][Starting_Station_Index].comingFromStationIndex := comingFromStationIndex;
     DijkstraTable[low(DijkstraTable)][Starting_Station_Index].isValidated := True;
@@ -121,14 +126,51 @@ begin
 
     for iteration := (low(DijkstraTable)) to (high(DijkstraTable)) do
         begin
-            Connect_Stations(iteration, indexStationToConnect, GraphTable, DijkstraTable);
+            Connect_Stations(iteration, comingFromStationIndex, GraphTable, DijkstraTable);
             for column := (low(DijkstraTable)) to (high(DijkstraTable)) do
                 begin
                     if (DijkstraTable[iteration][column].isAvailable = True) and (DijkstraTable[iteration][column].isConnected = True) and (DijkstraTable[iteration][column].isValidated = False) then
                         begin
                             DijkstraTable[iteration][column].comingFromStationIndex := comingFromStationIndex;
-                            DijkstraTable[iteration][column].weight := //TODO une fonction qui sort le poids d'une connection en sachant la station de départ et d'arrivée.
+                            DijkstraTable[iteration][column].weight := get_Weight(get_Pointer_From_Absolute_Index(comingFromStationIndex),get_Absolute_Index_From_Station_Pointer(indexStationToConnect), Game.Stations);
                         end;
                 end;
+        // - Compare et détermine l'index de la station dont le poids est le plus faible. 
+            minimum_Weight := 2203; //diagonale d'un écran 1920*1080
+            for i := (low(DijkstraTable)) to (high(DijkstraTable)) do
+                begin
+                    for column:= (low(DijkstraTable)) to (high(DijkstraTable)) do
+                        begin
+                            if (DijkstraTable[i][column].isConnected = True) and (DijkstraTable[iteration][column].isValidated = False) and (DijkstraTable[iteration][column].isAvailable = True) Then
+                                begin
+                                    If DijkstraTable[i][column].weight < minimum_Weight then 
+                                        begin
+                                            minimum_Weight := DijkstraTable[i][column].weight;
+                                            lightest_Station_Index := column;
+                                        end;
+                                    
+                                end;
+                        end;
+                end;
+            DijkstraTable[iteration+1][lightest_Station_Index] := DijkstraTable[iteration][lightest_Station_Index];
+            DijkstraTable[iteration+1][lightest_Station_Index].isValidated := True;
+            for i:= iteration to high(DijkstraTable) do //On peut également commencer la boucle à iteration+2.
+                begin
+                    DijkstraTable[i][lightest_Station_Index].isAvailable := False;
+                end;
+            comingFromStationIndex := lightest_Station_Index;
         end;
+        SetLength(Itinerary_Indexes, high(DijkstraTable));
+        Itinerary_Indexes[0] := Starting_Station_Index;
+        k:= 1;
+        for iteration:= low(DijkstraTable) to high(DijkstraTable) do
+            begin
+                for column := low(DijkstraTable) to high(DijkstraTable) do
+                    If (DijkstraTable[iteration][column].isValidated := True) and (Itinerary_Indexes[k-1] <> DijkstraTable[iteration][column].comingFromStationIndex) then
+                        begin
+                            Itinerary_Indexes[k] := DijkstraTable[iteration][column].comingFromStationIndex;
+                            k:= k + 1;  
+                        end;
+                       
+            end;
 end;

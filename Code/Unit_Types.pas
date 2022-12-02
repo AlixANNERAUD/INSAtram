@@ -165,33 +165,6 @@ Type Type_Font = pTTF_Font;
   // - - Graphics
 
 
-// - Interface graphique
-
-Type Type_Label = Record
-  Position, Size : Type_Coordinates;
-  Text : String;
-  Font : Type_Font;
-  Color : Type_Color;
-  Surface : Type_Surface;
-End;
-
-Type Type_Panel = Record
-  Position, Size : Type_Coordinates;
-  Surface : Type_Surface;
-  Color : Type_Color;
-End;
-
-Type Type_Image = Record
-  Position, Size : Type_Coordinates;
-  Surface : Type_Surface;
-End;
-
-Type Type_Button = Record
-  Position, Size : Type_Coordinates;
-  Pressed : Boolean;
-  Surface_Pressed : Type_Surface;
-  Surface_Released : Type_Surface;
-End;
 
 Type Type_Color = Record
   Red, Green, Blue, Alpha : Byte;
@@ -264,7 +237,44 @@ End;
 Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
 
 
-  // - - Passengers
+
+  // - Interface graphique
+
+Type Type_Label = Record
+  Position, Size : Type_Coordinates;
+  Text : String;
+  Font : Type_Font;
+  Color : Type_Color;
+  Surface : Type_Surface;
+End;
+
+Type Type_Panel = Record
+  Position, Size : Type_Coordinates;
+  Surface : Type_Surface;
+  Color : Type_Color;
+End;
+
+Type Type_Image = Record
+  Position, Size : Type_Coordinates;
+  Surface : Type_Surface;
+End;
+
+Type Type_Button = Record
+  Position, Size : Type_Coordinates;
+  Pressed : Boolean;
+  Surface_Pressed : Type_Surface;
+  Surface_Released : Type_Surface;
+End;
+
+Type Type_Dual_State_Button = Record
+  Position, Size : Type_Coordinates;
+  Pressed : Boolean;
+  State : Boolean;
+  Surface_Pressed : array[0 .. 1] of Type_Surface;
+  Surface_Released : array[0 .. 1] of Type_Surface;
+End;
+
+// - - Passengers
 
 Type Type_Station_Pointer = ^Type_Station;
 
@@ -320,8 +330,11 @@ Type Type_Train = Record
   // - Vitesse du train.
   Speed : Integer;
 
+  //  Tableau contenant les wagons du train.
   Vehicles : array Of Type_Vehicle;
-  //  Pointeur vers les wagons du train.
+
+  Passengers_Label : Type_Label;
+
 End;
 // - - Line
 
@@ -365,7 +378,7 @@ Type Type_Game = Record
 
   // Panneau contenant l'interface du haut (score, heure ...).
   Panel_Top : Type_Panel;
-  Play_Pause_Button : Type_Button;
+  Play_Pause_Button : Type_Dual_State_Button;
   Score_Label : Type_Label;
   Score_Image : Type_Image;
   Clock_Label : Type_Label;
@@ -389,6 +402,8 @@ Type Type_Game = Record
   // Stations
   // Tableau dymamique contenant les stations.
   Stations : array Of Type_Station;
+  // Carte des stations.
+  Stations_Map : Array Of Array Of Boolean;
   // Lignes
   // Tableau dynamque contenant les lignes.
   Lines : array Of Type_Line;
@@ -554,6 +569,7 @@ Begin
 
 
 
+
 { 
   For i := low(Station.Passengers) To high(Station.Passengers) Do
     Passenger_Delete(Station.Passengers[i]^, Station);
@@ -599,8 +615,8 @@ End;
 
 // Procédure qui alloue de la mémoire pour une station et le référence dans le tableau dynamique, détermine sa forme et position aléatoirement et defini ses attributs.
 Function Station_Create(Var Game : Type_Game) : Boolean;
-
 Var Shape : Byte;
+    Position : Type_Coordinates;
 Begin
   If (length(Game.Stations) < Maximum_Number_Stations) Then
     Begin
@@ -624,11 +640,16 @@ Begin
 
       Game.Stations[high(Game.Stations)].Size.Y := Game.Stations[high(Game.Stations)].Sprite^.h;
 
-      Game.Stations[high(Game.Stations)].Position.X := Random(Game.
-                                                       Panel_Right
-                                                       .Size.X - Game.Stations[high(Game.Stations)].Size.X);
-      Game.Stations[high(Game.Stations)].Position.Y := Random(Game.
-                                                       Panel_Right.Size.Y - Game.Stations[high(Game.Stations)].Size.Y);
+      // Détermination de la position de la station.
+      Repeat
+        Position.X := Random(length(Game.Stations_Map));
+        Position.Y := Random(length(Game.Stations_Map[high(Game.Stations_Map)]));
+      Until Game.Stations_Map[Position.X][Position.Y] = false;
+
+      Game.Stations_Map[Position.X][Position.Y] := true;
+
+      Game.Stations[high(Game.Stations)].Position.X := 64 * Position.X;
+      Game.Stations[high(Game.Stations)].Position.Y := 64 * Position.Y;
 
       // Calcul les coordoonées centré de la station.
       Game.Stations[high(Game.Stations)].Position_Centered := Get_Center_Position(Game.Stations[high(Game.Stations)].Position, Game.Stations[high(Game.Stations)].Size);
@@ -741,7 +762,8 @@ Begin
                     Begin
                       Line.Trains[high(Line.Trains)].Next_Station := Line.Stations[i + 1];
                       // Calcul du point intermédiaire.
-                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered);
+                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.
+                                                                              Trains)].Next_Station^.Position_Centered);
                     End
                   Else
                     Begin
@@ -764,8 +786,8 @@ Begin
 
 
       Line.Trains[high(Line.Trains)].Maximum_Distance := Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position);
-      Line.Trains[high(Line.Trains)].Maximum_Distance := Line.Trains[high(Line.Trains)].Maximum_Distance 
-      +  Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
+      Line.Trains[high(Line.Trains)].Maximum_Distance := Line.Trains[high(Line.Trains)].Maximum_Distance
+                                                         +  Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
                                                          (Line.Trains)].Next_Station^.Position_Centered);
 
       Line.Trains[high(Line.Trains)].Driving := True;

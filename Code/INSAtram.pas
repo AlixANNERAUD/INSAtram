@@ -9,10 +9,7 @@ Var Game : Type_Game;
   Timer : Type_Time;
 
 Begin
-
-  Graphics_Load(Game);
   Logic_Load(Game);
-  Mouse_Load(Game);
 
   While (Not(Game.Quit)) Do
     Begin

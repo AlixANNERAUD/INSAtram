@@ -51,9 +51,22 @@ Procedure Logic_Load(Var Game : Type_Game);
 
 Var i,j : Byte;
 Begin
+  Graphics_Load(Game);
+
   Randomize();
 
   Game.Quit := False;
+
+  Game.Play_Pause_Button.State := true;
+
+   // Défintion de la carte d'occupation des stations..
+  SetLength(Game.Stations_Map, Game.Panel_Right.Size.X Div 64);
+  For i := low(Game.Stations_Map) To high(Game.Stations_Map) Do
+    Begin
+      SetLength(Game.Stations_Map[i], Game.Panel_Right.Size.Y Div 64);
+      For j := low(Game.Stations_Map[i]) To high(Game.Stations_Map[i]) Do
+        Game.Stations_Map[i][j] := false;
+    End;
 
   // Création des 5 premères stations
   For i := 1 To 6 Do
@@ -79,8 +92,9 @@ Begin
     End;
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
+  Train_Create(Game.Lines[0].Stations[2], false, Game.Lines[0], Game);
 
-
+  Mouse_Load(Game);
 
 End;
 
@@ -217,15 +231,13 @@ Begin
             // On inverse la direction.
             Train.Direction := Not(Train.Direction);
 
-
-
           // Si le train est dans le sens direct (index des stations croissant).
           If (Train.Direction = true) Then
             Begin
               Train.Next_Station := Line.Stations[i + 1];
               // Calcul du point intermédiaire.
               Train.Intermediate_Position := Station_Get_Intermediate_Position(Train.Last_Station^.Position_Centered, Train.Next_Station^.Position_Centered);
-            
+
             End
             // Si le train est dans le sens indirect (index des stations décroissant).
           Else
@@ -244,8 +256,6 @@ Begin
   Train.Intermediate_Position_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
 
   // Calcul de la distance entre la station de départ et d'arrivée.
-
-
 
   Train.Maximum_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
 
@@ -323,6 +333,22 @@ Begin
           Train.Last_Station^.Passengers[high(Train.Last_Station^.Passengers)] := Passengers_Queue[i];
         End;
     End;
+
+  // Comptage des passagers dans le train.
+  k := 0;
+  For i := low(Train.Vehicles) To high(Train.Vehicles) Do
+    Begin
+      For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+        Begin
+          If (Train.Vehicles[i].Passengers[j] <> Nil) Then
+            inc(k);
+        End;
+    End;
+  // Mise à jour de l'étiquette.
+  Label_Set(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number), Game.Ressources.Fonts[Font_Small][Font_Normal], Game.Ressources.Palette[
+  Color_White]);
+
+
   // Désallocation de la queue.
   SetLength(Passengers_Queue, 0);
 
