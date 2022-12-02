@@ -28,170 +28,194 @@ Implementation
 
 // - - Fonctions et procédures relatives au passagers 
 
-function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : array Of Type_Station):integer;
-var iteration : Integer;
-begin
-    iteration := low(stations_Table);
-    repeat
-        if station_Pointer = @stations_Table[iteration] then
-            begin
-                get_Absolute_Index_From_Station_Pointer := iteration;
-            end;
-        iteration := iteration+1;
-    until (station_Pointer = @stations_Table[iteration]) or (iteration = high(stations_Table));
-end;
+Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
 
-function get_Pointer_From_Absolute_Index(Index : Integer; Stations : Array of Type_Station_Pointer):Type_Station_Pointer;
-begin
-    get_Pointer_From_Absolute_Index := @Stations[Index];
-end;
-
-procedure Build_Graph_Table(Game : Type_Game);
-var iteration, jiteration, kiteration, absolute_Index_First_Station, absolute_Index_Second_Station : Integer;
-    couple_Stations : array[0..1] of Type_Station_Pointer; // Tableau temporaire dans lequel stocker les pointeurs des stations à relier dans la table une fois prélevées dans le tableau de pointeur de station de chaque ligne.
+Var iteration : Integer;
 Begin
-    // Définit les dimensions de la graph_Table
-    SetLength(Game.graph_Table, length(Game.Stations));
-    for iteration := low(Game.graph_Table) to high(Game.graph_Table) do
-        begin
-            SetLength(Game.graph_Table[iteration], length(Game.stations));        
-        end;
+  iteration := low(stations_Table);
+  Repeat
+    If station_Pointer = @stations_Table[iteration] Then
+      Begin
+        get_Absolute_Index_From_Station_Pointer := iteration;
+      End;
+    iteration := iteration+1;
+  Until (station_Pointer = @stations_Table[iteration]) Or (iteration = high(stations_Table));
+End;
 
-    for iteration := low(Game.Stations) to high(Game.Stations) do // Initialise toutes les connections à NIL
-        begin
-            for jiteration := low(Game.Stations) to high(Game.Stations) do
-                begin
-                    for kiteration := low(Game.Lines) to high(Game.Lines) do
-                        begin
-                            Game.graph_Table[iteration][jiteration][kiteration] := NIL;
-                        end;
-                end;
-        end;
+Function get_Pointer_From_Absolute_Index(Index : Integer; Stations : Array Of Type_Station_Pointer): Type_Station_Pointer;
+Begin
+  get_Pointer_From_Absolute_Index := @Stations[Index];
+End;
 
-    for iteration := low(Game.Lines) to high(Game.Lines) do // Pour chacune des lignes :
-        begin
-            for jiteration:= low(Game.Lines[iteration].Stations) to (high(Game.Lines[iteration].Stations)-1) do // Pour chacune des stations consécutivement connectées contenues dans le tableau :
-                begin
-                    if (Game.Lines[iteration].Stations[jiteration] <> NIL) then // Au début de la partie il y a des chances pour que certaines lignes soient vides, il ne faut pas accéder à cet emplacement mémoire s'il ne contient pas un pointeur sur station.
-                    begin
-                    couple_Stations[0]:=Game.Lines[iteration].Stations[jiteration];
-                    couple_Stations[1]:=Game.Lines[iteration].Stations[jiteration+1];
-                    absolute_Index_First_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[0], Game.Stations); // Je pense qu'on pourrait directement mettre la fonction en tant qu'index pour graph_Table mais pour la compréhension je trouve ca mieux comme ca, surtout si on relit le code dans longtemps.
-                    absolute_Index_Second_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[1], Game.Stations);
-                    Game.graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := @Game.Lines[iteration];
-                    Game.graph_Table[absolute_Index_Second_Station][absolute_Index_First_Station][iteration] := @Game.Lines[iteration]; // La graphTable est symétrique (l'axe étant sa diagonale)
-                    end;
-                end;
-        end;
+Procedure Build_Graph_Table(Game : Type_Game);
+
+Var iteration, jiteration, kiteration, absolute_Index_First_Station, absolute_Index_Second_Station : Integer;
+  couple_Stations : array[0..1] Of Type_Station_Pointer;
+  // Tableau temporaire dans lequel stocker les pointeurs des stations à relier dans la table une fois prélevées dans le tableau de pointeur de station de chaque ligne.
+Begin
+  // Définit les dimensions de la graph_Table
+  SetLength(Game.graph_Table, length(Game.Stations));
+  For iteration := low(Game.graph_Table) To high(Game.graph_Table) Do
+    Begin
+      SetLength(Game.graph_Table[iteration], length(Game.stations));
+    End;
+
+  For iteration := low(Game.Stations) To high(Game.Stations) Do
+    // Initialise toutes les connections à NIL
+    Begin
+      For jiteration := low(Game.Stations) To high(Game.Stations) Do
+        Begin
+          For kiteration := low(Game.Lines) To high(Game.Lines) Do
+            Begin
+              Game.graph_Table[iteration][jiteration][kiteration] := Nil;
+            End;
+        End;
+    End;
+
+  For iteration := low(Game.Lines) To high(Game.Lines) Do
+    // Pour chacune des lignes :
+    Begin
+      For jiteration:= low(Game.Lines[iteration].Stations) To (high(Game.Lines[iteration].Stations)-1) Do
+        // Pour chacune des stations consécutivement connectées contenues dans le tableau :
+        Begin
+          If (Game.Lines[iteration].Stations[jiteration] <> Nil) Then
+            // Au début de la partie il y a des chances pour que certaines lignes soient vides, il ne faut pas accéder à cet emplacement mémoire s'il ne contient pas un pointeur sur station.
+            Begin
+              couple_Stations[0] := Game.Lines[iteration].Stations[jiteration];
+              couple_Stations[1] := Game.Lines[iteration].Stations[jiteration+1];
+              absolute_Index_First_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[0], Game.Stations);
+
+        // Je pense qu'on pourrait directement mettre la fonction en tant qu'index pour graph_Table mais pour la compréhension je trouve ca mieux comme ca, surtout si on relit le code dans longtemps.
+              absolute_Index_Second_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[1], Game.Stations);
+              Game.graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := @Game.Lines[iteration];
+              Game.graph_Table[absolute_Index_Second_Station][absolute_Index_First_Station][iteration] := @Game.Lines[iteration];
+              // La graphTable est symétrique (l'axe étant sa diagonale)
+            End;
+        End;
+    End;
 
 End;
 
-procedure Connect_Stations(rowToFill : Integer; indexStationToConnect : Integer; GraphTable : Type_Graph_Table; Var DijkstraTable : Array Of Type_Dijkstra_Cell; Game : Type_Game); // TypeGraphTable plutot que Type_Line parce que dans chaque case il y aura une record avec plusieurs lignes + la station avec laquelle la premiere station est reliée
+Procedure Connect_Stations(rowToFill : Integer; indexStationToConnect : Integer; Game : Type_Game);
+// TypeGraphTable plutot que Type_Line parce que dans chaque case il y aura une record avec plusieurs lignes + la station avec laquelle la premiere station est reliée
+
 Var i, iteration_Lines : Integer;
-begin
-    for i := low(GraphTable) to high(GraphTable) do
-        begin
-            iteration_Lines := low(Game.Lines);
-            repeat
-                if GraphTable[indexStationToConnect][i][iteration_Lines] <> NIL then     // Vérifie qu'une ligne relie bien les deux stations, i étant l'index de la deuxieme station.
-                    begin
-                        if (DijkstraTable[rowToFill][i].isAvailable = True) then      // Vérifie que Dijkstra n'a pas interdit de retourner sur cette case.
-                            begin
-                                DijkstraTable[rowToFill][i].isConnected := True;        // Permet à Dijkstra de savoir s'il doit considérer cette station en particulier dans son calcul d'itinéraire.
-                            end;
-                    end
-                else
-                    begin
-                        DijkstraTable[rowToFill][i].isConnected := False;
-                    end;
-                i := i+1;
-                iteration_Lines=iteration_Lines+1;
-            until (GraphTable[indexStationToConnect][i][iteration_Lines] <> NIL) or (iteration_Lines = high(Game.Lines));
-        end;
-end;
+Begin
+  For i := low(Game.Graph_Table) To high(Game.Graph_Table) Do
+    Begin
+      iteration_Lines := low(Game.Lines);
+      Repeat
+        If Game.Graph_Table[indexStationToConnect][i][iteration_Lines] <> Nil Then     // Vérifie qu'une ligne relie bien les deux stations, i étant l'index de la deuxieme station.
+          Begin
+            // Vérifie que Dijkstra n'a pas interdit de retourner sur cette case.
+            If (Game.Dijkstra_Table[rowToFill][i].isAvailable = True) Then      
+              Begin
+                // Permet à Dijkstra de savoir s'il doit considérer cette station en particulier dans son calcul d'itinéraire.
+                Game.Dijkstra_Table[rowToFill][i].isConnected := True;
+              End;
+          End// Vérifie que Dijkstra n'a pas interdit de retourner sur cette case.
+        Else
+          Begin
+            Game.Dijkstra_Table[rowToFill][i].isConnected := False;
+          End;
+        iteration_Lines := iteration_Lines + 1;
+      Until (Game.Graph_Table[indexStationToConnect][i][iteration_Lines] <> Nil) Or (iteration_Lines = high(Game.Lines));
+    End;
+End;
 
-function get_Weight(first_Station_Pointer : Type_Station_Pointer; second_Station_Pointer : Type_Station_Pointer; Game : Type_Game):Integer; // pas besoin de la graph table qui donne des infos sur les lignes uniquement, et deux lignes qui desservent la meme station ont la meme longueur (elles sont parallèles)
-var iteration : Integer;
-begin
-    get_Weight := Graphics_Get_Distance(^first_Station_Pointer.Position, Station_Get_Intermediate_Position(^first_Station_Pointer.Position, ^second_Station_Pointer.Position)) + Graphics_Get_Distance(Station_Get_Intermediate_Position(^first_Station_Pointer.Position, ^second_Station_Pointer.Position), ^second_Station_Pointer); //!\\ probleme ici : Station_Get_Intermediate_Position ne semble pas exister malgré son usage dans l'Unit_Graphics.
-end;
+Function get_Weight(first_Station_Pointer, second_Station_Pointer: Type_Station_Pointer; Game : Type_Game): Integer;
+// pas besoin de la graph table qui donne des infos sur les lignes uniquement, et deux lignes qui desservent la meme station ont la meme longueur (elles sont parallèles)
 
-procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var DijkstraTable : Array Of Type_Dijkstra_Cell; var Itinerary_Indexes : Array of Integer; GraphTable : TypeGraphTable; Game : Type_Game)
+Var iteration : Integer;
+    Intermediate_Position : Type_Coordinates;
+Begin
+
+  Intermediate_Position := Station_Get_Intermediate_Position(first_Station_Pointer^.Position_Centered, second_Station_Pointer^.Position_Centered);
+
+  get_Weight := Graphics_Get_Distance(first_Station_Pointer^.Position_Centered, Intermediate_Position) + Graphics_Get_Distance(Intermediate_Position, second_Station_Pointer^.Position_Centered);
+End;
+
+Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Array Of Integer; Game : Type_Game);
+
 Var row, column, iteration, indexStationToConnect, comingFromStationIndex, minimum_Weight, lightest_Station_Index, i, j : Integer;
-   
-begin
-    indexStationToConnect := Starting_Station_Index;
 
-    for row := low(DijkstraTable) to high(DijkstraTable) do
-        begin
-            for column := low(DijkstraTable) to high(DijkstraTable) do
-                begin
-                    DijkstraTable[i][j].isAvailable := True;            // Les cases sont a priori toutes disponibles avant d'être passé dessus.
-            
-                end;
-           
-        end;
-    
-    comingFromStationIndex := Starting_Station_Index;
-    DijkstraTable[low(DijkstraTable)][Starting_Station_Index].weight := 0;
-    DijkstraTable[low(DijkstraTable)][Starting_Station_Index].comingFromStationIndex := comingFromStationIndex;
-    DijkstraTable[low(DijkstraTable)][Starting_Station_Index].isValidated := True;
-    for iteration := low(DijkstraTable) to high(DijkstraTable) do
-        begin
-            DijkstraTable[low(DijkstraTable)][Starting_Station_Index].isAvailable := False;
-            iteration := iteration+1;
-        end;
+Begin
+  indexStationToConnect := Starting_Station_Index;
 
-    for iteration := (low(DijkstraTable)) to (high(DijkstraTable)) do
-        begin
-            Connect_Stations(iteration, comingFromStationIndex, GraphTable, DijkstraTable);
-            for column := (low(DijkstraTable)) to (high(DijkstraTable)) do
-                begin
-                    if (DijkstraTable[iteration][column].isAvailable = True) and (DijkstraTable[iteration][column].isConnected = True) and (DijkstraTable[iteration][column].isValidated = False) then
-                        begin
-                            DijkstraTable[iteration][column].comingFromStationIndex := comingFromStationIndex;
-                            DijkstraTable[iteration][column].weight := get_Weight(get_Pointer_From_Absolute_Index(comingFromStationIndex),get_Absolute_Index_From_Station_Pointer(indexStationToConnect), Game.Stations);
-                        end;
-                end;
-        // - Compare et détermine l'index de la station dont le poids est le plus faible. 
-            minimum_Weight := 2203; //diagonale d'un écran 1920*1080
-            for i := (low(DijkstraTable)) to (high(DijkstraTable)) do
-                begin
-                    for column:= (low(DijkstraTable)) to (high(DijkstraTable)) do
-                        begin
-                            if (DijkstraTable[i][column].isConnected = True) and (DijkstraTable[iteration][column].isValidated = False) and (DijkstraTable[iteration][column].isAvailable = True) Then
-                                begin
-                                    If DijkstraTable[i][column].weight < minimum_Weight then 
-                                        begin
-                                            minimum_Weight := DijkstraTable[i][column].weight;
-                                            lightest_Station_Index := column;
-                                        end;
-                                    
-                                end;
-                        end;
-                end;
-            DijkstraTable[iteration+1][lightest_Station_Index] := DijkstraTable[iteration][lightest_Station_Index];
-            DijkstraTable[iteration+1][lightest_Station_Index].isValidated := True;
-            for i:= iteration to high(DijkstraTable) do //On peut également commencer la boucle à iteration+2.
-                begin
-                    DijkstraTable[i][lightest_Station_Index].isAvailable := False;
-                end;
-            comingFromStationIndex := lightest_Station_Index;
-        end;
-        SetLength(Itinerary_Indexes, high(DijkstraTable));
-        Itinerary_Indexes[0] := Starting_Station_Index;
-        k:= 1;
-        for iteration:= low(DijkstraTable) to high(DijkstraTable) do
-            begin
-                for column := low(DijkstraTable) to high(DijkstraTable) do
-                    If (DijkstraTable[iteration][column].isValidated := True) and (Itinerary_Indexes[k-1] <> DijkstraTable[iteration][column].comingFromStationIndex) then
-                        begin
-                            Itinerary_Indexes[k] := DijkstraTable[iteration][column].comingFromStationIndex;
-                            k:= k + 1;  
-                        end;
-                       
-            end;
-end;
+  For i := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+    Begin
+      For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+        Begin
+          Game.Dijkstra_Table[i][j].isAvailable := True;
+          // Les cases sont a priori toutes disponibles avant d'être passé dessus.
+
+        End;
+
+    End;
+
+  comingFromStationIndex := Starting_Station_Index;
+  Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].weight := 0;
+  Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].comingFromStationIndex := comingFromStationIndex;
+  Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isValidated := True;
+  For iteration := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+    Begin
+      Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isAvailable := False;
+      iteration := iteration+1;
+    End;
+
+  For iteration := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
+    Begin
+      Connect_Stations(iteration, comingFromStationIndex, Game.Graph_Table, Game.Dijkstra_Table);
+      For column := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
+        Begin
+          If (Game.Dijkstra_Table[iteration][column].isAvailable = True) And (Game.Dijkstra_Table[iteration][column].isConnected = True) And (Game.Dijkstra_Table[iteration][column].isValidated = False) Then
+            Begin
+              Game.Dijkstra_Table[iteration][column].comingFromStationIndex := comingFromStationIndex;
+              Game.Dijkstra_Table[iteration][column].weight := get_Weight(get_Pointer_From_Absolute_Index(comingFromStationIndex),get_Absolute_Index_From_Station_Pointer(indexStationToConnect), Game.
+                                                         Stations);
+            End;
+        End;
+      // - Compare et détermine l'index de la station dont le poids est le plus faible. 
+      minimum_Weight := 2203;
+      //diagonale d'un écran 1920*1080
+      For i := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
+        Begin
+          For column:= (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
+            Begin
+              If (Game.Dijkstra_Table[i][column].isConnected = True) And (Game.Dijkstra_Table[iteration][column].isValidated = False) And (Game.Dijkstra_Table[iteration][column].isAvailable = True) Then
+                Begin
+                  If Game.Dijkstra_Table[i][column].weight < minimum_Weight Then
+                    Begin
+                      minimum_Weight := Game.Dijkstra_Table[i][column].weight;
+                      lightest_Station_Index := column;
+                    End;
+
+                End;
+            End;
+        End;
+      Game.Dijkstra_Table[iteration+1][lightest_Station_Index] := Game.Dijkstra_Table[iteration][lightest_Station_Index];
+      Game.Dijkstra_Table[iteration+1][lightest_Station_Index].isValidated := True;
+      For i:= iteration To high(Game.Dijkstra_Table) Do
+        //On peut également commencer la boucle à iteration+2.
+        Begin
+          Game.Dijkstra_Table[i][lightest_Station_Index].isAvailable := False;
+        End;
+      comingFromStationIndex := lightest_Station_Index;
+    End;
+  SetLength(Itinerary_Indexes, high(Game.Dijkstra_Table));
+  Itinerary_Indexes[0] := Starting_Station_Index;
+  k := 1;
+  For iteration:= low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+    Begin
+      For column := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+        If (Game.Dijkstra_Table[iteration][column].isValidated := True) And (Itinerary_Indexes[k-1] <> Game.Dijkstra_Table[iteration][column].comingFromStationIndex) Then
+          Begin
+            Itinerary_Indexes[k] := Game.Dijkstra_Table[iteration][column].comingFromStationIndex;
+            k := k + 1;
+          End;
+
+    End;
+End;
 
 
 Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;

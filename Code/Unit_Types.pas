@@ -431,9 +431,13 @@ Type Type_Game = Record
   // Tableau dymamique contenant les stations.
   Stations : array Of Type_Station;
   // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.  
-  graph_Table : Type_Graph_Table;
+  Graph_Table : Type_Graph_Table;
   // Carte des stations.
   Stations_Map : Array Of Array Of Boolean;
+  // Tableau de dijkstra.
+  Dijkstra_Table : Array Of Array Of Type_Dijkstra_Cell;
+
+
   // Lignes
   // Tableau dynamque contenant les lignes.
   Lines : array Of Type_Line;
@@ -676,6 +680,7 @@ End;
 Function Station_Create(Var Game : Type_Game) : Boolean;
 Var Shape : Byte;
     Position : Type_Coordinates;
+    i : Byte;
 Begin
   If (length(Game.Stations) < Maximum_Number_Stations) Then
     Begin
@@ -709,6 +714,15 @@ Begin
 
       Game.Stations[high(Game.Stations)].Position.X := 64 * Position.X;
       Game.Stations[high(Game.Stations)].Position.Y := 64 * Position.Y;
+
+      // Augmentation du nombre d'entrée dans le tableau de résolutions.
+      SetLength(Game.Graph_Table, length(Game.Stations));
+      For i := low(Game.Graph_Table) To high(Game.Graph_Table) Do
+        SetLength(Game.Graph_Table[i], length(Game.Stations));
+
+      SetLength(Game.Dijkstra_Table, length(Game.Stations));
+      For i := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+        SetLength(Game.Dijkstra_Table[i], length(Game.Stations));
 
       // Calcul les coordoonées centré de la station.
       Game.Stations[high(Game.Stations)].Position_Centered := Get_Center_Position(Game.Stations[high(Game.Stations)].Position, Game.Stations[high(Game.Stations)].Size);
