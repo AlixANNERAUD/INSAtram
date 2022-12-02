@@ -164,6 +164,35 @@ Type Type_Font = pTTF_Font;
 
   // - - Graphics
 
+
+// - Interface graphique
+
+Type Type_Label = Record
+  Position, Size : Type_Coordinates;
+  Text : String;
+  Font : Type_Font;
+  Color : Type_Color;
+  Surface : Type_Surface;
+End;
+
+Type Type_Panel = Record
+  Position, Size : Type_Coordinates;
+  Surface : Type_Surface;
+  Color : Type_Color;
+End;
+
+Type Type_Image = Record
+  Position, Size : Type_Coordinates;
+  Surface : Type_Surface;
+End;
+
+Type Type_Button = Record
+  Position, Size : Type_Coordinates;
+  Pressed : Boolean;
+  Surface_Pressed : Type_Surface;
+  Surface_Released : Type_Surface;
+End;
+
 Type Type_Color = Record
   Red, Green, Blue, Alpha : Byte;
 End;
@@ -315,33 +344,6 @@ Type Type_Player = Record
   Show : Boolean;
 End;
 
-// - Interface graphique
-
-Type Type_Label = Record
-  Position, Size : Type_Coordinates;
-  Text : String;
-  Font : Type_Font;
-  Color : Type_Color;
-  Surface : Type_Surface;
-End;
-
-Type Type_Panel = Record
-  Position, Size : Type_Coordinates;
-  Surface : Type_Surface;
-  Color : Type_Color;
-End;
-
-Type Type_Image = Record
-  Position, Size : Type_Coordinates;
-  Surface : Type_Surface;
-End;
-
-Type Type_Button = Record
-  Position, Size : Type_Coordinates;
-  Pressed : Boolean;
-  Surface_Pressed : Type_Surface;
-  Surface_Released : Type_Surface;
-End;
 
 // - Mouse
 

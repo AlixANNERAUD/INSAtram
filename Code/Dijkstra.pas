@@ -49,7 +49,7 @@ Begin
         begin
             for jiteration:= low(Game.Lines.Stations) to (high(Game.Lines.Stations)-1) do // Pour chacune des stations consécutivement connectées contenues dans le tableau :
                 begin
-                    if Game.Lines.Stations[jiteration] <> NIL then // Au début de la partie il y a des chances pour que certaines lignes soient vides, il ne faut pas accéder à cet emplacement mémoire s'il ne contient pas un pointeur sur station.
+                    if (Game.Lines.Stations[jiteration] <> NIL) then // Au début de la partie il y a des chances pour que certaines lignes soient vides, il ne faut pas accéder à cet emplacement mémoire s'il ne contient pas un pointeur sur station.
                     begin
                     couple_Stations[0]:=Game.Lines.Stations[jiteration];
                     couple_Stations[1]:=Game.Lines.Stations[jiteration+1];
