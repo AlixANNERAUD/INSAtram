@@ -201,13 +201,13 @@ Type Type_Color_Name = (Color_Black,
                        );
 
 Type Type_Day = (Day_Monday,
-                  Day_Tuesday,
-                  Day_Wednesday,
-                  Day_Thursday,
-                  Day_Friday,
-                  Day_Saturday,
-                  Day_Sunday
-                 );
+                 Day_Tuesday,
+                 Day_Wednesday,
+                 Day_Thursday,
+                 Day_Friday,
+                 Day_Saturday,
+                 Day_Sunday
+                );
 
 Type Type_Ressources = Record
   // Polices de caractères.
@@ -279,8 +279,8 @@ Type Type_Dual_State_Button = Record
   Position, Size : Type_Coordinates;
   Pressed : Boolean;
   State : Boolean;
-  Surface_Pressed : array[0 .. 1] of Type_Surface;
-  Surface_Released : array[0 .. 1] of Type_Surface;
+  Surface_Pressed : array[0 .. 1] Of Type_Surface;
+  Surface_Released : array[0 .. 1] Of Type_Surface;
 End;
 
 // - - Passengers
@@ -313,12 +313,14 @@ Type Type_Station_Pointer = ^Type_Station;
   // - - Train
 
 Type Type_Vehicle = Record
-  Position, Size : Type_Coordinates;
-  Sprite : Type_Surface;
   Passengers : Array[0 .. (Vehicle_Maximum_Passengers_Number - 1)] Of Type_Passenger_Pointer;
 End;
 
 Type Type_Train = Record
+  // Position du train.
+  Position, Size : Type_Coordinates;
+  // Sprite du train.
+  Sprite : Type_Surface;
   Timer : Type_Time;
   // - Détermine si le train est à l'arrêt ou non.
   Driving : Boolean;
@@ -368,30 +370,33 @@ Type Type_Player = Record
   Show : Boolean;
 End;
 
-  // - Itineraries
+// - Itineraries
 
-  Type Type_Graph_Table = Array of Array of Array[0..Game_Maximum_Lines_Number-1] of Type_Line_Pointer;
+Type Type_Graph_Table = Array Of Array Of Array[0..Game_Maximum_Lines_Number-1] Of Type_Line_Pointer;
 
-  Type Type_Dijkstra_Cell = Record
-    isConnected : Boolean;
-    isAvailable : Boolean;
-    comingFromStationIndex : Type_Station_Pointer;
-    weight : Real;
-    isValidated : Boolean;
-  End;
+Type Type_Dijkstra_Cell = Record
+  isConnected : Boolean;
+  isAvailable : Boolean;
+  comingFromStationIndex : Type_Station_Pointer;
+  weight : Real;
+  isValidated : Boolean;
+End;
 
 
 // - Mouse
 
+Type Type_Mouse_Mode = (Mouse_Mode_Normal, Mouse_Mode_Add_Locomotive, Mouse_Mode_Add_Wagon);
+
 Type Type_Mouse = Record
   Press_Position, Release_Position : Type_Coordinates;
+  Mode : Type_Mouse_Mode;
   State : Boolean;
 End;
 
 // - Game
 
 Type Type_Game = Record
-  
+
   Start_Time : Type_Time;
 
   Day : Type_Day;
@@ -415,7 +420,7 @@ Type Type_Game = Record
 
   // Panneau contenant l'interface du bas (selection des lignes).
   Panel_Bottom : Type_Panel;
-  Lines_Buttons : array[0 .. (Game_Maximum_Lines_Number - 1)] Of Type_Button;
+  Lines_Buttons : array[0 .. (Game_Maximum_Lines_Number - 1)] Of Type_Dual_State_Button;
 
   // Panneau contenant l'interface de gauche (train, wagon, tunnel).
   Panel_Left : Type_Panel;
@@ -479,7 +484,7 @@ Function Station_Create(Var Game: Type_Game) : Boolean;
 Function Line_Create(Color : Type_Color; Var Game : Type_Game; Var First_Station, Second_Station : Type_Station) : Boolean;
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
-Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
+Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 
 
 
@@ -521,7 +526,7 @@ Implementation
 
 Function Day_To_String(Day : Type_Day) : String;
 Begin
-  Case Day Of
+  Case Day Of 
     Day_Monday : Day_To_String := 'Monday';
     Day_Tuesday : Day_To_String := 'Tuesday';
     Day_Wednesday : Day_To_String := 'Wednesday';
@@ -534,7 +539,7 @@ End;
 
 Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
 Begin
-  Case Day_Index Of
+  Case Day_Index Of 
     0 : Time_Index_To_Day := Day_Monday;
     1 : Time_Index_To_Day := Day_Tuesday;
     2 : Time_Index_To_Day := Day_Wednesday;
@@ -625,14 +630,6 @@ Begin
 
 
 
-
-
-
-
-
-
-
-
 { 
   For i := low(Station.Passengers) To high(Station.Passengers) Do
     Passenger_Delete(Station.Passengers[i]^, Station);
@@ -678,9 +675,10 @@ End;
 
 // Procédure qui alloue de la mémoire pour une station et le référence dans le tableau dynamique, détermine sa forme et position aléatoirement et defini ses attributs.
 Function Station_Create(Var Game : Type_Game) : Boolean;
+
 Var Shape : Byte;
-    Position : Type_Coordinates;
-    i : Byte;
+  Position : Type_Coordinates;
+  i : Byte;
 Begin
   If (length(Game.Stations) < Maximum_Number_Stations) Then
     Begin
@@ -857,15 +855,15 @@ Begin
 
       // Calcul de la distance maximale du train.
 
-
       Line.Trains[high(Line.Trains)].Maximum_Distance := Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position);
       Line.Trains[high(Line.Trains)].Maximum_Distance := Line.Trains[high(Line.Trains)].Maximum_Distance
                                                          +  Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
                                                          (Line.Trains)].Next_Station^.Position_Centered);
 
+
       Line.Trains[high(Line.Trains)].Driving := True;
 
-      Vehicle_Create(Line.Trains[high(Line.Trains)], Game);
+      Vehicle_Create(Line.Trains[high(Line.Trains)]);
 
       Train_Create := True;
     End
@@ -873,18 +871,13 @@ Begin
     Train_Create := False;
 End;
 
-Function Vehicle_Create(Var Train : Type_Train; Var Game : Type_Game) : Boolean;
+Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 
 Var i : Byte;
 Begin
   If (length(Train.Vehicles) < Train_Maximum_Vehicles_Number) Then
     Begin
       SetLength(Train.Vehicles, length(Train.Vehicles) + 1);
-      Train.Vehicles[high(Train.Vehicles)].Position.X := 0;
-      Train.Vehicles[high(Train.Vehicles)].Position.Y := 0;
-      Train.Vehicles[high(Train.Vehicles)].Size.X := Vehicle_Width;
-      Train.Vehicles[high(Train.Vehicles)].Size.Y := Vehicle_Height;
-      Train.Vehicles[high(Train.Vehicles)].Sprite := Game.Ressources.Vehicle_0_Degree;
       Vehicle_Create := True;
       For i := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
         Train.Vehicles[high(Train.Vehicles)].Passengers[i] := Nil;

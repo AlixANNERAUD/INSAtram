@@ -13,24 +13,36 @@ Function Mouse_Is_Pressed(Game : Type_Game) : Boolean;
 
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
 
-Function Mouse_On_Object(Mouse_Position, Object_Position, Object_Size : Type_Coordinates) : Boolean;
+Function Mouse_On_Panel(Mouse_Position : Type_Coordinates; Panel : Type_Panel) : Boolean;
+Function Mouse_On_Object(Mouse_Position : Type_Coordinates; Object_Position, Object_Size : Type_Coordinates; Panel : Type_Panel) : Boolean;
 
 Function Mouse_Get_Press_Position(Game : Type_Game) : Type_Coordinates;
 Function Mouse_Get_Release_Position(Game : Type_Game) : Type_Coordinates;
 
 Implementation
 
-Function Mouse_On_Object(Mouse_Position, Object_Position, Object_Size : Type_Coordinates) : Boolean;
+Function Mouse_On_Object(Mouse_Position : Type_Coordinates; Object_Position, Object_Size : Type_Coordinates; Panel : Type_Panel) : Boolean;
 Begin
-  If (Mouse_Position.X >= Object_Position.X) And (Mouse_Position.X <= Object_Position.X + Object_Size.X) And (Mouse_Position.Y >= Object_Position.Y) And (Mouse_Position.Y <= Object_Position.Y +
-     Object_Size.Y) Then
+  If (Mouse_Position.X >= Object_Position.X + Panel.Position.X) And (Mouse_Position.X <= Object_Position.X + Object_Size.X + Panel.Position.X) And
+     (Mouse_Position.Y >= Object_Position.Y + Panel.Position.Y) And (Mouse_Position.Y <= Object_Position.Y + Object_Size.Y + Panel.Position.Y) Then
     Mouse_On_Object := True
   Else
     Mouse_On_Object := False;
 End;
 
+Function Mouse_On_Panel(Mouse_Position : Type_Coordinates; Panel : Type_Panel) : Boolean;
+Begin
+  If (Mouse_Position.X >= Panel.Position.X) And (Mouse_Position.X <= Panel.Position.X + Panel.Size.X) And
+     (Mouse_Position.Y >= Panel.Position.Y) And (Mouse_Position.Y <= Panel.Position.Y + Panel.Size.Y) Then
+    Mouse_On_Panel := True
+  Else
+    Mouse_On_Panel := False;
+End;
+
 // Procedure qui gère les interractions avec la souris.
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
+
+Var i, j, k : Byte;
 Begin
   If (Mouse_Event.Button = SDL_BUTTON_LEFT) Then
     Begin
@@ -51,24 +63,83 @@ Begin
   // Si la souris est pressé.
   If (Mouse_Is_Pressed(Game)) Then
     Begin
-      // Si il y a un clic dans le panneau du haut.
-      If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Panel_Top.Position, Game.Panel_Top.Size)) Then
+      // Si la souris se trouve dans le panneau de gauche.
+      If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Left)) Then
         Begin
-          // Vérifie si le clic est sur le bouton play pause.
-          If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Play_Pause_Button.Position, Game.Play_Pause_Button.Size)) Then
-              Game.Play_Pause_Button.State := Not(Game.Play_Pause_Button.State);
+          If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Locomotive_Button.Position, Game.Locomotive_Button.Size, Game.Panel_Left)) Then
+            Begin
+              Game.Mouse.Mode := Mouse_Mode_Add_Locomotive;
+            End
+          Else If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Wagon_Button.Position, Game.Wagon_Button.Size, Game.Panel_Left)) Then
+                 Begin
+                   Game.Mouse.Mode := Mouse_Mode_Add_Wagon;
+                 End
         End;
 
-      // Si la souris se trouve dans le panneau de gauche.
-      If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Panel_Left.Position, Game.Panel_Left.Size)) Then
-        writeln('Mouse on panel left');
+
     End
     // Si la souris est relachée.
   Else
     Begin
+      // Si il y a un clic dans le panneau du haut.
+      If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Top)) Then
+        Begin
+          // Vérifie si le clic est sur le bouton play pause.
+          If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Play_Pause_Button.Position, Game.Play_Pause_Button.Size, Game.Panel_Top)) Then
+            Game.Play_Pause_Button.State := Not(Game.Play_Pause_Button.State);
+        End;
+
+
       // Si la souris se trouve sur le panneau de droite.
-      If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Panel_Right.Position, Game.Panel_Right.Size)) Then
-        writeln('Mouse on panel right');
+      If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Right)) Then
+        Begin
+          //
+         If (Game.Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
+            Begin
+              // Détecte si le poiteur est en collision avec une ligne.
+
+            End
+          Else If (Game.Mouse.Mode = Mouse_Mode_Add_Wagon) Then
+                 Begin
+                    writeln('Wagon');
+                   // Détecte si le pointeur est sur un train.
+                   For i := low(Game.Lines) To high(Game.Lines) Do
+                     Begin
+                       For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+                         Begin
+                            If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Lines[i].Trains[j].Position, Game.Lines[i].Trains[j].Size, Game.Panel_Right)) Then
+                            Begin
+                              Vehicle_Create(Game.Lines[i].Trains[j]);
+                              writeln('Train : ', i, ' ', j);
+                              Break;
+                              Break;
+                            End;
+                         End;
+                     End;
+
+                 End
+          Else
+            Begin
+
+            End;
+
+        End;
+
+      // Si la souris se trouve dans le panneau du bas.
+      If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Bottom)) Then
+        Begin
+          For i := 0 To Game_Maximum_Lines_Number - 1 Do
+            Begin
+              If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Lines_Buttons[i].Position, Game.Lines_Buttons[i].Size, Game.Panel_Bottom)) Then
+                Game.Lines_Buttons[i].State := Not(Game.Lines_Buttons[i].State)
+              Else
+                Game.Lines_Buttons[i].State := False;
+
+            End;
+        End;
+
+        Game.Mouse.Mode := Mouse_Mode_Normal;
+
     End;
 
 End;

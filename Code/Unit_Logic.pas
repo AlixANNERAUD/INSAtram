@@ -26,6 +26,8 @@ Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station :
 
 Implementation
 
+{
+
 // - - Fonctions et procédures relatives au passagers 
 
 Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
@@ -216,7 +218,7 @@ Begin
 
     End;
 End;
-
+}
 
 Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
 Begin
@@ -286,7 +288,7 @@ Begin
     End;
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
-  Train_Create(Game.Lines[0].Stations[2], false, Game.Lines[0], Game);
+  Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
 
   Mouse_Load(Game);
 

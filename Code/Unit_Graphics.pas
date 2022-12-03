@@ -3,7 +3,7 @@ Unit Unit_Graphics;
 
 Interface
 
-Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Math;
+Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Math, Unit_Mouse;
 
 // - Function
 
@@ -70,6 +70,7 @@ Implementation
 
 // Fonction qui rend un button à double état.
 Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
+
 Var Destination_Rectangle : TSDL_Rect;
 Begin
   Destination_Rectangle.x := Button.Position.X;
@@ -80,13 +81,13 @@ Begin
   If Button.Pressed Then
     If (Button.State = False) Then
       SDL_BlitSurface(Button.Surface_Pressed[0], Nil, Destination_Panel.Surface, @Destination_Rectangle)
-    Else
-       SDL_BlitSurface(Button.Surface_Pressed[1], Nil, Destination_Panel.Surface, @Destination_Rectangle)
   Else
-    If (Button.State = True) Then
+    SDL_BlitSurface(Button.Surface_Pressed[1], Nil, Destination_Panel.Surface, @Destination_Rectangle)
+  Else
+    If (Button.State = False) Then
       SDL_BlitSurface(Button.Surface_Released[0], Nil, Destination_Panel.Surface, @Destination_Rectangle)
-    Else
-      SDL_BlitSurface(Button.Surface_Released[1], Nil, Destination_Panel.Surface, @Destination_Rectangle);
+  Else
+    SDL_BlitSurface(Button.Surface_Released[1], Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
 
 
@@ -98,6 +99,7 @@ Begin
   Dual_State_Button.Surface_Released[1] := Surface_Released_Enable;
   Dual_State_Button.Size.X := Surface_Released_Disabled^.w;
   Dual_State_Button.Size.Y := Surface_Released_Disabled^.h;
+  Dual_State_Button.State := False;
 End;
 
 // Fonction qui détecte si un rectangle et une ligne sont en colision.
@@ -262,6 +264,8 @@ Begin
 
   SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
+
+
 
 // Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
@@ -428,7 +432,7 @@ Begin
   Game.Clock_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Image.Size.Y);
   Game.Clock_Image.Position.X := Game.Clock_Label.Position.X - 16 - Game.Clock_Image.Size.X;
 
-  Dual_State_Button_Set(Game.Play_Pause_Button, IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause), IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause));
+  Dual_State_Button_Set(Game.Play_Pause_Button, IMG_Load(Path_Image_Pause), IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause), IMG_Load(Path_Image_Play));
 
   Game.Play_Pause_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Play_Pause_Button.Size.Y);
   Game.Play_Pause_Button.Position.X := 16;
@@ -437,18 +441,45 @@ Begin
 
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
     Begin
-      Button_Set(Game.Lines_Buttons[i], Surface_Create(32, 32), Surface_Create(32, 32));
+      Dual_State_Button_Set(Game.Lines_Buttons[i], Surface_Create(32, 32), Surface_Create(32, 32), Surface_Create(32, 32), Surface_Create(32, 32));
     End;
 
+  FilledCircleRGBA(Game.Lines_Buttons[0].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Red].Red, Game.Ressources.Palette[Color_Red].Green, Game.Ressources.Palette[Color_Red].Blue, 255
+  );
+  FilledCircleRGBA(Game.Lines_Buttons[1].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Purple].Red, Game.Ressources.Palette[Color_Purple].Green, Game.Ressources.Palette[Color_Purple].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[2].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Indigo].Red, Game.Ressources.Palette[Color_Indigo].Green, Game.Ressources.Palette[Color_Indigo].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[3].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Teal].Red, Game.Ressources.Palette[Color_Teal].Green, Game.Ressources.Palette[Color_Teal].Blue,
+                   255);
+  FilledCircleRGBA(Game.Lines_Buttons[4].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Green].Red, Game.Ressources.Palette[Color_Green].Green, Game.Ressources.Palette[Color_Green].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[5].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Yellow].Red, Game.Ressources.Palette[Color_Yellow].Green, Game.Ressources.Palette[Color_Yellow].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[6].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Orange].Red, Game.Ressources.Palette[Color_Orange].Green, Game.Ressources.Palette[Color_Orange].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[7].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Brown].Red, Game.Ressources.Palette[Color_Brown].Green, Game.Ressources.Palette[Color_Brown].
+                   Blue, 255);
 
-  FilledCircleColor(Game.Lines_Buttons[0].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Red]));
-  FilledcircleColor(Game.Lines_Buttons[1].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Purple]));
-  FilledcircleColor(Game.Lines_Buttons[2].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Deep_Purple]));
-  FilledcircleColor(Game.Lines_Buttons[3].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Indigo]));
-  FilledcircleColor(Game.Lines_Buttons[4].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Blue]));
-  FilledcircleColor(Game.Lines_Buttons[5].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Light_Blue]));
-  FilledcircleColor(Game.Lines_Buttons[6].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Cyan]));
-  FilledcircleColor(Game.Lines_Buttons[7].Surface_Released, 16, 16, 16, Color_To_Longword(Game.Ressources.Palette[Color_Teal]));
+  // 
+
+  FilledCircleRGBA(Game.Lines_Buttons[0].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Red].Red, Game.Ressources.Palette[Color_Red].Green, Game.Ressources.Palette[Color_Red].Blue, 255
+  );
+  FilledCircleRGBA(Game.Lines_Buttons[1].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Purple].Red, Game.Ressources.Palette[Color_Purple].Green, Game.Ressources.Palette[Color_Purple].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[2].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Indigo].Red, Game.Ressources.Palette[Color_Indigo].Green, Game.Ressources.Palette[Color_Indigo].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[3].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Teal].Red, Game.Ressources.Palette[Color_Teal].Green, Game.Ressources.Palette[Color_Teal].Blue,
+                   255);
+  FilledCircleRGBA(Game.Lines_Buttons[4].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Green].Red, Game.Ressources.Palette[Color_Green].Green, Game.Ressources.Palette[Color_Green].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[5].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Yellow].Red, Game.Ressources.Palette[Color_Yellow].Green, Game.Ressources.Palette[Color_Yellow].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[6].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Orange].Red, Game.Ressources.Palette[Color_Orange].Green, Game.Ressources.Palette[Color_Orange].
+                   Blue, 255);
+  FilledCircleRGBA(Game.Lines_Buttons[7].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Brown].Red, Game.Ressources.Palette[Color_Brown].Green, Game.Ressources.Palette[Color_Brown].
+                   Blue, 255);
+
 
   Game.Lines_Buttons[0].Position.Y := Get_Centered_Position(Game.Panel_Bottom.Size.Y, Game.Lines_Buttons[0].Size.Y);
   Game.Lines_Buttons[0].Position.X := Get_Centered_Position(Game.Panel_Bottom.Size.X, Game.Lines_Buttons[0].Size.X * Game_Maximum_Lines_Number + 16 * (Game_Maximum_Lines_Number - 1));
@@ -504,6 +535,7 @@ End;
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
 Var i, j:   Byte;
+  Destination_Rectangle : TSDL_Rect;
 Begin
 
   // - Terrain de jeu.
@@ -560,7 +592,7 @@ Begin
 
   // - Panneau du bas.
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
-    Button_Render(Game.Lines_Buttons[i], Game.Panel_Bottom);
+    Dual_State_Button_Render(Game.Lines_Buttons[i], Game.Panel_Bottom);
 
   // - Panneau de gauche.
 
@@ -574,6 +606,21 @@ Begin
   Panel_Render(Game.Panel_Bottom, Game.Window);
   Panel_Render(Game.Panel_Left, Game.Window);
   Panel_Render(Game.Panel_Right, Game.Window);
+
+  // Affichage du curseur.
+
+  If (Game.Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
+    Begin
+      Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
+      Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
+      SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
+    End
+  Else If (Game.Mouse.Mode = Mouse_Mode_Add_Wagon) Then
+         Begin
+           Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
+           Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
+           SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
+         End;
 
   SDL_Flip(Game.Window.Surface);
 
@@ -726,74 +773,74 @@ Begin
     0 :
         Begin
           Centered_Position.X := Centered_Position.X + Norme;
-          Train.Vehicles[0].Sprite := Ressources.Vehicle_0_Degree;
-          Train.Vehicles[0].Size.X := Ressources.Vehicle_0_Degree^.w;
-          Train.Vehicles[0].Size.Y := Ressources.Vehicle_0_Degree^.h;
+          Train.Sprite := Ressources.Vehicle_0_Degree;
+          Train.Size.X := Ressources.Vehicle_0_Degree^.w;
+          Train.Size.Y := Ressources.Vehicle_0_Degree^.h;
         End;
     180 :
           Begin
             Centered_Position.X := Centered_Position.X - Norme;
-            Train.Vehicles[0].Sprite := Ressources.Vehicle_0_Degree;
-            Train.Vehicles[0].Size.X := Ressources.Vehicle_0_Degree^.w;
-            Train.Vehicles[0].Size.Y := Ressources.Vehicle_0_Degree^.h;
+            Train.Sprite := Ressources.Vehicle_0_Degree;
+            Train.Size.X := Ressources.Vehicle_0_Degree^.w;
+            Train.Size.Y := Ressources.Vehicle_0_Degree^.h;
           End;
     90 :
          Begin
            Centered_Position.Y := Centered_Position.Y - Norme;
-           Train.Vehicles[0].Sprite := Ressources.Vehicle_90_Degree;
-           Train.Vehicles[0].Size.X := Ressources.Vehicle_90_Degree^.w;
-           Train.Vehicles[0].Size.Y := Ressources.Vehicle_90_Degree^.h;
+           Train.Sprite := Ressources.Vehicle_90_Degree;
+           Train.Size.X := Ressources.Vehicle_90_Degree^.w;
+           Train.Size.Y := Ressources.Vehicle_90_Degree^.h;
          End;
     -90 :
           Begin
             Centered_Position.Y := Centered_Position.Y + Norme;
-            Train.Vehicles[0].Sprite := Ressources.Vehicle_90_Degree;
-            Train.Vehicles[0].Size.X := Ressources.Vehicle_90_Degree^.w;
-            Train.Vehicles[0].Size.Y := Ressources.Vehicle_90_Degree^.h;
+            Train.Sprite := Ressources.Vehicle_90_Degree;
+            Train.Size.X := Ressources.Vehicle_90_Degree^.w;
+            Train.Size.Y := Ressources.Vehicle_90_Degree^.h;
           End;
     -45 :
           Begin
             Centered_Position.X := Centered_Position.X + Norme;
             Centered_Position.Y := Centered_Position.Y + Norme;
-            Train.Vehicles[0].Sprite := Ressources.Vehicle_135_Degree;
-            Train.Vehicles[0].Size.X := Ressources.Vehicle_135_Degree^.w;
-            Train.Vehicles[0].Size.Y := Ressources.Vehicle_135_Degree^.h;
+            Train.Sprite := Ressources.Vehicle_135_Degree;
+            Train.Size.X := Ressources.Vehicle_135_Degree^.w;
+            Train.Size.Y := Ressources.Vehicle_135_Degree^.h;
           End;
     -135 :
            Begin
              Centered_Position.X := Centered_Position.X - Norme;
              Centered_Position.Y := Centered_Position.Y + Norme;
-             Train.Vehicles[0].Sprite := Ressources.Vehicle_45_Degree;
-             Train.Vehicles[0].Size.X := Ressources.Vehicle_45_Degree^.w;
-             Train.Vehicles[0].Size.Y := Ressources.Vehicle_45_Degree^.h;
+             Train.Sprite := Ressources.Vehicle_45_Degree;
+             Train.Size.X := Ressources.Vehicle_45_Degree^.w;
+             Train.Size.Y := Ressources.Vehicle_45_Degree^.h;
            End;
     45:
         Begin
           Centered_Position.X := Centered_Position.X + Norme;
           Centered_Position.Y := Centered_Position.Y - Norme;
-          Train.Vehicles[0].Sprite := Ressources.Vehicle_45_Degree;
-          Train.Vehicles[0].Size.X := Ressources.Vehicle_45_Degree^.w;
-          Train.Vehicles[0].Size.Y := Ressources.Vehicle_45_Degree^.h;
+          Train.Sprite := Ressources.Vehicle_45_Degree;
+          Train.Size.X := Ressources.Vehicle_45_Degree^.w;
+          Train.Size.Y := Ressources.Vehicle_45_Degree^.h;
         End;
     135:
          Begin
            Centered_Position.X := Centered_Position.X - Norme;
            Centered_Position.Y := Centered_Position.Y - Norme;
-           Train.Vehicles[0].Sprite := Ressources.Vehicle_135_Degree;
-           Train.Vehicles[0].Size.X := Ressources.Vehicle_135_Degree^.w;
-           Train.Vehicles[0].Size.Y := Ressources.Vehicle_135_Degree^.h;
+           Train.Sprite := Ressources.Vehicle_135_Degree;
+           Train.Size.X := Ressources.Vehicle_135_Degree^.w;
+           Train.Size.Y := Ressources.Vehicle_135_Degree^.h;
          End;
 
   End;
 
-  Destination_Rectangle.x := round(Centered_Position.X - (Train.Vehicles[0].Size.X*0.5));
-  Destination_Rectangle.y := round(Centered_Position.Y - (Train.Vehicles[0].Size.X*0.5));
+  Destination_Rectangle.x := round(Centered_Position.X - (Train.Size.X*0.5));
+  Destination_Rectangle.y := round(Centered_Position.Y - (Train.Size.X*0.5));
 
-  SDL_BlitSurface(Train.Vehicles[0].Sprite, Nil, Panel.Surface, @Destination_Rectangle);
+  SDL_BlitSurface(Train.Sprite, Nil, Panel.Surface, @Destination_Rectangle);
 
   // Affichage de l'étiquette du train.
-  Destination_Rectangle.x := Destination_Rectangle.x + Get_Centered_Position(Train.Vehicles[0].Size.X, Train.Passengers_Label.Size.X);
-  Destination_Rectangle.y := Destination_Rectangle.y + Get_Centered_Position(Train.Vehicles[0].Size.Y, Train.Passengers_Label.Size.Y);
+  Destination_Rectangle.x := Destination_Rectangle.x + Get_Centered_Position(Train.Size.X, Train.Passengers_Label.Size.X);
+  Destination_Rectangle.y := Destination_Rectangle.y + Get_Centered_Position(Train.Size.Y, Train.Passengers_Label.Size.Y);
 
   SDL_BlitSurface(Train.Passengers_Label.Surface, Nil, Panel.Surface, @Destination_Rectangle);
 End;
