@@ -377,10 +377,12 @@ Type Type_Graph_Table = Array Of Array Of Array[0..Game_Maximum_Lines_Number-1] 
 Type Type_Dijkstra_Cell = Record
   isConnected : Boolean;
   isAvailable : Boolean;
-  comingFromStationIndex : Type_Station_Pointer;
+  comingFromStationIndex : Integer;
   weight : Real;
   isValidated : Boolean;
 End;
+
+Type Type_Itinerary_Indexes = Array of Integer;
 
 
 // - Mouse

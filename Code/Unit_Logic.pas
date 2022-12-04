@@ -26,7 +26,7 @@ Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station :
 
 Implementation
 
-{
+
 
 // - - Fonctions et procédures relatives au passagers 
 
@@ -128,8 +128,7 @@ End;
 Function get_Weight(first_Station_Pointer, second_Station_Pointer: Type_Station_Pointer; Game : Type_Game): Integer;
 // pas besoin de la graph table qui donne des infos sur les lignes uniquement, et deux lignes qui desservent la meme station ont la meme longueur (elles sont parallèles)
 
-Var iteration : Integer;
-    Intermediate_Position : Type_Coordinates;
+Var Intermediate_Position : Type_Coordinates;
 Begin
 
   Intermediate_Position := Station_Get_Intermediate_Position(first_Station_Pointer^.Position_Centered, second_Station_Pointer^.Position_Centered);
@@ -137,9 +136,10 @@ Begin
   get_Weight := Graphics_Get_Distance(first_Station_Pointer^.Position_Centered, Intermediate_Position) + Graphics_Get_Distance(Intermediate_Position, second_Station_Pointer^.Position_Centered);
 End;
 
-Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Array Of Integer; Game : Type_Game);
+Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
 
-Var row, column, iteration, indexStationToConnect, comingFromStationIndex, minimum_Weight, lightest_Station_Index, i, j : Integer;
+Var k, row, column, iteration, indexStationToConnect, comingFromStationIndex, lightest_Station_Index, i, j : Integer;
+  minimum_Weight : Real;
 
 Begin
   indexStationToConnect := Starting_Station_Index;
@@ -162,24 +162,21 @@ Begin
   For iteration := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
     Begin
       Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isAvailable := False;
-      iteration := iteration+1;
     End;
 
   For iteration := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
     Begin
-      Connect_Stations(iteration, comingFromStationIndex, Game.Graph_Table, Game.Dijkstra_Table);
+      Connect_Stations(iteration, comingFromStationIndex, Game);
       For column := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
         Begin
           If (Game.Dijkstra_Table[iteration][column].isAvailable = True) And (Game.Dijkstra_Table[iteration][column].isConnected = True) And (Game.Dijkstra_Table[iteration][column].isValidated = False) Then
             Begin
               Game.Dijkstra_Table[iteration][column].comingFromStationIndex := comingFromStationIndex;
-              Game.Dijkstra_Table[iteration][column].weight := get_Weight(get_Pointer_From_Absolute_Index(comingFromStationIndex),get_Absolute_Index_From_Station_Pointer(indexStationToConnect), Game.
-                                                         Stations);
+              Game.Dijkstra_Table[iteration][column].weight := get_Weight(get_Pointer_From_Absolute_Index(comingFromStationIndex, Game.Lines[i].Stations),get_Pointer_From_Absolute_Index(indexStationToConnect, Game.Lines[i].Stations), Game);
             End;
         End;
       // - Compare et détermine l'index de la station dont le poids est le plus faible. 
-      minimum_Weight := 2203;
-      //diagonale d'un écran 1920*1080
+      minimum_Weight := 2203; //diagonale d'un écran 1920*1080
       For i := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
         Begin
           For column:= (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
@@ -204,13 +201,13 @@ Begin
         End;
       comingFromStationIndex := lightest_Station_Index;
     End;
-  SetLength(Itinerary_Indexes, high(Game.Dijkstra_Table));
+  SetLength(Itinerary_Indexes, length(Game.Dijkstra_Table));
   Itinerary_Indexes[0] := Starting_Station_Index;
   k := 1;
   For iteration:= low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
     Begin
       For column := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
-        If (Game.Dijkstra_Table[iteration][column].isValidated := True) And (Itinerary_Indexes[k-1] <> Game.Dijkstra_Table[iteration][column].comingFromStationIndex) Then
+        If (Game.Dijkstra_Table[iteration][column].isValidated = True) And (Itinerary_Indexes[k-1] <> Game.Dijkstra_Table[iteration][column].comingFromStationIndex) Then
           Begin
             Itinerary_Indexes[k] := Game.Dijkstra_Table[iteration][column].comingFromStationIndex;
             k := k + 1;
@@ -218,7 +215,7 @@ Begin
 
     End;
 End;
-}
+
 
 Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
 Begin
