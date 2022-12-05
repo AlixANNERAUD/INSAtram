@@ -52,6 +52,7 @@ End;
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
 
 Var i, j, k : Byte;
+    Vehicle_Size : Type_Coordinates;
 Begin
   If (Mouse_Event.Button = SDL_BUTTON_LEFT) Then
     Begin
@@ -111,29 +112,34 @@ Begin
           // Si le curseur est en mode ajout de locomotive.
           If (Game.Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
             Begin
-              If (length(Game.Lines) > 0)
-              Begin
-              // Parcourt les lignes.
-              For i := low(Game.Lines) To high(Game.Lines) Do
+              If (length(Game.Lines) > 0) Then
                 Begin
-                  // Parcourt les stations (et point intermédiaires) d'une ligne.
-                  For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
-                  Begin
-                    // Vérifie que le pointeur est en collision avec la première partie d'une ligne.
-                    If (Line_Rectangle_Colling(Game.Lines[i].Stations[j].Position, Game.Lines[i].Intermediate_Position[j], Mouse_Get_Release_Position(), Game.Ressources.Vehicle_0_Degree.Size))
+                  Vehicle_Size.X := Game.Ressources.Vehicle_0_Degree^.w;
+                  Vehicle_Size.Y := Game.Ressources.Vehicle_0_Degree^.h;
+                  // Parcourt les lignes.
+                  For i := low(Game.Lines) To high(Game.Lines) Do
                     Begin
+                      // Parcourt les stations (et point intermédiaires) d'une ligne.
+                      For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
+                        Begin
+                          // Vérifie que le pointeur est en collision avec la première partie d'une ligne.
+                          If (Line_Rectangle_Colling(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Intermediate_Positions[j], Mouse_Get_Release_Position(Game), Vehicle_Size))
+                            Then
+                            Begin
+                              writeln('Collision ',i ,'-', j);
+                            End;
+                          // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
+                          If (Line_Rectangle_Colling(Game.Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position, Mouse_Get_Release_Position(Game), Vehicle_Size)) Then
+                            Begin
 
+                              writeln('Collision ',i ,'-', j);
+                            End;
+                        End;
                     End;
-                    // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
-                    If (Line_Rectangle_Colling(Game.Lines[i].Intermediate_Position[j], Game.Lines[i].Stations[j + 1].Position, Mouse_Get_Release_Position(), Game.Ressources.Vehicle_0_Degree.Size))
-                    Begin
-
-                    End;
-                  End; 
-                  End;
-
                 End;
-    
+
+            End
+
           // Si le curseur est en mode ajout de wagons.
           Else If (Game.Mouse.Mode = Mouse_Mode_Add_Wagon) Then
                  Begin

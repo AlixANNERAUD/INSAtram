@@ -336,11 +336,11 @@ Begin
   Game.Ressources.Vehicle_135_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 135, 1, 1);
 
   // - Fonts loading
-  Game.Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 16);
+  Game.Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 12);
   Game.Ressources.Fonts[Font_Medium][Font_Normal] := TTF_OpenFont(Path_Font, 24);
   Game.Ressources.Fonts[Font_Big][Font_Normal] := TTF_OpenFont(Path_Font, 32);
 
-  Game.Ressources.Fonts[Font_Small][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 16);
+  Game.Ressources.Fonts[Font_Small][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 12);
   Game.Ressources.Fonts[Font_Medium][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 24);
   Game.Ressources.Fonts[Font_Big][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 32);
 
