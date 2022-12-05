@@ -8,13 +8,15 @@ Unit Unit_Types;
 
 Interface
 
-// - Libraries inclusion.
+// - Dépendances
 
 Uses sdl, sdl_image, sdl_ttf, sysutils, Math;
 
-// - Constants declaration.
+// - Déclaration des constantes
 
-// - - Settings
+// - - Réglages généraux
+
+// - - - Graphismes
 
 Const Color_Depth =   32;
 
@@ -32,9 +34,9 @@ Const Mask_Green =  $0000FF00;
 
 Const Mask_Blue =  $00FF0000;
 
-  // - - Paths
+  // - - - Répertoires des ressources.
 
-  // - - - Images
+  // - - - - Images
 
 Const Path_Ressources =  'Resources/';
 
@@ -76,9 +78,7 @@ Const Path_Image_Button_Wagon = Path_Images + 'Wagon.png';
 
 Const Path_Image_Button_Tunnel = Path_Images + 'Tunnel.png';
 
-
-
-  // - - - Fonts
+  // - - - - Polices
 
 Const Path_Fonts = Path_Ressources + 'Fonts/';
 
@@ -86,16 +86,14 @@ Const Path_Font =   Path_Fonts + '/FreeSans.ttf';
 
 Const Path_Font_Bold = Path_Fonts + '/FreeSansBold.ttf';
 
-  // - - - Sounds
+  // - - - - Sons
 
 Const Path_Sounds = Path_Ressources + 'Sounds/';
 
 
-  // - - Object constants
+  // - - - Jeux
 
-
-
-  // - - - Game
+  // - - - - Entités
 
 Const Game_Maximum_Lines_Number = 8;
 
@@ -148,31 +146,70 @@ Const Lines_Maximum_Number_Stations = 20;
 
 Const Lines_Maximum_Number_Trains = 4;
 
-  // - Type definition
-
-  // - - General
-
-Type Long_Integer_Pointer = ^LongInt;
-
-  // - - Timer
-
-Type Type_Time = Longword;
-
-  // - - SDL related objects
-
-Type Type_Surface = PSDL_Surface;
-
-Type Type_Font = pTTF_Font;
-
-  // - - Graphics
+  // - Définition des types
 
 
+
+  // - - Graphismes
 
 Type Type_Color = Record
   Red, Green, Blue, Alpha : Byte;
 End;
 
-// Structure contenant tous pointeurs des sprites du jeu.
+Type Type_Coordinates = Record
+  X, Y : LongInt;
+End;
+
+// - - - Interface graphique
+
+Type Type_Label = Record
+  Position, Size : Type_Coordinates;
+  Text : String;
+  Font : pTTF_Font;
+  Color : Type_Color;
+  Surface : PSDL_Surface;
+End;
+
+Type Type_Panel = Record
+  Position, Size : Type_Coordinates;
+  Surface : PSDL_Surface;
+  Color : Type_Color;
+End;
+
+Type Type_Image = Record
+  Position, Size : Type_Coordinates;
+  Surface : PSDL_Surface;
+End;
+
+Type Type_Button = Record
+  Position, Size : Type_Coordinates;
+  Pressed : Boolean;
+  Surface_Pressed : PSDL_Surface;
+  Surface_Released : PSDL_Surface;
+End;
+
+Type Type_Dual_State_Button = Record
+  Position, Size : Type_Coordinates;
+  Pressed : Boolean;
+  State : Boolean;
+  Surface_Pressed : array[0 .. 1] Of PSDL_Surface;
+  Surface_Released : array[0 .. 1] Of PSDL_Surface;
+End;
+
+// - - Temps
+
+Type Type_Time = Longword;
+
+Type Type_Day = (Day_Monday,
+                 Day_Tuesday,
+                 Day_Wednesday,
+                 Day_Thursday,
+                 Day_Friday,
+                 Day_Saturday,
+                 Day_Sunday
+                );
+
+  // Structure contenant tous pointeurs des sprites du jeu.
 
 Type Type_Font_Size = (Font_Small, Font_Medium, Font_Big);
 
@@ -200,90 +237,23 @@ Type Type_Color_Name = (Color_Black,
                         Color_White
                        );
 
-Type Type_Day = (Day_Monday,
-                 Day_Tuesday,
-                 Day_Wednesday,
-                 Day_Thursday,
-                 Day_Friday,
-                 Day_Saturday,
-                 Day_Sunday
-                );
 
 Type Type_Ressources = Record
   // Polices de caractères.
-  Fonts : Array [Font_Small..Font_Big, Font_Normal..Font_Bold] Of Type_Font;
+  Fonts : Array [Font_Small..Font_Big, Font_Normal..Font_Bold] Of pTTF_Font;
   // Stations (5 formes différentes).
-  Stations : Array [0 .. (Shapes_Number - 1)] Of Type_Surface;
+  Stations : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface;
   // Passagers (5 formes différentes).
-  Passengers : Array [0 .. (Shapes_Number - 1)] Of Type_Surface;
+  Passengers : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface;
   // Vehicles (locomotive et wagon).
-  Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : Type_Surface;
+  Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : PSDL_Surface;
   // Color palette [Color].
   Palette : Array [Color_Black..Color_White] Of Type_Color;
 End;
 
-// - - Animation
-
-// Animation structure used by animation function in order to animate objects.
-
-Type Type_Animation = Record
-
-  Delay_Time : Type_Time;
-  Variable : Long_Integer_Pointer;
-  Minimum_Value, Maximum_Value : LongInt;
-  //Path : Type_Animation_Path;
-  Enabled : Boolean;
-
-End;
-
-//Type Type_Animation_Path = function(var Animation : Type_Animation) : LongInt;
-
-// - Entity
-// - - Généraux
-
-Type Type_Coordinates = Record
-  X, Y : LongInt;
-End;
+// - - Entités du jeux.
 
 Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
-
-  // - Interface graphique
-
-Type Type_Label = Record
-  Position, Size : Type_Coordinates;
-  Text : String;
-  Font : Type_Font;
-  Color : Type_Color;
-  Surface : Type_Surface;
-End;
-
-Type Type_Panel = Record
-  Position, Size : Type_Coordinates;
-  Surface : Type_Surface;
-  Color : Type_Color;
-End;
-
-Type Type_Image = Record
-  Position, Size : Type_Coordinates;
-  Surface : Type_Surface;
-End;
-
-Type Type_Button = Record
-  Position, Size : Type_Coordinates;
-  Pressed : Boolean;
-  Surface_Pressed : Type_Surface;
-  Surface_Released : Type_Surface;
-End;
-
-Type Type_Dual_State_Button = Record
-  Position, Size : Type_Coordinates;
-  Pressed : Boolean;
-  State : Boolean;
-  Surface_Pressed : array[0 .. 1] Of Type_Surface;
-  Surface_Released : array[0 .. 1] Of Type_Surface;
-End;
-
-// - - Passengers
 
 Type Type_Station_Pointer = ^Type_Station;
 
@@ -293,7 +263,7 @@ Type Type_Station_Pointer = ^Type_Station;
     // Forme du passager (et donc sa station de destination).
     Shape : Type_Shape;
     // Pointeur vers le sprite du passager.
-    Sprite : Type_Surface;
+    Sprite : PSDL_Surface;
     // Itinéraire du passager.
     Itinerary : Array Of Type_Station_Pointer;
   End;
@@ -303,64 +273,65 @@ Type Type_Station_Pointer = ^Type_Station;
   // - - Station
 
   Type_Station = Record
+    // Position, position centrée et taille de la stations.
     Position, Size, Position_Centered : Type_Coordinates;
+    // Forme de la station.
     Shape : Type_Shape;
-    Sprite : Type_Surface;
+    // Pointeur vers le sprite de la station.
+    Sprite : PSDL_Surface;
+    // Passagers de la station.
     Passengers : array Of Type_Passenger_Pointer;
   End;
 
+  Type_Vehicle = Record
+    // Passagers dans le véhicule.
+    Passengers : Array[0 .. (Vehicle_Maximum_Passengers_Number - 1)] Of Type_Passenger_Pointer;
+  End;
 
-  // - - Train
+  Type_Train = Record
+    // Position du train.
+    Position, Size : Type_Coordinates;
+    // Sprite du train.
+    Sprite : PSDL_Surface;
+    Timer : Type_Time;
+    // Détermine si le train est à l'arrêt ou non.
+    Driving : Boolean;
+    // Pointeur de la dernière station.
+    Last_Station : Type_Station_Pointer;
+    // Pointeur de la prochaine station.
+    Next_Station : Type_Station_Pointer;
+    // Distance parcourue depuis la dernière station en pixel.
+    Distance : Integer;
+    // Copie de la position intermédiaire actuelle entre les stations.
+    Intermediate_Position : Type_Coordinates;
+    // Distance de la prochaine position intermédiaire.
+    Intermediate_Position_Distance : Integer;
+    // - Distance maximum;
+    Maximum_Distance : Integer;
+    // Direction directe ou indirecte du train (indexe des stations de la ligne croissant ou décroissant).
+    Direction : Boolean;
+    // - Vitesse du train.
+    Speed : Integer;
+    //  Tableau contenant les wagons du train.
+    Vehicles : array Of Type_Vehicle;
+    // Etiquette 
+    Passengers_Label : Type_Label;
 
-Type Type_Vehicle = Record
-  Passengers : Array[0 .. (Vehicle_Maximum_Passengers_Number - 1)] Of Type_Passenger_Pointer;
-End;
+  End;
+  // - - Line
 
-Type Type_Train = Record
-  // Position du train.
-  Position, Size : Type_Coordinates;
-  // Sprite du train.
-  Sprite : Type_Surface;
-  Timer : Type_Time;
-  // - Détermine si le train est à l'arrêt ou non.
-  Driving : Boolean;
-  // - Pointeur de la dernière station.
-  Last_Station : Type_Station_Pointer;
-  // - Copie de la position intermédiaire actuelle entre les stations.
-  Intermediate_Position : Type_Coordinates;
-  // - Pointeur de la prochaine station.
-  Next_Station : Type_Station_Pointer;
-  // - Distance parcourue depuis la dernière station en pixel.
-  Distance : Integer;
-  // -
-  Intermediate_Position_Distance : Integer;
-  // - Distance maximum;
-  Maximum_Distance : Integer;
-  // Direction directe ou indirecte du train (indexe des stations de la ligne croissant ou décroissant).
-  Direction : Boolean;
-  // - Vitesse du train.
-  Speed : Integer;
+  Type_Line = Record
+    // Couleur de la ligne.
+    Color : Type_Color;
+    // Tableau dynamique de pointeur vers les stations.
+    Stations : array Of Type_Station_Pointer;
+    // Tableau dynamique des positions intermédiaires pré-calculées.
+    Intermediate_Positions : Array Of Type_Coordinates;
+    // Tableau dynamique contenant les trains.
+    Trains : array Of Type_Train;
+  End;
 
-  //  Tableau contenant les wagons du train.
-  Vehicles : array Of Type_Vehicle;
-
-  Passengers_Label : Type_Label;
-
-End;
-// - - Line
-
-Type Type_Line = Record
-  // Couleur de la ligne.
-  Color : Type_Color;
-  // Tableau dynamique de pointeur vers les stations.
-  Stations : array Of Type_Station_Pointer;
-  // Tableau dynamique des positions intermédiaires pré-calculées.
-  Intermediate_Positions : Array Of Type_Coordinates;
-  // Tableau dynamique contenant les trains.
-  Trains : array Of Type_Train;
-End;
-
-Type Type_Line_Pointer = ^Type_Line;
+  Type_Line_Pointer = ^Type_Line;
 
 Type Type_Player = Record
   Score : Integer;
@@ -382,10 +353,10 @@ Type Type_Dijkstra_Cell = Record
   isValidated : Boolean;
 End;
 
-Type Type_Itinerary_Indexes = Array of Integer;
+Type Type_Itinerary_Indexes = Array Of Integer;
 
 
-// - Mouse
+  // - - Souris
 
 Type Type_Mouse_Mode = (Mouse_Mode_Normal, Mouse_Mode_Add_Locomotive, Mouse_Mode_Add_Wagon);
 
@@ -395,17 +366,18 @@ Type Type_Mouse = Record
   State : Boolean;
 End;
 
-// - Game
+// - - Partie
 
 Type Type_Game = Record
 
   Start_Time : Type_Time;
   Day : Type_Day;
   Quit : Boolean;
-  
-  Graphics_Timer : Type_Time;
 
-  // Souri
+  Graphics_Timer : Type_Time;
+  Passengers_Timer : Type_Time;
+
+  // Souris
   Mouse : Type_Mouse;
   // Fenêtre du jeu.
   Window : Type_Panel;
@@ -513,6 +485,9 @@ Function Time_Get_Elapsed(Start_Time : Type_Time) : Type_Time;
 
 // - - Shape
 
+Function Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
+Function Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+
 Function Number_To_Shape(Number : Byte) : Type_Shape;
 
 Function String_To_Characters(String_To_Convert : String) : pChar;
@@ -526,6 +501,80 @@ Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
 Function Day_To_String(Day : Type_Day) : String;
 
 Implementation
+
+// Fonction qui détecte si un rectangle et une ligne sont en colision.
+Function Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+Var 
+  Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
+Begin
+  // Les quatres côtés du rectangles sont décomposés en 4 lignes.
+  // La détection se fait ensuite ligne par ligne.
+  // Les détections sont imbriqués afin de ne pas faire de calculs inutiles.
+
+  // Côté gauche du rectangle.
+  Temporary_Line[0].X := Rectangle_Position.X;
+  Temporary_Line[0].Y := Rectangle_Position.Y;
+  Temporary_Line[1].X := Rectangle_Position.X;
+  Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
+
+  If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+    Begin
+      // Côté droit du rectangle.
+      Temporary_Line[0].X := Rectangle_Position.X+Rectangle_Size.X;
+      Temporary_Line[0].Y := Rectangle_Position.Y;
+      Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
+      Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
+
+      If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+        Begin
+
+          // Côté en haut du rectangle.
+
+          Temporary_Line[0].X := Rectangle_Position.X;
+          Temporary_Line[0].Y := Rectangle_Position.Y;
+          Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
+          Temporary_Line[1].Y := Rectangle_Position.Y;
+
+          If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+            Begin
+              // Coté en bas du rectangle.
+              Temporary_Line[0].X := Rectangle_Position.X;
+              Temporary_Line[0].Y := Rectangle_Position.Y+Rectangle_Size.Y;
+              Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
+              Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
+
+              If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+                Line_Rectangle_Colling := False
+              Else
+                Line_Rectangle_Colling := True;
+            End
+          Else
+            Line_Rectangle_Colling := True;
+        End
+      Else
+        Line_Rectangle_Colling := True;
+    End
+  Else
+    Line_Rectangle_Colling := True;
+End;
+
+// Fonction qui détecte si deux lignes sont sécantes.
+Function Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
+
+Var Coeffcient_A, Coeffcient_B : Real;
+Begin
+  Coeffcient_A := ((Line_2_B.X - Line_2_A.X)*(Line_1_A.Y - Line_2_A.Y) - (Line_2_B.Y - Line_2_A.Y)*(Line_1_A.X - Line_2_A.X)) / ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X -
+                  Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
+
+  Coeffcient_B := ((Line_1_B.X - Line_1_A.X)*(Line_1_A.Y - Line_2_A.Y)) /
+                  ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X - Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
+
+  If ((Coeffcient_A  >= 0) And (Coeffcient_A <= 1) And (Coeffcient_B >= 0) And (Coeffcient_B <= 1)) Then
+    Lines_Colliding := true
+  Else
+    Lines_Colliding := false;
+End;
+
 
 Function Day_To_String(Day : Type_Day) : String;
 Begin
@@ -630,6 +679,11 @@ Procedure Stations_Delete(Var Station : Type_Station; Var Game : Type_Game);
 Var 
   i : Byte;
 Begin
+
+
+
+
+
 
 
 

@@ -53,7 +53,7 @@ End;
 
 Procedure Build_Graph_Table(Game : Type_Game);
 
-Var iteration, jiteration, kiteration, absolute_Index_First_Station, absolute_Index_Second_Station : Integer;
+Var iteration, jiteration, k, absolute_Index_First_Station, absolute_Index_Second_Station : Integer;
   couple_Stations : array[0..1] Of Type_Station_Pointer;
   // Tableau temporaire dans lequel stocker les pointeurs des stations à relier dans la table une fois prélevées dans le tableau de pointeur de station de chaque ligne.
 Begin
@@ -69,9 +69,9 @@ Begin
     Begin
       For jiteration := low(Game.Stations) To high(Game.Stations) Do
         Begin
-          For kiteration := low(Game.Lines) To high(Game.Lines) Do
+          For k := low(Game.Lines) To high(Game.Lines) Do
             Begin
-              Game.graph_Table[iteration][jiteration][kiteration] := Nil;
+              Game.graph_Table[iteration][jiteration][k] := Nil;
             End;
         End;
     End;
@@ -88,6 +88,7 @@ Begin
               couple_Stations[0] := Game.Lines[iteration].Stations[jiteration];
               couple_Stations[1] := Game.Lines[iteration].Stations[jiteration+1];
               absolute_Index_First_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[0], Game.Stations);
+
 
 
 
@@ -141,7 +142,7 @@ Begin
   get_Weight := Graphics_Get_Distance(first_Station_Pointer^.Position_Centered, Intermediate_Position) + Graphics_Get_Distance(Intermediate_Position, second_Station_Pointer^.Position_Centered);
 End;
 
-Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
+Procedure Dijkstra(Starting_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
 
 Var k, row, column, iteration, indexStationToConnect, comingFromStationIndex, lightest_Station_Index, i, j : Integer;
   minimum_Weight : Real;
@@ -225,6 +226,19 @@ Begin
     End;
 End;
 
+
+{Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station; Game : Type_Game) : Boolean;
+Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
+
+
+End;
+
+Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
+Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
+Begin
+  Dijkstra()
+ 
+End;}
 
 Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
 Begin
@@ -374,10 +388,11 @@ Begin
 End;
 
 Procedure Logic_Event_Handler(Var Game : Type_Game);
+
 Var Event : TSDL_Event;
 Begin
   // Vérifie les évènements.
-  while (SDL_PollEvent(@Event) > 0) Do
+  While (SDL_PollEvent(@Event) > 0) Do
     Begin
       // Si l'utilisateur demande la fermeture du programme.
       Case Event.type_ Of 
@@ -396,18 +411,17 @@ End;
 
 // Rafraichissement de la logique.
 Procedure Logic_Refresh(Var Game : Type_Game);
-
 Var i, j : Integer;
 Begin
   // Vérifie les évenements
 
+  If (Game.Graphics_Timer > Time_Get_Current()) Then
+    Begin
+      Logic_Event_Handler(Game);
+      SDL_Delay(Game.Graphics_Timer - Time_Get_Current());
+    End;
 
-  if (Game.Graphics_Timer > Time_Get_Current()) Then
-      Begin
-          Logic_Event_Handler(Game);
-          SDL_Delay(Game.Graphics_Timer - Time_Get_Current());
-        End;
-
+  
   If (Game.Play_Pause_Button.State = true) Then
     Begin
       // Vérifie si le jour affiché est différent du jour actuel.
@@ -420,9 +434,17 @@ Begin
         End;
 
       // Génération aléatoire des passagers.
+      // Vérifie si il y a bien des stations dans une partie.
       If (length(Game.Stations) > 0) Then
         Begin
-          Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
+          // Si le timer à été dépassé.
+          If (Game.Passengers_Timer < Time_Get_Current()) Then
+          Begin
+            // Création d'un passager sur une station choisie aléatoirement.
+            Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
+            // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
+            Game.Passengers_Timer := Time_Get_Current() + round((exp(1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
+          End;
         End;
     End;
 
@@ -448,7 +470,7 @@ Begin
 
 
   Graphics_Refresh(Game);
-  Game.Graphics_Timer := Time_Get_Current() + 1000 div 60;
+  Game.Graphics_Timer := Time_Get_Current() + 1000 Div 60;
 
 End;
 
@@ -600,7 +622,5 @@ Begin
   // Le train peut repartir.
   Train.Driving := true;
 End;
-
-
 
 End.

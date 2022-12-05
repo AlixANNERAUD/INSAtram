@@ -3,70 +3,97 @@ Unit Unit_Graphics;
 
 Interface
 
+// - Dépendances
+
 Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Math, Unit_Mouse;
 
-// - Function
+// - Défintion des fonctions.
 
-// - - Window
+// - - Graphismes généraux
 
 Procedure Graphics_Load(Var Game : Type_Game);
 Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
+// - - - Outils
 
+Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
 Function Graphics_Get_Direction(Angle : Real) : Integer;
-
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Coordinates; Width : Integer; Color :
                              Type_Color; Var Panel : Type_Panel);
 
+// - - Objets liées à l'interface graphique.
 
-Function Graphics_Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
+// - - - Curseur
 
-Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
 
-// - - Entity
+// - - - Bouton
 
-Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
+Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
+Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
 
+// - - - Bouton à deux états.
 
-Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Color; Var Panel : Type_Panel);
+Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
+Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
 
-Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
+// - - - Images
 
-Function Surface_Create(Width, Height : Integer) : PSDL_Surface;
+Procedure Image_Render(Var Image : Type_Image; Destination_Panel : Type_Panel);
+Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
 
-// - - Interface
-// - - - Label
+// - - - Couleurs
 
-Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : Type_Font; Color : Type_Color);
+Function Get_Color(Red,Green,Blue,Alpha : Byte) : Type_Color;
+Function Color_To_Longword(Color : Type_Color) : Longword;
+
+// - - - Etiquette
+
+Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : pTTF_Font; Color : Type_Color);
 Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
 Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
-Procedure Label_Set_Font(Var Laabel : Type_Label; Font : Type_Font);
+Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
+
+// - - - Panneaux
 
 Procedure Panel_Create(Var Panel : Type_Panel; X,Y, Width, Height : Integer);
 Procedure Panel_Delete(Var Panel : Type_Panel);
 Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
 Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
 
-Procedure Image_Render(Var Image : Type_Image; Destination_Panel : Type_Panel);
 
-Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
+// - - Entités du jeux.
 
-Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
+Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
+Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Color; Var Panel : Type_Panel);
+Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
-Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
-
-Function Get_Color(Red,Green,Blue,Alpha : Byte) : Type_Color;
-
-Function Color_To_Longword(Color : Type_Color) : Longword;
-
-Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
-
-Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
 
 Implementation
+
+
+Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
+
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+  // Si le curseur est en mode ajout de locomotive.
+  If (Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
+    Begin
+      Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
+      Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
+      SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
+    End
+    // Si le curseur est en mode ajout de wagon.
+  Else If (Mouse.Mode = Mouse_Mode_Add_Wagon) Then
+         Begin
+           Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
+           Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
+           SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
+         End;
+End;
 
 // Fonction qui rend un button à double état.
 Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
@@ -102,85 +129,10 @@ Begin
   Dual_State_Button.State := False;
 End;
 
-// Fonction qui détecte si un rectangle et une ligne sont en colision.
-Function Graphics_Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
-
-Var 
-  Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
-Begin
-  // Les quatres côtés du rectangles sont décomposés en 4 lignes.
-  // La détection se fait ensuite ligne par ligne.
-  // Les détections sont imbriqués afin de ne pas faire de calculs inutiles.
-
-  // Côté gauche du rectangle.
-  Temporary_Line[0].X := Rectangle_Position.X;
-  Temporary_Line[0].Y := Rectangle_Position.Y;
-  Temporary_Line[1].X := Rectangle_Position.X;
-  Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
-
-  If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
-    Begin
-      // Côté droit du rectangle.
-      Temporary_Line[0].X := Rectangle_Position.X+Rectangle_Size.X;
-      Temporary_Line[0].Y := Rectangle_Position.Y;
-      Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
-      Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
-
-      If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
-        Begin
-
-          // Côté en haut du rectangle.
-
-          Temporary_Line[0].X := Rectangle_Position.X;
-          Temporary_Line[0].Y := Rectangle_Position.Y;
-          Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
-          Temporary_Line[1].Y := Rectangle_Position.Y;
-
-          If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
-            Begin
-              // Coté en bas du rectangle.
-              Temporary_Line[0].X := Rectangle_Position.X;
-              Temporary_Line[0].Y := Rectangle_Position.Y+Rectangle_Size.Y;
-              Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
-              Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
-
-              If (Graphics_Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
-                Graphics_Line_Rectangle_Colling := False
-              Else
-                Graphics_Line_Rectangle_Colling := True;
-            End
-          Else
-            Graphics_Line_Rectangle_Colling := True;
-        End
-      Else
-        Graphics_Line_Rectangle_Colling := True;
-    End
-  Else
-    Graphics_Line_Rectangle_Colling := True;
-End;
-
-// Fonction qui détecte si deux lignes sont sécantes.
-Function Graphics_Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
-
-Var Coeffcient_A, Coeffcient_B : Real;
-Begin
-  Coeffcient_A := ((Line_2_B.X - Line_2_A.X)*(Line_1_A.Y - Line_2_A.Y) - (Line_2_B.Y - Line_2_A.Y)*(Line_1_A.X - Line_2_A.X)) / ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X -
-                  Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
-
-  Coeffcient_B := ((Line_1_B.X - Line_1_A.X)*(Line_1_A.Y - Line_2_A.Y)) /
-                  ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X - Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
-
-  If ((Coeffcient_A  >= 0) And (Coeffcient_A <= 1) And (Coeffcient_B >= 0) And (Coeffcient_B <= 1)) Then
-    Graphics_Lines_Colliding := true
-  Else
-    Graphics_Lines_Colliding := false;
-End;
-
-
-Function Surface_Create(Width, Height : Integer) : PSDL_Surface;
+Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
 Begin
   // Création d'une surface SDL avec les masques de couleurs aproriés.
-  Surface_Create := SDL_CreateRGBSurface(0, Width, Height, Color_Depth, Mask_Red, Mask_Green, Mask_Blue,Mask_Alpha);
+  Graphics_Surface_Create := SDL_CreateRGBSurface(0, Width, Height, Color_Depth, Mask_Red, Mask_Green, Mask_Blue,Mask_Alpha);
 End;
 
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
@@ -267,6 +219,7 @@ End;
 
 
 
+
 // Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
@@ -292,7 +245,7 @@ Begin
 End;
 
 // Procédure qui définit tout les attributs d'un texte à la fois.
-Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : Type_Font; Color : Type_Color);
+Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : pTTF_Font; Color : Type_Color);
 Begin
   Laabel.Font := Font;
   Laabel.Color := Color;
@@ -306,7 +259,7 @@ Begin
   Label_Pre_Render(Laabel);
 End;
 
-Procedure Label_Set_Font(Var Laabel : Type_Label; Font : Type_Font);
+Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
 Begin
   Laabel.Font := Font;
   Label_Pre_Render(Laabel);
@@ -441,7 +394,7 @@ Begin
 
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
     Begin
-      Dual_State_Button_Set(Game.Lines_Buttons[i], Surface_Create(32, 32), Surface_Create(32, 32), Surface_Create(32, 32), Surface_Create(32, 32));
+      Dual_State_Button_Set(Game.Lines_Buttons[i], Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32));
     End;
 
   FilledCircleRGBA(Game.Lines_Buttons[0].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Red].Red, Game.Ressources.Palette[Color_Red].Green, Game.Ressources.Palette[Color_Red].Blue, 255
@@ -534,11 +487,8 @@ End;
 // Procédure rafraissant tout les éléments graphiques de l'écrans.
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
-Var i, j:   Byte;
-  Destination_Rectangle : TSDL_Rect;
+Var i, j : Byte;
 Begin
-
-  // - Terrain de jeu.
 
   // - Nettoyage des panneaux
   // TODO : Remplacer avec Panel.Color.
@@ -548,6 +498,9 @@ Begin
   SDL_FillRect(Game.Panel_Left.Surface, Nil, Color_To_Longword(Get_Color(255, 255, 255, 255)));
   SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Get_Color(255, 255, 255, 255)));
 
+  // - Rendu dans le panneau de droite.
+
+  // Vérifie qu'il y a bien des lignes dans la partie.
   If (length(Game.Lines) > 0) Then
     Begin
       // - Affichage des lignes.
@@ -573,6 +526,7 @@ Begin
         End;
     End;
 
+  // Vérifie qu'il y a bien des stations dans la partie.
   If (length(Game.Stations) > 0) Then
     Begin
       // - Affichage les stations.
@@ -582,7 +536,7 @@ Begin
         End;
     End;
 
-  // - Panneau du haut.
+  // - Rendu dans le panneau du haut.
 
   Label_Render(Game.Score_Label, Game.Panel_Top);
   Image_Render(Game.Score_Image, Game.Panel_Top);
@@ -590,7 +544,7 @@ Begin
   Image_Render(Game.Clock_Image, Game.Panel_Top);
   Dual_State_Button_Render(Game.Play_Pause_Button, Game.Panel_Top);
 
-  // - Panneau du bas.
+  // - Rendu dans le panneau du bas.
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
     Dual_State_Button_Render(Game.Lines_Buttons[i], Game.Panel_Bottom);
 
@@ -600,27 +554,14 @@ Begin
   Button_Render(Game.Wagon_Button, Game.Panel_Left);
   Button_Render(Game.Tunnel_Button, Game.Panel_Left);
 
-  // Regroupement des surfaces.
+  // - Regroupement des surfaces dans la fenêtre.
 
   Panel_Render(Game.Panel_Top, Game.Window);
   Panel_Render(Game.Panel_Bottom, Game.Window);
   Panel_Render(Game.Panel_Left, Game.Window);
   Panel_Render(Game.Panel_Right, Game.Window);
 
-  // Affichage du curseur.
-
-  If (Game.Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
-    Begin
-      Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
-      Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
-      SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
-    End
-  Else If (Game.Mouse.Mode = Mouse_Mode_Add_Wagon) Then
-         Begin
-           Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
-           Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
-           SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
-         End;
+  Cursor_Render(Game.Mouse, Game.Window, Game);
 
   SDL_Flip(Game.Window.Surface);
 
@@ -741,14 +682,13 @@ Var Destination_Rectangle : TSDL_Rect;
   i : Byte;
   Direction : Integer;
   Norme : Integer;
-  Centered_Position : Type_Coordinates;
 Begin
 
   If (Train.Distance <= Train.Intermediate_Position_Distance) Then // Si le train se trouve avant le point intermédiaire.
     Begin
       // Calcul de l'angle et de la direction (arrondissement de l'angle à 45 degré près).
       Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Train.Intermediate_Position));
-      Centered_Position := Train.Last_Station^.Position_Centered;
+      Train.Position := Train.Last_Station^.Position_Centered;
 
       If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
         Norme := Train.Distance
@@ -760,7 +700,7 @@ Begin
       // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
       Direction := Graphics_Get_Direction(Get_Angle(Train.Intermediate_Position, Train.Next_Station^.Position_Centered));
 
-      Centered_Position := Train.Intermediate_Position;
+      Train.Position := Train.Intermediate_Position;
 
       If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
         Norme := Train.Distance - Train.Intermediate_Position_Distance
@@ -772,60 +712,60 @@ Begin
   Case Direction Of 
     0 :
         Begin
-          Centered_Position.X := Centered_Position.X + Norme;
+          Train.Position.X := Train.Position.X + Norme;
           Train.Sprite := Ressources.Vehicle_0_Degree;
           Train.Size.X := Ressources.Vehicle_0_Degree^.w;
           Train.Size.Y := Ressources.Vehicle_0_Degree^.h;
         End;
     180 :
           Begin
-            Centered_Position.X := Centered_Position.X - Norme;
+            Train.Position.X := Train.Position.X - Norme;
             Train.Sprite := Ressources.Vehicle_0_Degree;
             Train.Size.X := Ressources.Vehicle_0_Degree^.w;
             Train.Size.Y := Ressources.Vehicle_0_Degree^.h;
           End;
     90 :
          Begin
-           Centered_Position.Y := Centered_Position.Y - Norme;
+           Train.Position.Y := Train.Position.Y - Norme;
            Train.Sprite := Ressources.Vehicle_90_Degree;
            Train.Size.X := Ressources.Vehicle_90_Degree^.w;
            Train.Size.Y := Ressources.Vehicle_90_Degree^.h;
          End;
     -90 :
           Begin
-            Centered_Position.Y := Centered_Position.Y + Norme;
+            Train.Position.Y := Train.Position.Y + Norme;
             Train.Sprite := Ressources.Vehicle_90_Degree;
             Train.Size.X := Ressources.Vehicle_90_Degree^.w;
             Train.Size.Y := Ressources.Vehicle_90_Degree^.h;
           End;
     -45 :
           Begin
-            Centered_Position.X := Centered_Position.X + Norme;
-            Centered_Position.Y := Centered_Position.Y + Norme;
+            Train.Position.X := Train.Position.X + Norme;
+            Train.Position.Y := Train.Position.Y + Norme;
             Train.Sprite := Ressources.Vehicle_135_Degree;
             Train.Size.X := Ressources.Vehicle_135_Degree^.w;
             Train.Size.Y := Ressources.Vehicle_135_Degree^.h;
           End;
     -135 :
            Begin
-             Centered_Position.X := Centered_Position.X - Norme;
-             Centered_Position.Y := Centered_Position.Y + Norme;
+             Train.Position.X := Train.Position.X - Norme;
+             Train.Position.Y := Train.Position.Y + Norme;
              Train.Sprite := Ressources.Vehicle_45_Degree;
              Train.Size.X := Ressources.Vehicle_45_Degree^.w;
              Train.Size.Y := Ressources.Vehicle_45_Degree^.h;
            End;
     45:
         Begin
-          Centered_Position.X := Centered_Position.X + Norme;
-          Centered_Position.Y := Centered_Position.Y - Norme;
+          Train.Position.X := Train.Position.X + Norme;
+          Train.Position.Y := Train.Position.Y - Norme;
           Train.Sprite := Ressources.Vehicle_45_Degree;
           Train.Size.X := Ressources.Vehicle_45_Degree^.w;
           Train.Size.Y := Ressources.Vehicle_45_Degree^.h;
         End;
     135:
          Begin
-           Centered_Position.X := Centered_Position.X - Norme;
-           Centered_Position.Y := Centered_Position.Y - Norme;
+           Train.Position.X := Train.Position.X - Norme;
+           Train.Position.Y := Train.Position.Y - Norme;
            Train.Sprite := Ressources.Vehicle_135_Degree;
            Train.Size.X := Ressources.Vehicle_135_Degree^.w;
            Train.Size.Y := Ressources.Vehicle_135_Degree^.h;
@@ -833,8 +773,11 @@ Begin
 
   End;
 
-  Destination_Rectangle.x := round(Centered_Position.X - (Train.Size.X*0.5));
-  Destination_Rectangle.y := round(Centered_Position.Y - (Train.Size.X*0.5));
+  Train.Position.X := round(Train.Position.X - (Train.Size.X*0.5));
+  Train.Position.Y := round(Train.Position.Y - (Train.Size.X*0.5));
+
+  Destination_Rectangle.x := Train.Position.X;
+  Destination_Rectangle.y := Train.Position.Y;
 
   SDL_BlitSurface(Train.Sprite, Nil, Panel.Surface, @Destination_Rectangle);
 

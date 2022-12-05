@@ -5,22 +5,30 @@ Interface
 
 Uses Unit_Types, sdl;
 
+
+// - Chargement
+
 Procedure Mouse_Load(Game : Type_Game);
 
-Function Mouse_Get_Position() : Type_Coordinates;
-
-Function Mouse_Is_Pressed(Game : Type_Game) : Boolean;
+// - Gestion des évènements.
 
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
+
+// - Attributs
+
+Function Mouse_Get_Press_Position(Game : Type_Game) : Type_Coordinates;
+Function Mouse_Get_Release_Position(Game : Type_Game) : Type_Coordinates;
+Function Mouse_Get_Position() : Type_Coordinates;
+Function Mouse_Is_Pressed(Game : Type_Game) : Boolean;
+
+// - Détection de colisions / superposition.
 
 Function Mouse_On_Panel(Mouse_Position : Type_Coordinates; Panel : Type_Panel) : Boolean;
 Function Mouse_On_Object(Mouse_Position : Type_Coordinates; Object_Position, Object_Size : Type_Coordinates; Panel : Type_Panel) : Boolean;
 
-Function Mouse_Get_Press_Position(Game : Type_Game) : Type_Coordinates;
-Function Mouse_Get_Release_Position(Game : Type_Game) : Type_Coordinates;
-
 Implementation
 
+// Fonction qui vérifie si la souris se trouve sur un objet donné.
 Function Mouse_On_Object(Mouse_Position : Type_Coordinates; Object_Position, Object_Size : Type_Coordinates; Panel : Type_Panel) : Boolean;
 Begin
   If (Mouse_Position.X >= Object_Position.X + Panel.Position.X) And (Mouse_Position.X <= Object_Position.X + Object_Size.X + Panel.Position.X) And
@@ -30,6 +38,7 @@ Begin
     Mouse_On_Object := False;
 End;
 
+// Fonction qui vérifie si la souris se trouve sur un panneau donné.
 Function Mouse_On_Panel(Mouse_Position : Type_Coordinates; Panel : Type_Panel) : Boolean;
 Begin
   If (Mouse_Position.X >= Panel.Position.X) And (Mouse_Position.X <= Panel.Position.X + Panel.Size.X) And
@@ -46,14 +55,18 @@ Var i, j, k : Byte;
 Begin
   If (Mouse_Event.Button = SDL_BUTTON_LEFT) Then
     Begin
+      // Si la souris à été pressé.
       If (Mouse_Event.state = SDL_PRESSED) Then
         Begin
+          // Mise à jour des attributs.
           Game.Mouse.State := True;
           Game.Mouse.Press_Position.X := Mouse_Event.x;
           Game.Mouse.Press_Position.Y := Mouse_Event.y;
         End
+        // Si la souris à été relachée.
       Else
         Begin
+          // Mise à jour des attributs.
           Game.Mouse.State := False;
           Game.Mouse.Release_Position.X := Mouse_Event.x;
           Game.Mouse.Release_Position.Y := Mouse_Event.y;
@@ -66,10 +79,12 @@ Begin
       // Si la souris se trouve dans le panneau de gauche.
       If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Left)) Then
         Begin
+          // Si la souris se trouve le boutton d'ajout d'une locomotive.
           If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Locomotive_Button.Position, Game.Locomotive_Button.Size, Game.Panel_Left)) Then
             Begin
               Game.Mouse.Mode := Mouse_Mode_Add_Locomotive;
             End
+            // Si la souris se trouve sur le boutton d'ajout d'un wagon.
           Else If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Wagon_Button.Position, Game.Wagon_Button.Size, Game.Panel_Left)) Then
                  Begin
                    Game.Mouse.Mode := Mouse_Mode_Add_Wagon;
@@ -93,35 +108,49 @@ Begin
       // Si la souris se trouve sur le panneau de droite.
       If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Right)) Then
         Begin
-          //
-         If (Game.Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
+          // Si le curseur est en mode ajout de locomotive.
+          If (Game.Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
             Begin
-              // Détecte si le poiteur est en collision avec une ligne.
+              If (length(Game.Lines) > 0)
+              Begin
+              // Parcourt les lignes.
+              For i := low(Game.Lines) To high(Game.Lines) Do
+                Begin
+                  // Parcourt les stations (et point intermédiaires) d'une ligne.
+                  For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
+                  Begin
+                    // Vérifie que le pointeur est en collision avec la première partie d'une ligne.
+                    If (Line_Rectangle_Colling(Game.Lines[i].Stations[j].Position, Game.Lines[i].Intermediate_Position[j], Mouse_Get_Release_Position(), Game.Ressources.Vehicle_0_Degree.Size))
+                    Begin
 
-            End
+                    End;
+                    // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
+                    If (Line_Rectangle_Colling(Game.Lines[i].Intermediate_Position[j], Game.Lines[i].Stations[j + 1].Position, Mouse_Get_Release_Position(), Game.Ressources.Vehicle_0_Degree.Size))
+                    Begin
+
+                    End;
+                  End; 
+                  End;
+
+                End;
+    
+          // Si le curseur est en mode ajout de wagons.
           Else If (Game.Mouse.Mode = Mouse_Mode_Add_Wagon) Then
                  Begin
-                    writeln('Wagon');
                    // Détecte si le pointeur est sur un train.
                    For i := low(Game.Lines) To high(Game.Lines) Do
                      Begin
                        For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
                          Begin
-                            If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Lines[i].Trains[j].Position, Game.Lines[i].Trains[j].Size, Game.Panel_Right)) Then
-                            Begin
-                              Vehicle_Create(Game.Lines[i].Trains[j]);
-                              writeln('Train : ', i, ' ', j);
-                              Break;
-                              Break;
-                            End;
+                           If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Lines[i].Trains[j].Position, Game.Lines[i].Trains[j].Size, Game.Panel_Right)) Then
+                             Begin
+                               Vehicle_Create(Game.Lines[i].Trains[j]);
+                               Break;
+                               Break;
+                             End;
                          End;
                      End;
-
-                 End
-          Else
-            Begin
-
-            End;
+                 End;
 
         End;
 
@@ -138,7 +167,7 @@ Begin
             End;
         End;
 
-        Game.Mouse.Mode := Mouse_Mode_Normal;
+      Game.Mouse.Mode := Mouse_Mode_Normal;
 
     End;
 
