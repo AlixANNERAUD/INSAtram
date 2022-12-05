@@ -392,7 +392,6 @@ Type Type_Game = Record
   Clock_Label : Type_Label;
   Clock_Image : Type_Image;
 
-
   // Panneau contenant l'interface du bas (selection des lignes).
   Panel_Bottom : Type_Panel;
   Lines_Buttons : array[0 .. (Game_Maximum_Lines_Number - 1)] Of Type_Dual_State_Button;
@@ -409,7 +408,9 @@ Type Type_Game = Record
   Player : Type_Player;
   // Stations
   // Tableau dymamique contenant les stations.
-  Stations : array Of Type_Station;
+  Stations : Array Of Type_Station;
+  // Tableau des 
+  River_Points : Array Of Type_Coordinates;
   // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.  
   Graph_Table : Type_Graph_Table;
   // Carte des stations.
@@ -485,8 +486,8 @@ Function Time_Get_Elapsed(Start_Time : Type_Time) : Type_Time;
 
 // - - Shape
 
-Function Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
-Function Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+Function Lines_Colliding(Line_1, Line_2, Line_3, Line_4 : Type_Coordinates) : Boolean;
+Function Line_Rectangle_Colliding(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
 
 Function Number_To_Shape(Number : Byte) : Type_Shape;
 
@@ -500,10 +501,19 @@ Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
 
 Function Day_To_String(Day : Type_Day) : String;
 
+Function Panel_Get_Relative_Position(Absolute_Position : Type_Coordinates; Panel : Type_Panel) : Type_Coordinates;
+
 Implementation
 
+Function Panel_Get_Relative_Position(Absolute_Position : Type_Coordinates; Panel : Type_Panel) : Type_Coordinates;
+Begin
+  Panel_Get_Relative_Position.X := Absolute_Position.X - Panel.Position.X;
+  Panel_Get_Relative_Position.Y := Absolute_Position.Y - Panel.Position.Y;
+End;
+
 // Fonction qui détecte si un rectangle et une ligne sont en colision.
-Function Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+Function Line_Rectangle_Colliding(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+
 Var 
   Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
 Begin
@@ -532,7 +542,7 @@ Begin
 
           Temporary_Line[0].X := Rectangle_Position.X;
           Temporary_Line[0].Y := Rectangle_Position.Y;
-          Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
+          Temporary_Line[1].X := Rectangle_Position.X + Rectangle_Size.X;
           Temporary_Line[1].Y := Rectangle_Position.Y;
 
           If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
@@ -544,30 +554,34 @@ Begin
               Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
 
               If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
-                Line_Rectangle_Colling := False
+                Line_Rectangle_Colliding := False
               Else
-                Line_Rectangle_Colling := True;
+                Line_Rectangle_Colliding := True;
             End
           Else
-            Line_Rectangle_Colling := True;
+            Line_Rectangle_Colliding := True;
         End
       Else
-        Line_Rectangle_Colling := True;
+        Line_Rectangle_Colliding := True;
     End
   Else
-    Line_Rectangle_Colling := True;
+    Line_Rectangle_Colliding := True;
 End;
 
 // Fonction qui détecte si deux lignes sont sécantes.
-Function Lines_Colliding(Line_1_A, Line_1_B, Line_2_A, Line_2_B : Type_Coordinates) : Boolean;
+Function Lines_Colliding(Line_1, Line_2, Line_3, Line_4 : Type_Coordinates) : Boolean;
 
 Var Coeffcient_A, Coeffcient_B : Real;
 Begin
-  Coeffcient_A := ((Line_2_B.X - Line_2_A.X)*(Line_1_A.Y - Line_2_A.Y) - (Line_2_B.Y - Line_2_A.Y)*(Line_1_A.X - Line_2_A.X)) / ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X -
-                  Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
+  writeln('Line_1.X : ', Line_1.X, ' Line_1.Y : ', Line_1.Y);
+  writeln('Line_2.X : ', Line_2.X, ' Line_2.Y : ', Line_2.Y);
+  writeln('Line_3.X : ', Line_3.X, ' Line_3.Y : ', Line_3.Y);
+  writeln('Line_4.X : ', Line_4.X, ' Line_4.Y : ', Line_4.Y);
 
-  Coeffcient_B := ((Line_1_B.X - Line_1_A.X)*(Line_1_A.Y - Line_2_A.Y)) /
-                  ((Line_2_B.Y - Line_2_A.Y)*(Line_1_B.X - Line_1_A.X) - (Line_2_B.X - Line_2_A.X)*(Line_1_B.Y - Line_1_A.Y));
+
+  Coeffcient_A := ((Line_4.X-Line_3.X)*(Line_1.Y-Line_3.Y) - (Line_4.Y-Line_3.Y)*(Line_1.X-Line_3.X)) / ((Line_4.Y-Line_3.Y)*(Line_2.X-Line_1.X) - (Line_4.X-Line_3.X)*(Line_2.Y-Line_1.Y));
+
+  Coeffcient_B := ((Line_2.X-Line_1.X)*(Line_1.Y-Line_3.Y) - (Line_2.Y-Line_1.Y)*(Line_1.X-Line_3.X)) / ((Line_4.Y-Line_3.Y)*(Line_2.X-Line_1.X) - (Line_4.X-Line_3.X)*(Line_2.Y-Line_1.Y));
 
   If ((Coeffcient_A  >= 0) And (Coeffcient_A <= 1) And (Coeffcient_B >= 0) And (Coeffcient_B <= 1)) Then
     Lines_Colliding := true
@@ -679,6 +693,8 @@ Procedure Stations_Delete(Var Station : Type_Station; Var Game : Type_Game);
 Var 
   i : Byte;
 Begin
+
+
 
 
 

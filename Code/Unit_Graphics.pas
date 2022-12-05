@@ -366,6 +366,11 @@ Begin
   Game.Ressources.Palette[Color_Blue_Grey] := Get_Color(96, 125, 139, 255);
   Game.Ressources.Palette[Color_White] := Get_Color(255, 255, 255, 255);
 
+  // - Panneau de droite.
+
+  SetLength(Game.River_Points, 6);
+  
+
   // - Panneau de haut.
 
   Image_Set(Game.Score_Image, IMG_Load(Path_Image_People));

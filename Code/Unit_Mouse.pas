@@ -122,17 +122,23 @@ Begin
                       // Parcourt les stations (et point intermédiaires) d'une ligne.
                       For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
                         Begin
+                        writeln('Collision ',i ,'-', j);
                           // Vérifie que le pointeur est en collision avec la première partie d'une ligne.
-                          If (Line_Rectangle_Colling(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Intermediate_Positions[j], Mouse_Get_Release_Position(Game), Vehicle_Size))
+                          writeln('Position : ', Game.Lines[i].Stations[j]^.Position.X, ' ', Game.Lines[i].Stations[j]^.Position.Y);
+                          writeln('Intermediate_Positions : ', Game.Lines[i].Intermediate_Positions[j].X, ' ', Game.Lines[i].Intermediate_Positions[j].Y);
+                          writeln('Mouse_Get_Release_Position : ', Mouse_Get_Release_Position(Game).X, ' ', Mouse_Get_Release_Position(Game).Y);
+                          writeln('Vehicle_Size : ', Vehicle_Size.X, ' ', Vehicle_Size.Y);
+
+                          If (Line_Rectangle_Colliding(Game.Lines[i].Stations[j]^.Position, Game.Lines[i].Intermediate_Positions[j], Panel_Get_Relative_Position(Mouse_Get_Release_Position(Game), Game.Panel_Right), Vehicle_Size))
                             Then
                             Begin
-                              writeln('Collision ',i ,'-', j);
+                              writeln('Collision !');
                             End;
                           // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
-                          If (Line_Rectangle_Colling(Game.Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position, Mouse_Get_Release_Position(Game), Vehicle_Size)) Then
+                          If (Line_Rectangle_Colliding(Game.Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position, Mouse_Get_Release_Position(Game), Vehicle_Size)) Then
                             Begin
 
-                              writeln('Collision ',i ,'-', j);
+                              writeln('Collision !');
                             End;
                         End;
                     End;
