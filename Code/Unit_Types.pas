@@ -400,10 +400,11 @@ End;
 Type Type_Game = Record
 
   Start_Time : Type_Time;
-
   Day : Type_Day;
-
   Quit : Boolean;
+  
+  Graphics_Timer : Type_Time;
+
   // Souri
   Mouse : Type_Mouse;
   // Fenêtre du jeu.

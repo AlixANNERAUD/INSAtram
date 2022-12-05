@@ -22,6 +22,8 @@ Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Stati
 
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
 
+Procedure Logic_Event_Handler(Var Game : Type_Game);
+
 // - Définition des fonctions et des procédures.
 
 Implementation
@@ -87,6 +89,8 @@ Begin
               couple_Stations[1] := Game.Lines[iteration].Stations[jiteration+1];
               absolute_Index_First_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[0], Game.Stations);
 
+
+
         // Je pense qu'on pourrait directement mettre la fonction en tant qu'index pour graph_Table mais pour la compréhension je trouve ca mieux comme ca, surtout si on relit le code dans longtemps.
               absolute_Index_Second_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[1], Game.Stations);
               Game.graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := @Game.Lines[iteration];
@@ -110,12 +114,13 @@ Begin
         If Game.Graph_Table[indexStationToConnect][i][iteration_Lines] <> Nil Then     // Vérifie qu'une ligne relie bien les deux stations, i étant l'index de la deuxieme station.
           Begin
             // Vérifie que Dijkstra n'a pas interdit de retourner sur cette case.
-            If (Game.Dijkstra_Table[rowToFill][i].isAvailable = True) Then      
+            If (Game.Dijkstra_Table[rowToFill][i].isAvailable = True) Then
               Begin
                 // Permet à Dijkstra de savoir s'il doit considérer cette station en particulier dans son calcul d'itinéraire.
                 Game.Dijkstra_Table[rowToFill][i].isConnected := True;
               End;
-          End// Vérifie que Dijkstra n'a pas interdit de retourner sur cette case.
+          End
+          // Vérifie que Dijkstra n'a pas interdit de retourner sur cette case.
         Else
           Begin
             Game.Dijkstra_Table[rowToFill][i].isConnected := False;
@@ -169,19 +174,23 @@ Begin
       Connect_Stations(iteration, comingFromStationIndex, Game);
       For column := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
         Begin
-          If (Game.Dijkstra_Table[iteration][column].isAvailable = True) And (Game.Dijkstra_Table[iteration][column].isConnected = True) And (Game.Dijkstra_Table[iteration][column].isValidated = False) Then
+          If (Game.Dijkstra_Table[iteration][column].isAvailable = True) And (Game.Dijkstra_Table[iteration][column].isConnected = True) And (Game.Dijkstra_Table[iteration][column].isValidated = False
+             ) Then
             Begin
               Game.Dijkstra_Table[iteration][column].comingFromStationIndex := comingFromStationIndex;
-              Game.Dijkstra_Table[iteration][column].weight := get_Weight(get_Pointer_From_Absolute_Index(comingFromStationIndex, Game.Lines[i].Stations),get_Pointer_From_Absolute_Index(indexStationToConnect, Game.Lines[i].Stations), Game);
+              Game.Dijkstra_Table[iteration][column].weight := get_Weight(get_Pointer_From_Absolute_Index(comingFromStationIndex, Game.Lines[i].Stations),get_Pointer_From_Absolute_Index(
+                                                               indexStationToConnect, Game.Lines[i].Stations), Game);
             End;
         End;
       // - Compare et détermine l'index de la station dont le poids est le plus faible. 
-      minimum_Weight := 2203; //diagonale d'un écran 1920*1080
+      minimum_Weight := 2203;
+      //diagonale d'un écran 1920*1080
       For i := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
         Begin
           For column:= (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
             Begin
-              If (Game.Dijkstra_Table[i][column].isConnected = True) And (Game.Dijkstra_Table[iteration][column].isValidated = False) And (Game.Dijkstra_Table[iteration][column].isAvailable = True) Then
+              If (Game.Dijkstra_Table[i][column].isConnected = True) And (Game.Dijkstra_Table[iteration][column].isValidated = False) And (Game.Dijkstra_Table[iteration][column].isAvailable = True)
+                Then
                 Begin
                   If Game.Dijkstra_Table[i][column].weight < minimum_Weight Then
                     Begin
@@ -262,19 +271,27 @@ Begin
     End;
 
   // Création des 5 premères stations
-  For i := 1 To 6 Do
+  For i := 1 To 10 Do
     Begin
       Station_Create(Game);
     End;
 
   // Création de la première ligne
-  Line_Create(Game.Ressources.Palette[Color_Orange], Game, Game.Stations[low(Game.Stations)], Game.Stations[low(Game.Stations)+1]);
+  Line_Create(Game.Ressources.Palette[Color_Red], Game, Game.Stations[low(Game.Stations)], Game.Stations[low(Game.Stations)+1]);
+
+  Line_Create(Game.Ressources.Palette[Color_Purple], Game, Game.Stations[high(Game.Stations)], Game.Stations[high(Game.Stations) - 1]);
 
 
-  For i := low(Game.Stations) + 2 To high(Game.Stations) Do
+  For i := low(Game.Stations) + 2 To high(Game.Stations) - 5 Do
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
     End;
+
+  For i := high(Game.Stations) - 5 To high(Game.Stations) - 2 Do
+    Begin
+      Line_Add_Station(@Game.Stations[i], Game.Lines[1]);
+    End;
+
 
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
@@ -284,8 +301,11 @@ Begin
         End;
     End;
 
+
+
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
   Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
+  Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
 
   Mouse_Load(Game);
 
@@ -353,39 +373,58 @@ Begin
   SDL_Quit();
 End;
 
+Procedure Logic_Event_Handler(Var Game : Type_Game);
+Var Event : TSDL_Event;
+Begin
+  // Vérifie les évènements.
+  while (SDL_PollEvent(@Event) > 0) Do
+    Begin
+      // Si l'utilisateur demande la fermeture du programme.
+      Case Event.type_ Of 
+        SDL_QUITEV :
+                     Game.Quit := True;
+        SDL_MOUSEBUTTONDOWN :
+                              //Mouse_Event_Handler(Event, Game);
+                              Mouse_Event_Handler(Event.button, Game);
+        SDL_MOUSEBUTTONUP :
+                            // writeln('click released');
+                            Mouse_Event_Handler(Event.button, Game);
+      End;
+
+    End;
+End;
+
 // Rafraichissement de la logique.
 Procedure Logic_Refresh(Var Game : Type_Game);
 
 Var i, j : Integer;
-  Event : TSDL_Event;
 Begin
-  // Vérifie les évènements.
-  SDL_PollEvent(@Event);
+  // Vérifie les évenements
 
-  // Si l'utilisateur demande la fermeture du programme.
 
-  Case Event.type_ Of 
-    SDL_QUITEV :
-                 Game.Quit := True;
-    SDL_MOUSEBUTTONDOWN :
-                          //Mouse_Event_Handler(Event, Game);
-                          Mouse_Event_Handler(Event.button, Game);
-    SDL_MOUSEBUTTONUP :
-                        // writeln('click released');
-                        Mouse_Event_Handler(Event.button, Game);
-  End;
+  if (Game.Graphics_Timer > Time_Get_Current()) Then
+      Begin
+          Logic_Event_Handler(Game);
+          SDL_Delay(Game.Graphics_Timer - Time_Get_Current());
+        End;
 
-  // Vérifie si le jour affiché est différent du jour actuel.
-  If (Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7)) <> Game.Day) Then
+  If (Game.Play_Pause_Button.State = true) Then
     Begin
-      // Mise à jour de la variable du jour.
-      Game.Day := Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7));
-      // Mise à jour de l'étiquette du jour.
-      Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
+      // Vérifie si le jour affiché est différent du jour actuel.
+      If (Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7)) <> Game.Day) Then
+        Begin
+          // Mise à jour de la variable du jour.
+          Game.Day := Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7));
+          // Mise à jour de l'étiquette du jour.
+          Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
+        End;
+
+      // Génération aléatoire des passagers.
+      If (length(Game.Stations) > 0) Then
+        Begin
+          Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
+        End;
     End;
-
-
-
 
   // Détecte les trains arrivés à quais.
   // Vérifié qu'il existe une ligne.
@@ -407,7 +446,10 @@ Begin
         End;
     End;
 
+
   Graphics_Refresh(Game);
+  Game.Graphics_Timer := Time_Get_Current() + 1000 div 60;
+
 End;
 
 // Fonction qui effectue la correspondance du train arrivé à quais et change les attributs du trains pour sa prochaine destination.
