@@ -202,7 +202,7 @@ Begin
   Panel.Position.Y := Y;
   Panel.Size.X := Width;
   Panel.Size.Y := Height;
-  Panel.Surface := SDL_CreateRGBSurface(0, Width, Height, Color_Depth, 0, 0, 0, 0);
+  Panel.Surface := Graphics_Surface_Create(Width, Height);
 End;
 
 Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);

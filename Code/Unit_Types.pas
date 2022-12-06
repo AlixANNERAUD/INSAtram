@@ -10,7 +10,7 @@ Interface
 
 // - Dépendances
 
-Uses sdl, sdl_image, sdl_ttf, sysutils, Math;
+Uses sdl, sdl_mixer, sdl_image, sdl_ttf, sysutils, Math;
 
 // - Déclaration des constantes
 
@@ -89,6 +89,17 @@ Const Path_Font_Bold = Path_Fonts + '/FreeSansBold.ttf';
   // - - - - Sons
 
 Const Path_Sounds = Path_Ressources + 'Sounds/';
+
+Const Path_Sounds_Music = Path_Sounds + 'Sounds.wav';
+
+
+  // - Sons
+
+Const Sounds_Sampling_Rate = 22050;
+  Sounds_Format : Word = AUDIO_S16;
+  Sounds_Channels : INTEGER = 2;
+  Sounds_Chunck_Size : INTEGER = 4096;
+  Sounds_Maximum_Volume = 128;
 
 
   // - - - Jeux
@@ -249,6 +260,8 @@ Type Type_Ressources = Record
   Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : PSDL_Surface;
   // Color palette [Color].
   Palette : Array [Color_Black..Color_White] Of Type_Color;
+  // Sons
+  Music : pMIX_MUSIC;
 End;
 
 // - - Entités du jeux.
@@ -503,6 +516,8 @@ Function Day_To_String(Day : Type_Day) : String;
 
 Function Panel_Get_Relative_Position(Absolute_Position : Type_Coordinates; Panel : Type_Panel) : Type_Coordinates;
 
+Function Lines_Intersects(a1, a2, b1, b2 : Type_Coordinates) : Boolean;
+
 Implementation
 
 Function Panel_Get_Relative_Position(Absolute_Position : Type_Coordinates; Panel : Type_Panel) : Type_Coordinates;
@@ -527,7 +542,7 @@ Begin
   Temporary_Line[1].X := Rectangle_Position.X;
   Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
 
-  If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+  If (Lines_Intersects(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
     Begin
       // Côté droit du rectangle.
       Temporary_Line[0].X := Rectangle_Position.X+Rectangle_Size.X;
@@ -535,7 +550,7 @@ Begin
       Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
       Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
 
-      If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+      If (Lines_Intersects(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
         Begin
 
           // Côté en haut du rectangle.
@@ -545,7 +560,7 @@ Begin
           Temporary_Line[1].X := Rectangle_Position.X + Rectangle_Size.X;
           Temporary_Line[1].Y := Rectangle_Position.Y;
 
-          If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+          If (Lines_Intersects(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
             Begin
               // Coté en bas du rectangle.
               Temporary_Line[0].X := Rectangle_Position.X;
@@ -553,7 +568,7 @@ Begin
               Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
               Temporary_Line[1].Y := Rectangle_Position.Y+Rectangle_Size.Y;
 
-              If (Lines_Colliding(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
+              If (Lines_Intersects(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
                 Line_Rectangle_Colliding := False
               Else
                 Line_Rectangle_Colliding := True;
@@ -567,6 +582,46 @@ Begin
   Else
     Line_Rectangle_Colliding := True;
 End;
+
+
+// a1 is line1 start, a2 is line1 end, b1 is line2 start, b2 is line2 end
+Function Lines_Intersects(a1, a2, b1, b2 : Type_Coordinates) : Boolean;
+
+Var B, D, C : Type_Coordinates;
+  BD, T : Real;
+Begin
+  B.X := a2.X - a1.X;
+  B.Y := a2.Y - a1.Y;
+
+  D.X := b2.X - b1.X;
+  D.Y := b2.Y - b1.Y;
+
+  BD := (B.X * D.Y) - (B.Y * D.X);
+
+  // if b dot d == 0, it means the lines are parallel so have infinite intersection points
+  If (BD = 0) Then
+    Lines_Intersects := false
+  Else
+    Begin
+      C.X := b1.X - a1.X;
+      C.Y := b1.Y - a1.Y;
+
+      T := ((C.X * D.Y) - (C.Y * D.X)) / BD;
+
+      If ((T < 0) Or (T > 1)) Then
+        Lines_Intersects := false
+      Else
+        Begin
+          T := ((C.X * B.Y) - (C.Y * b.X)) / BD;
+
+          If ((T < 0) Or (T > 1)) Then
+            Lines_Intersects := false
+          Else
+            Lines_Intersects := true;
+        End;
+    End;
+End;
+
 
 // Fonction qui détecte si deux lignes sont sécantes.
 Function Lines_Colliding(Line_1, Line_2, Line_3, Line_4 : Type_Coordinates) : Boolean;
@@ -644,8 +699,8 @@ Begin
       For i := low(Line.Stations) To (high(Line.Stations) - 1) Do
         Begin
           // Calcule la position intermédiaire.
-          Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)] := Station_Get_Intermediate_Position(Line.Stations[i]^.Position, Line.Stations[i + 1]^.
-                                                                               Position);
+          Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)] := Station_Get_Intermediate_Position(Line.Stations[i]^.Position_Centered, Line.Stations[i + 1]^.
+                                                                               Position_Centered);
         End;
     End;
 
@@ -693,6 +748,11 @@ Procedure Stations_Delete(Var Station : Type_Station; Var Game : Type_Game);
 Var 
   i : Byte;
 Begin
+
+
+
+
+
 
 
 

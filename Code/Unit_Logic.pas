@@ -5,7 +5,7 @@ Interface
 
 // - Inclut les unités internes au projet. 
 
-Uses Unit_Types, Unit_Graphics, sdl, Unit_Mouse, sysutils;
+Uses Unit_Types, Unit_Sounds, Unit_Graphics, sdl, Unit_Mouse, sysutils;
 
 // - Déclaration des fonctions et procédures.
 
@@ -142,7 +142,7 @@ Begin
   get_Weight := Graphics_Get_Distance(first_Station_Pointer^.Position_Centered, Intermediate_Position) + Graphics_Get_Distance(Intermediate_Position, second_Station_Pointer^.Position_Centered);
 End;
 
-Procedure Dijkstra(Starting_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
+{Procedure Dijkstra(Starting_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
 
 Var k, row, column, iteration, indexStationToConnect, comingFromStationIndex, lightest_Station_Index, i, j : Integer;
   minimum_Weight : Real;
@@ -224,7 +224,7 @@ Begin
           End;
 
     End;
-End;
+End;}
 
 
 {Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station; Game : Type_Game) : Boolean;
@@ -263,9 +263,13 @@ Procedure Logic_Load(Var Game : Type_Game);
 
 Var i,j : Byte;
 Begin
+  Randomize();
+
   Graphics_Load(Game);
 
-  Randomize();
+  Sounds_Load(Game);
+  Sounds_Set_Volume(Sounds_Maximum_Volume);
+  Sounds_Play(Game.Ressources.Music);
 
   Game.Start_Time := Time_Get_Current();
 
@@ -301,10 +305,12 @@ Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
     End;
 
-  For i := high(Game.Stations) - 5 To high(Game.Stations) - 2 Do
+
+For i := high(Game.Stations) - 5 To high(Game.Stations) - 2 Do
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[1]);
     End;
+
 
 
   For i := low(Game.Stations) To high(Game.Stations) Do
@@ -318,8 +324,8 @@ Begin
 
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
-  Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
-  Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
+ Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
+Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
 
   Mouse_Load(Game);
 
@@ -331,6 +337,7 @@ Procedure Logic_Unload(Var Game : Type_Game);
 Var i,j,k,l : Byte;
 Begin
   Graphics_Unload(Game);
+  Sounds_Unload(Game);
 
   // Suppresion des passagers des stations.
   // Itère parmis les stations
@@ -421,7 +428,7 @@ Begin
       SDL_Delay(Game.Graphics_Timer - Time_Get_Current());
     End;
 
-  
+  // Si la partie n'est pas en pause.  
   If (Game.Play_Pause_Button.State = true) Then
     Begin
       // Vérifie si le jour affiché est différent du jour actuel.
