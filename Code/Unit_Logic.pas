@@ -32,7 +32,7 @@ Implementation
 
 // - - Fonctions et procédures relatives au passagers 
 
-Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
+{Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
 
 Var iteration : Integer;
 Begin
@@ -142,7 +142,43 @@ Begin
   get_Weight := Get_Distance(first_Station_Pointer^.Position_Centered, Intermediate_Position) + Get_Distance(Intermediate_Position, second_Station_Pointer^.Position_Centered);
 End;
 
-{Procedure Dijkstra(Starting_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
+Procedure Get_Ending_Station_From_Shape(Game : Type_Game; Passenger : Type_Passenger_Pointer; var Index_Table : array of Integer);
+var i, counter : Integer;
+Begin
+counter := 0;
+for i:= low(Game.Stations) to high(Game.Stations) do
+  Begin
+    if Game.Stations[i].Shape = Passenger^.Shape Then
+      begin
+        SetLength(Index_Table, counter+1); //confirmer le +1 avec Alix (est-ce qu'on peut set la taille à 0 ou non ?)
+        Index_Table[counter]:=i;
+        counter:=counter+1;
+      end;
+  end;
+end;
+
+function Destination_Reached(Index_Ending_Station : Integer; Dijkstra_Table : Array Of Array Of Type_Dijkstra_Cell):Boolean;
+var i       : Integer;
+    Reached : Boolean;
+begin
+  for i := low(Dijkstra_Table) to high(Dijkstra_Table) do // En cas de soucis, on peut utiliser high(Game.Stations) qui lui représente un tableau à une dimension.
+    begin
+      if Dijkstra_Table[i][Index_Ending_Station].is_Validated = true then
+        begin
+          Reached := true
+        end;  
+    end;
+  if Reached <> true then
+    begin
+      Destination_Reached := False;
+    end
+  else
+    begin
+      Destination_Reached := True;
+    end;
+end;
+
+Procedure Dijkstra(Starting_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
 
 Var k, row, column, iteration, indexStationToConnect, comingFromStationIndex, lightest_Station_Index, i, j : Integer;
   minimum_Weight : Real;
@@ -170,6 +206,9 @@ Begin
       Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isAvailable := False;
     End;
 
+// Inserer une boucler for pour chacune des cases de Index_Table (tous les indexs des stations de la meme forme que celle du passager) 
+//  iteration := low(Game.Dijkstra_Table)
+//  Repeat until (iteration = high(Game.Dijkstra_Table)) or () // todo fonction qui vérifie la présence d'un is_Validated = True dans la colonne de la station d'arrivée
   For iteration := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
     Begin
       Connect_Stations(iteration, comingFromStationIndex, Game);
