@@ -20,7 +20,7 @@ Procedure Graphics_Refresh(Var Game : Type_Game);
 Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
 Function Graphics_Get_Direction(Angle : Real) : Integer;
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
-                             Type_Coordinates; Width : Integer; Color :
+                             Type_Coordinates; Integer; Color :
                              Type_Color; Var Panel : Type_Panel);
 
 // - - Objets liées à l'interface graphique.
@@ -76,8 +76,8 @@ Implementation
 
 
 Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
-
 Var Destination_Rectangle : TSDL_Rect;
+    Intermediate_Position : Type_Coordinates;
 Begin
   // Si le curseur est en mode ajout de locomotive.
   If (Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
@@ -92,6 +92,18 @@ Begin
            Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
            Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
            SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
+         End;
+      // Si le curseur est en mode ajout de station à une ligne/
+  Else If (Mouse.Mode = Mouse_Mode_Line_Add_Station) Then
+         Begin
+            Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
+            Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+            Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+
+            Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Next_Station^.Position_Centered, Mouse_Get_Position());
+            Graphics_Draw_Line(Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+            Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+
          End;
 End;
 
@@ -216,6 +228,7 @@ Begin
 
   SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
+
 
 
 
@@ -369,7 +382,7 @@ Begin
   // - Panneau de droite.
 
   SetLength(Game.River_Points, 6);
-  
+
 
   // - Panneau de haut.
 
@@ -617,7 +630,7 @@ Begin
 End;
 
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
-                             Type_Coordinates; Width : Integer; Color :
+                             Type_Coordinates; Color :
                              Type_Color; Var Panel : Type_Panel);
 
 Var Direction : Integer;
@@ -677,8 +690,8 @@ Begin
 
   Intermediate_Position := Station_Get_Intermediate_Position(Position_1, Position_2);
 
-  Graphics_Draw_Line(Position_1, Intermediate_Position, 0, Color, Panel);
-  Graphics_Draw_Line(Intermediate_Position, Position_2, 0, Color, Panel);
+  Graphics_Draw_Line(Position_1, Intermediate_Position, Color, Panel);
+  Graphics_Draw_Line(Intermediate_Position, Position_2, Color, Panel);
 End;
 
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);

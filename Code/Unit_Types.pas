@@ -92,6 +92,8 @@ Const Path_Sounds = Path_Ressources + 'Sounds/';
 
 Const Path_Sounds_Music = Path_Sounds + 'Sounds.wav';
 
+Const Mouse_Hit_Box_Size =  10;
+
 
   // - Sons
 
@@ -331,6 +333,8 @@ Type Type_Station_Pointer = ^Type_Station;
     Passengers_Label : Type_Label;
 
   End;
+
+  Type_Train_Pointer = ^Type_Train;
   // - - Line
 
   Type_Line = Record
@@ -371,12 +375,16 @@ Type Type_Itinerary_Indexes = Array Of Integer;
 
   // - - Souris
 
-Type Type_Mouse_Mode = (Mouse_Mode_Normal, Mouse_Mode_Add_Locomotive, Mouse_Mode_Add_Wagon);
+Type Type_Mouse_Mode = (Mouse_Mode_Normal, Mouse_Mode_Delete_Locomotive, Mouse_Mode_Add_Locomotive, Mouse_Mode_Add_Wagon, Mouse_Mode_Line_Add_Station);
 
 Type Type_Mouse = Record
   Press_Position, Release_Position : Type_Coordinates;
   Mode : Type_Mouse_Mode;
   State : Boolean;
+  Selected_Train : Type_Train_Pointer;
+  Selected_Line : Type_Line_Pointer;
+  Selected_Last_Station, Selected_Next_Station : Type_Line_Station;
+ 
 End;
 
 // - - Partie
@@ -479,13 +487,13 @@ Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 
 // - - Object deletion.
 
-Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
 
 Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
-
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
-Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean
+                                                                                                                Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line :
+                                                                                                                                             Type_Line) : Boolean;
 
 //Function Train_Delete(Var Train : Type_Train; Var Line : Type_Train) : Boolean;
 //Function Vehicle_Delete(Var Vehicle : Type_Vehicle; Var Train : Type_Train) : Boolean;
@@ -508,7 +516,8 @@ Function String_To_Characters(String_To_Convert : String) : pChar;
 
 Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
 
-Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates) : Integer;
+Function Get_Distance(Position_1, Position_2 : Type_Coordinates) : Integer;
+Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
 
 Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
 
@@ -671,9 +680,9 @@ Begin
   End;
 End;
 
-Function Graphics_Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
+Function Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
 Begin
-  Graphics_Get_Distance := round(sqrt(sqr(Position_2.X-Position_1.X)+sqr(Position_2.Y-Position_1.Y)));
+  Get_Distance := round(sqrt(sqr(Position_2.X-Position_1.X)+sqr(Position_2.Y-Position_1.Y)));
 End;
 
 // - Définition des fonctions et procédures.
@@ -748,6 +757,9 @@ Procedure Stations_Delete(Var Station : Type_Station; Var Game : Type_Game);
 Var 
   i : Byte;
 Begin
+
+
+
 
 
 
@@ -901,6 +913,42 @@ Begin
     Line_Add_Station := False;
 End;
 
+// Fonction qui insert une station dans une ligne.
+Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+
+Var i : Byte;
+  Temporary_Array : Array Of Stations;
+  Duplicate : Boolean;
+Begin
+  Line_Add_Station := false;
+  If (length(Line.Stations) < Lines_Maximum_Number_Stations) Then
+    Begin
+      If (length(Line.Stations) > 0) Then
+        Begin
+          Duplicate := false;
+          // Vérifie si la station n'as pas déjà été ajoutée.
+          For i := low(Line.Stations) To high(Line.Stations) Do
+              If (Line.Statios[i] = Last_Station_Pointer) Then
+                  Duplicate := true;
+
+          If (Duplicate = false) Then
+            Begin
+              For i := low(Line.Stations) To high(Line.Stations) Do
+                Begin
+                  If (Line.Stations = Last_Station_Pointer) Then
+                    Begin
+                      SetLength(Temporary_Array, 1);
+                      Temporary_Array[high(Temporary_Array)] := Station_Pointer;
+                      Insert(Temporary_Array, Line.Stations, i);
+                      Line_Add_Station := true;
+                      Break;
+                    End;
+                End;
+            End;
+        End;
+    End;
+End;
+
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 
 Var i : Byte;
@@ -983,14 +1031,14 @@ Begin
         End;
 
       // Calcul de la distance du point intermédiaire.
-      Line.Trains[high(Line.Trains)].Intermediate_Position_Distance := Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].
+      Line.Trains[high(Line.Trains)].Intermediate_Position_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].
                                                                        Intermediate_Position);
 
       // Calcul de la distance maximale du train.
 
-      Line.Trains[high(Line.Trains)].Maximum_Distance := Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position);
+      Line.Trains[high(Line.Trains)].Maximum_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position);
       Line.Trains[high(Line.Trains)].Maximum_Distance := Line.Trains[high(Line.Trains)].Maximum_Distance
-                                                         +  Graphics_Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
+                                                         +  Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
                                                          (Line.Trains)].Next_Station^.Position_Centered);
 
 

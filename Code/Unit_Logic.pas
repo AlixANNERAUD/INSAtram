@@ -139,7 +139,7 @@ Begin
 
   Intermediate_Position := Station_Get_Intermediate_Position(first_Station_Pointer^.Position_Centered, second_Station_Pointer^.Position_Centered);
 
-  get_Weight := Graphics_Get_Distance(first_Station_Pointer^.Position_Centered, Intermediate_Position) + Graphics_Get_Distance(Intermediate_Position, second_Station_Pointer^.Position_Centered);
+  get_Weight := Get_Distance(first_Station_Pointer^.Position_Centered, Intermediate_Position) + Get_Distance(Intermediate_Position, second_Station_Pointer^.Position_Centered);
 End;
 
 {Procedure Dijkstra(Starting_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
@@ -527,14 +527,14 @@ Begin
 
 
   // Calcul de la distance du point intermédiaire.
-  Train.Intermediate_Position_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
+  Train.Intermediate_Position_Distance := Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
 
   // Calcul de la distance entre la station de départ et d'arrivée.
 
-  Train.Maximum_Distance := Graphics_Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
+  Train.Maximum_Distance := Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
 
 
-  Train.Maximum_Distance := Train.Maximum_Distance +  Graphics_Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered);
+  Train.Maximum_Distance := Train.Maximum_Distance +  Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered);
 
   // Itère parmis les véhicules du train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do
