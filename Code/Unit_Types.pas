@@ -260,10 +260,10 @@ Type Type_Ressources = Record
   Passengers : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface;
   // Vehicles (locomotive et wagon).
   Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : PSDL_Surface;
-  // Color palette [Color].
-  Palette : Array [Color_Black..Color_White] Of Type_Color;
   // Sons
-  Music : pMIX_MUSIC;
+  Music : pMIX_MUSIC; 
+  =  =  =  =  =  =  = 
+                      >>>>>>> Stashed changes
 End;
 
 // - - Entités du jeux.
@@ -337,6 +337,8 @@ Type Type_Station_Pointer = ^Type_Station;
   Type_Train_Pointer = ^Type_Train;
   // - - Line
 
+Type Type_Line_Colors = (Red, Purple, Indigo, Teal, Green, Yellow, Orange, Brown);
+
   Type_Line = Record
     // Couleur de la ligne.
     Color : Type_Color;
@@ -346,6 +348,8 @@ Type Type_Station_Pointer = ^Type_Station;
     Intermediate_Positions : Array Of Type_Coordinates;
     // Tableau dynamique contenant les trains.
     Trains : array Of Type_Train;
+    // Boutton de la ligne.
+    Button : Type_Dual_State_Button;
   End;
 
   Type_Line_Pointer = ^Type_Line;
@@ -375,7 +379,7 @@ Type Type_Itinerary_Indexes = Array Of Integer;
 
   // - - Souris
 
-Type Type_Mouse_Mode = (Mouse_Mode_Normal, Mouse_Mode_Delete_Locomotive, Mouse_Mode_Add_Locomotive, Mouse_Mode_Add_Wagon, Mouse_Mode_Line_Add_Station);
+Type Type_Mouse_Mode = (Normal, Delete_Locomotive, Add_Locomotive, Add_Wagon, Line_Add_Station, Line_Insert_Station);
 
 Type Type_Mouse = Record
   Press_Position, Release_Position : Type_Coordinates;
@@ -384,7 +388,7 @@ Type Type_Mouse = Record
   Selected_Train : Type_Train_Pointer;
   Selected_Line : Type_Line_Pointer;
   Selected_Last_Station, Selected_Next_Station : Type_Line_Station;
- 
+
 End;
 
 // - - Partie
@@ -393,9 +397,10 @@ Type Type_Game = Record
 
   Start_Time : Type_Time;
   Day : Type_Day;
-  Quit : Boolean;
 
+  // Temporisateur déterminant rendre les graphismes.
   Graphics_Timer : Type_Time;
+  // Temporisateur déterminant quand générer un nouveau passager.
   Passengers_Timer : Type_Time;
 
   // Souris
@@ -415,7 +420,6 @@ Type Type_Game = Record
 
   // Panneau contenant l'interface du bas (selection des lignes).
   Panel_Bottom : Type_Panel;
-  Lines_Buttons : array[0 .. (Game_Maximum_Lines_Number - 1)] Of Type_Dual_State_Button;
 
   // Panneau contenant l'interface de gauche (train, wagon, tunnel).
   Panel_Left : Type_Panel;
@@ -478,7 +482,7 @@ Function Get_Centered_Position(Container_Size, Size : Integer) : Integer;
 // - - Object creation.
 
 Function Station_Create(Var Game: Type_Game) : Boolean;
-Function Line_Create(Color : Type_Color; Var Game : Type_Game; Var First_Station, Second_Station : Type_Station) : Boolean;
+Function Line_Create(Var Game : Type_Game) : Boolean;
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Vehicle_Create(Var Train : Type_Train) : Boolean;
@@ -491,9 +495,8 @@ Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
-Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean
-                                                                                                                Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line :
-                                                                                                                                             Type_Line) : Boolean;
+Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 
 //Function Train_Delete(Var Train : Type_Train; Var Line : Type_Train) : Boolean;
 //Function Vehicle_Delete(Var Vehicle : Type_Vehicle; Var Train : Type_Train) : Boolean;
@@ -537,6 +540,90 @@ End;
 
 // Fonction qui détecte si un rectangle et une ligne sont en colision.
 Function Line_Rectangle_Colliding(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
+Function Color_Get() : Type_Color;
+
+Function Lines_Get_Selected(Game : Type_Game) : Type_Line_Pointer;
+
+Implementation
+
+// Fonction qui renvoie la ligne actuellement sélectionnée où Nil s'il y en a pas.
+Function Lines_Get_Selected(Game : Type_Game) : Type_Line_Pointer;
+
+Var i : Byte;
+Begin
+  // Vérifie si il y a des lignes.
+  Lines_Get_Selected := Nil;
+  If (length(Game.Lines) > 0) Then
+    Begin
+      For i := low(Game.Lines) To high(Game.Lines) Do
+        Begin
+          If (Game.Lines[i].Button.State = true) Then
+            Begin
+              Lines_Get_Selected := @Game.Lines[i];
+              Break;
+            End;
+        End;
+    End;
+End;
+
+Function Color_Get(Color : Type_Color_Name) : Type_Color;
+Begin
+  Case Color Of 
+    Color_Black : Color_Get := Color_Get(0, 0, 0, 255);
+    Color_Red : Color_Get := Color_Get(244, 64, 54, 255);
+    Color_Purple : Color_Get := Color_Get(156, 39, 176, 255);
+    Color_Deep_Purple : Color_Get := Color_Get(103, 58, 183, 255);
+    Color_Indigo : Color_Get := Color_Get(63, 81, 181, 255);
+    Color_Blue : Color_Get := Color_Get(33, 150, 243, 255);
+    Color_Light_Blue : Color_Get := Color_Get(3, 169, 244, 255);
+    Color_Cyan : Color_Get := Color_Get(0, 188, 212, 255);
+    Color_Teal : Color_Get := Color_Get(0, 150, 136, 255);
+    Color_Green : Color_Get := Color_Get(76, 175, 80, 255);
+    Color_Light_Green : Color_Get := Color_Get(139, 195, 74, 255);
+    Color_Lime : Color_Get := Color_Get(205, 220, 57, 255);
+    Color_Yellow : Color_Get := Color_Get(255, 235, 59, 255);
+    Color_Amber : Color_Get := Color_Get(255, 193, 7, 255);
+    Color_Orange : Color_Get := Color_Get(255, 152, 0, 255);
+    Color_Deep_Orange : Color_Get := Color_Get(255, 87, 34, 255);
+    Color_Brown : Color_Get := Color_Get(121, 85, 72, 255);
+    Color_Grey : Color_Get := Color_Get(158, 158, 158, 255);
+    Color_Blue_Grey : Color_Get := Color_Get(96, 125, 139, 255);
+    Color_White : Color_Get := Color_Get(255, 255, 255, 255);
+  End;
+
+
+
+
+
+
+
+{
+    // - Set colors from palette (from Google's Material Design palette).
+  Game.Ressources.Palette[Color_Black] := Color_Get(0, 0, 0, 255);
+  Game.Ressources.Palette[Color_Red] := Color_Get(244, 64, 54, 255);
+  Game.Ressources.Palette[Color_Purple] := Color_Get(156, 39, 176, 255);
+  Game.Ressources.Palette[Color_Deep_Purple] := Color_Get(103, 58, 183, 255);
+  Game.Ressources.Palette[Color_Indigo] := Color_Get(63, 81, 181, 255);
+  Game.Ressources.Palette[Color_Blue] := Color_Get(33, 150, 243, 255);
+  Game.Ressources.Palette[Color_Light_Blue] := Color_Get(3, 169, 244, 255);
+  Game.Ressources.Palette[Color_Cyan] := Color_Get(0, 188, 212, 255);
+  Game.Ressources.Palette[Color_Teal] := Color_Get(0, 150, 136, 255);
+  Game.Ressources.Palette[Color_Green] := Color_Get(76, 175, 80, 255);
+  Game.Ressources.Palette[Color_Light_Green] := Color_Get(139, 195, 74, 255);
+  Game.Ressources.Palette[Color_Lime] := Color_Get(205, 220, 57, 255);
+  Game.Ressources.Palette[Color_Yellow] := Color_Get(255, 235, 59, 255);
+  Game.Ressources.Palette[Color_Amber] := Color_Get(255, 193, 7, 255);
+  Game.Ressources.Palette[Color_Orange] := Color_Get(255, 152, 0, 255);
+  Game.Ressources.Palette[Color_Deep_Orange] := Color_Get(255, 87, 34, 255);
+  Game.Ressources.Palette[Color_Brown] := Color_Get(121, 85, 72, 255);
+  Game.Ressources.Palette[Color_Grey] := Color_Get(158, 158, 158, 255);
+  Game.Ressources.Palette[Color_Blue_Grey] := Color_Get(96, 125, 139, 255);
+  Game.Ressources.Palette[Color_White] := Color_Get(255, 255, 255, 255);
+}
+End;
+
+// Fonction qui détecte si un rectangle et une ligne sont en colision.
+Function Line_Rectangle_Colling(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
 
 Var 
   Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
@@ -774,6 +861,19 @@ Begin
 
 
 
+  <<<<<<< Updated upstream 
+
+  =  =  =  =  =  =  = 
+                      >>>>>>> Stashed changes
+
+
+
+
+
+
+
+
+
 
 { 
   For i := low(Station.Passengers) To high(Station.Passengers) Do
@@ -877,18 +977,65 @@ Begin
 End;
 
 // Procédure qui créer une ligne.
-Function Line_Create(Color : Type_Color; Var Game : Type_Game; Var First_Station, Second_Station : Type_Station) : Boolean;
+Function Line_Create(Var Game : Type_Game) : Boolean;
+
+Var i, j : Byte;
+  Colors : Set Of (Color_Red, Color_Purple, Color_Indigo, Color_Teal, Color_Green, Color_Yellow, Color_Orange, Color_Brown);
+  Color : Type_Color;
 Begin
   If (length(Game.Lines) < Game_Maximum_Lines_Number) Then
     Begin
       // Création de la ligne.
       SetLength(Game.Lines, length(Game.Lines) + 1);
-      // Détermination des valeurs par défaut.
-      Game.Lines[high(Game.Lines)].Color := Color;
+      // Récupération de l'index de la ligne crée (dernier élément du tableau).
+      i := high(Game.Lines);
+      // Détermination de la couleur.
+      For j := low(Game.Lines) To high(Game.Lines) Do
+        Begin
+          If (Game.Lines[j].Color = Game.Ressources.Palette[Color_Red]) Then
+            Exclude(Colors, Color_Red)
+          Else If (Game.Lines[j].Color = Game.Ressources.Palette[Color_Purple]) Then
+                 Exclude(Colors, Color_Purple)
+          Else If (Game.Lines[j].Color = Game.Ressources.Palette[Color_Indigo]) Then
+                 Exclude(Colors, Color_Indigo)
+          Else If (Game.Lines[j].Color = Game.Ressources.Palette[Color_Teal]) Then
+                 Exclude(Colors, Color_Teal)
+          Else If (Game.Lines[j].Color = Game.Ressources.Palette[Color_Green]) Then
+                 Exclude(Colors, Color_Green)
+          Else If (Game.Lines[j].Color = Game.Ressources.Palette[Color_Yellow]) Then
+                 Exclude(Colors, Color_Yellow)
+          Else If (Game.Lines[j].Color = Game.Ressources.Palette[Color_Orange]) Then
+                 Exclude(Colors, Color_Orange)
+          Else If (Game.Lines[j].Color = Game.Ressources.Palette[Color_Brown]) Then
+                 Exclude(Colors, Color_Brown);
+        End;
 
-      Line_Add_Station(@First_Station, Game.Lines[high(Game.Lines)]);
-      Line_Add_Station(@Second_Station, Game.Lines[high(Game.Lines)]);
+      For Color In Colors Do
+        Begin
+          Game.Lines[i].Color := Color;
+          Break;
+        End;
 
+      // Création du boutton
+      Dual_State_Button_Set(Game.Lines[i].Button, Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32));
+
+      FilledCircleRGBA(Game.Lines[i].Button.Surface_Released[0], 16, 16, 12, Color_Get(Color).Red, Color_Get[Color].Green, Color_Get(Color).Blue, 255);
+
+      FilledCircleRGBA(Game.Lines[i].Button.Surface_Released[1], 16, 16, 16, Color_Get(Color).Red, Color_Get[Color].Green, Color_Get(Color).Blue, 255);
+
+      // Recalcul des positions des boutons.
+      Game.Lines[i].Button.Position.Y := Get_Centered_Position(Game.Panel_Bottom.Size.Y, Game.Lines[i].Button.Position.Y);
+
+      Game.Lines[low(Game.Lines)].Button.Position.X := Get_Centered_Position(Game.Panel_Bottom.Size.X, (Game.Lines[i].Button.Size.X * length(Game.Lines)) + (16 * (length(Game.Lines) - 1)));
+
+      If (length(Game.Lines) > 1) Then
+        Begin
+          For j := low(Game.Lines) + 1 To high(Game.Lines) Do
+            Begin
+              Game.Lines[j].Button.Position.Y := Game.Lines[j].Button.Position.Y;
+              Game.Lines[j].Button.Position.X := Game.Lines[j - 1].Button.Position.X + Game.Lines[j - 1].Button.Size.X + 16;
+            End;
+        End;
 
       Line_Create := True;
     End
@@ -928,8 +1075,8 @@ Begin
           Duplicate := false;
           // Vérifie si la station n'as pas déjà été ajoutée.
           For i := low(Line.Stations) To high(Line.Stations) Do
-              If (Line.Statios[i] = Last_Station_Pointer) Then
-                  Duplicate := true;
+            If (Line.Statios[i] = Last_Station_Pointer) Then
+              Duplicate := true;
 
           If (Duplicate = false) Then
             Begin
@@ -940,6 +1087,7 @@ Begin
                       SetLength(Temporary_Array, 1);
                       Temporary_Array[high(Temporary_Array)] := Station_Pointer;
                       Insert(Temporary_Array, Line.Stations, i);
+                      Line_Compute_Intermediate_Positions(Line);
                       Line_Add_Station := true;
                       Break;
                     End;
@@ -949,26 +1097,27 @@ Begin
     End;
 End;
 
+// Fonction qui enlève une station d'une ligne.
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 
 Var i : Byte;
 Begin
+  Line_Remove_Station := False;
   If (length(Line.Stations) > 0) Then
     Begin
       For i := low(Line.Stations) To high(Line.Stations) Do
         If (Line.Stations[i] = Station_Pointer) Then
           Begin
-
-            FreeMem(Line.Stations[i]);
-            Line.Stations[i] := Line.Stations[high(Line.Stations)];
-
-            SetLength(Line.Stations, length(Line.Stations) - 1);
+            // Enlève la station.
+            Delete(Line.Stations, i, 1);
+            // Si il n'y a plus qu'une station dans la ligne, alors, on supprime la seule station restante.
+            If (length(Line.Stations) = 1) Then
+              SetLength(Line.Stations, 0);
+            Line_Compute_Intermediate_Positions(Line);
+            Line_Remove_Station := True;
             Break;
           End;
-      Line_Remove_Station := True;
-    End
-  Else
-    Line_Remove_Station := False;
+    End;
 End;
 
 // Fonction qui créer un passager dans une station.

@@ -92,6 +92,7 @@ Begin
 
 
 
+
         // Je pense qu'on pourrait directement mettre la fonction en tant qu'index pour graph_Table mais pour la compréhension je trouve ca mieux comme ca, surtout si on relit le code dans longtemps.
               absolute_Index_Second_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[1], Game.Stations);
               Game.graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := @Game.Lines[iteration];
@@ -268,6 +269,7 @@ Begin
 End;}
 
 
+
 {Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station; Game : Type_Game) : Boolean;
 Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
 
@@ -313,8 +315,6 @@ Begin
   Sounds_Play(Game.Ressources.Music);
 
   Game.Start_Time := Time_Get_Current();
-
-  Game.Quit := False;
 
   Game.Play_Pause_Button.State := true;
 
@@ -444,6 +444,7 @@ Begin
     Begin
       // Si l'utilisateur demande la fermeture du programme.
       Case Event.type_ Of 
+        // Si la fenêtre est fermée.
         SDL_QUITEV :
                      Game.Quit := True;
         SDL_MOUSEBUTTONDOWN :
@@ -451,7 +452,7 @@ Begin
                               Mouse_Event_Handler(Event.button, Game);
         SDL_MOUSEBUTTONUP :
                             // writeln('click released');
-                            Mouse_Event_Handler(Event.button, Game);
+                              Mouse_Event_Handler(Event.button, Game);
       End;
 
     End;
@@ -459,6 +460,7 @@ End;
 
 // Rafraichissement de la logique.
 Procedure Logic_Refresh(Var Game : Type_Game);
+
 Var i, j : Integer;
 Begin
   // Vérifie les évenements
@@ -487,12 +489,12 @@ Begin
         Begin
           // Si le timer à été dépassé.
           If (Game.Passengers_Timer < Time_Get_Current()) Then
-          Begin
-            // Création d'un passager sur une station choisie aléatoirement.
-            Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
-            // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
-            Game.Passengers_Timer := Time_Get_Current() + round((exp(1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
-          End;
+            Begin
+              // Création d'un passager sur une station choisie aléatoirement.
+              Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
+              // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
+              Game.Passengers_Timer := Time_Get_Current() + round((exp(1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
+            End;
         End;
     End;
 

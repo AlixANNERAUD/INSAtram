@@ -10,7 +10,7 @@ Var Game : Type_Game;
 Begin
   Logic_Load(Game);
 
-  While (Not(Game.Quit)) Do
+  While (True) Do
       Logic_Refresh(Game);
 
   Logic_Unload(Game);

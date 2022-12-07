@@ -12,7 +12,6 @@ Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Ma
 // - - Graphismes généraux
 
 Procedure Graphics_Load(Var Game : Type_Game);
-Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
 // - - - Outils
@@ -23,7 +22,13 @@ Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Coordinates; Integer; Color :
                              Type_Color; Var Panel : Type_Panel);
 
+
 // - - Objets liées à l'interface graphique.
+
+// - - - Ressources
+
+Procedure Ressources_Load(Var Ressources : Type_Ressources);
+Procedure Ressources_Unload(Var Ressources : Type_Ressources);
 
 // - - - Curseur
 
@@ -46,7 +51,8 @@ Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
 
 // - - - Couleurs
 
-Function Get_Color(Red,Green,Blue,Alpha : Byte) : Type_Color;
+Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
+
 Function Color_To_Longword(Color : Type_Color) : Longword;
 
 // - - - Etiquette
@@ -74,37 +80,83 @@ Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources 
 
 Implementation
 
+// Procédure qui charge les ressources graphiques.
+Procedure Ressources_Load(Var Ressources : Type_Ressources);
+Begin
+
+  // - - Station
+  Game.Ressources.Stations[0] := IMG_Load(Path_Image_Station_Circle);
+  Game.Ressources.Stations[1] := IMG_Load(Path_Image_Station_Lozenge);
+  Game.Ressources.Stations[2] := IMG_Load(Path_Image_Station_Pentagon);
+  Game.Ressources.Stations[3] := IMG_Load(Path_Image_Station_Square);
+  Game.Ressources.Stations[4] := IMG_Load(Path_Image_Station_Triangle);
+
+  // - - Passenger
+  Game.Ressources.Passengers[0] := IMG_Load(Path_Image_Passenger_Circle);
+  Game.Ressources.Passengers[1] := IMG_Load(Path_Image_Passenger_Lozenge);
+  Game.Ressources.Passengers[2] := IMG_Load(Path_Image_Passenger_Pentagon);
+  Game.Ressources.Passengers[3] := IMG_Load(Path_Image_Passenger_Square);
+  Game.Ressources.Passengers[4] := IMG_Load(Path_Image_Passenger_Triangle);
+
+
+  // - - Véhicule (Locomotive et Wagon)
+  Game.Ressources.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
+  Game.Ressources.Vehicle_45_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 45, 1, 1);
+  Game.Ressources.Vehicle_90_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 90, 1, 1);
+  Game.Ressources.Vehicle_135_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 135, 1, 1);
+
+  // - Fonts loading
+  Game.Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 12);
+  Game.Ressources.Fonts[Font_Medium][Font_Normal] := TTF_OpenFont(Path_Font, 24);
+  Game.Ressources.Fonts[Font_Big][Font_Normal] := TTF_OpenFont(Path_Font, 32);
+
+  Game.Ressources.Fonts[Font_Small][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 12);
+  Game.Ressources.Fonts[Font_Medium][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 24);
+  Game.Ressources.Fonts[Font_Big][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 32);
+End;
 
 Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
+
 Var Destination_Rectangle : TSDL_Rect;
-    Intermediate_Position : Type_Coordinates;
+  Intermediate_Position : Type_Coordinates;
 Begin
   // Si le curseur est en mode ajout de locomotive.
-  If (Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
+  If (Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Then
     Begin
       Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
       Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
       SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
     End
     // Si le curseur est en mode ajout de wagon.
-  Else If (Mouse.Mode = Mouse_Mode_Add_Wagon) Then
+  Else If (Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
          Begin
            Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
            Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
            SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
          End;
-      // Si le curseur est en mode ajout de station à une ligne/
-  Else If (Mouse.Mode = Mouse_Mode_Line_Add_Station) Then
+  // Si le curseur est en mode ajout de station à une ligne/
+  Else If (Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
          Begin
-            Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
-            Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
-            Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
 
-            Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Next_Station^.Position_Centered, Mouse_Get_Position());
-            Graphics_Draw_Line(Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
-            Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+           Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+
+           Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+
+           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Next_Station^.Position_Centered, Mouse_Get_Position());
+
+           Graphics_Draw_Line(Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+
+           Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
 
          End;
+  Else If (Mouse.Mode = Type_Mouse.Line_Add_Station) Then
+         Begin
+           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
+           Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+           Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position(), Mouse.Selected_Line^.Color, Destination_Panel);
+         End;
+
 End;
 
 // Fonction qui rend un button à double état.
@@ -173,12 +225,12 @@ Begin
   Color_To_Longword := (Color.Red << 16) Or (Color.Green << 8) Or (Color.Blue) Or (Color.Alpha << 24);
 End;
 
-Function Get_Color(Red,Green,Blue,Alpha : Byte) : Type_Color;
+Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
 Begin
-  Get_Color.Red := Red;
-  Get_Color.Green := Green;
-  Get_Color.Blue := Blue;
-  Get_Color.Alpha := Alpha;
+  Color_Get.Red := Red;
+  Color_Get.Green := Green;
+  Color_Get.Blue := Blue;
+  Color_Get.Alpha := Alpha;
 End;
 
 Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
@@ -228,6 +280,7 @@ Begin
 
   SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
+
 
 
 
@@ -305,6 +358,7 @@ Begin
   // - Initialisation de la SDL
   SDL_Init(SDL_INIT_EVERYTHING);
   TTF_INIT();
+
   // - Création du panneau fenêtre.
   If Full_Screen Then
     Game.Window.Surface := SDL_SetVideoMode(0, 0, Color_Depth, SDL_HWSURFACE Or SDL_FULLSCREEN)
@@ -325,59 +379,7 @@ Begin
   Panel_Create(Game.Panel_Right, Game.Panel_Left.Size.X, Game.Panel_Top.Size.Y, Game.Window.Size.X - Game.Panel_Left.Size.X, Game.Window.Size.Y - Game.Panel_Top.Size.Y - Game.Panel_Bottom.Size.Y);
 
   // - Chargement des ressources.
-
-  // - - Station
-  Game.Ressources.Stations[0] := IMG_Load(Path_Image_Station_Circle);
-  Game.Ressources.Stations[1] := IMG_Load(Path_Image_Station_Lozenge);
-  Game.Ressources.Stations[2] := IMG_Load(Path_Image_Station_Pentagon);
-  Game.Ressources.Stations[3] := IMG_Load(Path_Image_Station_Square);
-  Game.Ressources.Stations[4] := IMG_Load(Path_Image_Station_Triangle);
-
-  // - - Passenger
-  Game.Ressources.Passengers[0] := IMG_Load(Path_Image_Passenger_Circle);
-  Game.Ressources.Passengers[1] := IMG_Load(Path_Image_Passenger_Lozenge);
-  Game.Ressources.Passengers[2] := IMG_Load(Path_Image_Passenger_Pentagon);
-  Game.Ressources.Passengers[3] := IMG_Load(Path_Image_Passenger_Square);
-  Game.Ressources.Passengers[4] := IMG_Load(Path_Image_Passenger_Triangle);
-
-
-  // - - Véhicule (Locomotive et Wagon)
-
-  Game.Ressources.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
-  Game.Ressources.Vehicle_45_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 45, 1, 1);
-  Game.Ressources.Vehicle_90_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 90, 1, 1);
-  Game.Ressources.Vehicle_135_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 135, 1, 1);
-
-  // - Fonts loading
-  Game.Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 12);
-  Game.Ressources.Fonts[Font_Medium][Font_Normal] := TTF_OpenFont(Path_Font, 24);
-  Game.Ressources.Fonts[Font_Big][Font_Normal] := TTF_OpenFont(Path_Font, 32);
-
-  Game.Ressources.Fonts[Font_Small][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 12);
-  Game.Ressources.Fonts[Font_Medium][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 24);
-  Game.Ressources.Fonts[Font_Big][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 32);
-
-  // - Set colors from palette (from Google's Material Design palette).
-  Game.Ressources.Palette[Color_Black] := Get_Color(0, 0, 0, 255);
-  Game.Ressources.Palette[Color_Red] := Get_Color(244, 64, 54, 255);
-  Game.Ressources.Palette[Color_Purple] := Get_Color(156, 39, 176, 255);
-  Game.Ressources.Palette[Color_Deep_Purple] := Get_Color(103, 58, 183, 255);
-  Game.Ressources.Palette[Color_Indigo] := Get_Color(63, 81, 181, 255);
-  Game.Ressources.Palette[Color_Blue] := Get_Color(33, 150, 243, 255);
-  Game.Ressources.Palette[Color_Light_Blue] := Get_Color(3, 169, 244, 255);
-  Game.Ressources.Palette[Color_Cyan] := Get_Color(0, 188, 212, 255);
-  Game.Ressources.Palette[Color_Teal] := Get_Color(0, 150, 136, 255);
-  Game.Ressources.Palette[Color_Green] := Get_Color(76, 175, 80, 255);
-  Game.Ressources.Palette[Color_Light_Green] := Get_Color(139, 195, 74, 255);
-  Game.Ressources.Palette[Color_Lime] := Get_Color(205, 220, 57, 255);
-  Game.Ressources.Palette[Color_Yellow] := Get_Color(255, 235, 59, 255);
-  Game.Ressources.Palette[Color_Amber] := Get_Color(255, 193, 7, 255);
-  Game.Ressources.Palette[Color_Orange] := Get_Color(255, 152, 0, 255);
-  Game.Ressources.Palette[Color_Deep_Orange] := Get_Color(255, 87, 34, 255);
-  Game.Ressources.Palette[Color_Brown] := Get_Color(121, 85, 72, 255);
-  Game.Ressources.Palette[Color_Grey] := Get_Color(158, 158, 158, 255);
-  Game.Ressources.Palette[Color_Blue_Grey] := Get_Color(96, 125, 139, 255);
-  Game.Ressources.Palette[Color_White] := Get_Color(255, 255, 255, 255);
+  Ressources_Load(Game.Ressources);
 
   // - Panneau de droite.
 
@@ -407,58 +409,6 @@ Begin
 
   Game.Play_Pause_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Play_Pause_Button.Size.Y);
   Game.Play_Pause_Button.Position.X := 16;
-
-  // - Panneau du bas.
-
-  For i := 0 To Game_Maximum_Lines_Number - 1 Do
-    Begin
-      Dual_State_Button_Set(Game.Lines_Buttons[i], Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32));
-    End;
-
-  FilledCircleRGBA(Game.Lines_Buttons[0].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Red].Red, Game.Ressources.Palette[Color_Red].Green, Game.Ressources.Palette[Color_Red].Blue, 255
-  );
-  FilledCircleRGBA(Game.Lines_Buttons[1].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Purple].Red, Game.Ressources.Palette[Color_Purple].Green, Game.Ressources.Palette[Color_Purple].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[2].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Indigo].Red, Game.Ressources.Palette[Color_Indigo].Green, Game.Ressources.Palette[Color_Indigo].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[3].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Teal].Red, Game.Ressources.Palette[Color_Teal].Green, Game.Ressources.Palette[Color_Teal].Blue,
-                   255);
-  FilledCircleRGBA(Game.Lines_Buttons[4].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Green].Red, Game.Ressources.Palette[Color_Green].Green, Game.Ressources.Palette[Color_Green].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[5].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Yellow].Red, Game.Ressources.Palette[Color_Yellow].Green, Game.Ressources.Palette[Color_Yellow].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[6].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Orange].Red, Game.Ressources.Palette[Color_Orange].Green, Game.Ressources.Palette[Color_Orange].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[7].Surface_Released[0], 16, 16, 12, Game.Ressources.Palette[Color_Brown].Red, Game.Ressources.Palette[Color_Brown].Green, Game.Ressources.Palette[Color_Brown].
-                   Blue, 255);
-
-  // 
-
-  FilledCircleRGBA(Game.Lines_Buttons[0].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Red].Red, Game.Ressources.Palette[Color_Red].Green, Game.Ressources.Palette[Color_Red].Blue, 255
-  );
-  FilledCircleRGBA(Game.Lines_Buttons[1].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Purple].Red, Game.Ressources.Palette[Color_Purple].Green, Game.Ressources.Palette[Color_Purple].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[2].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Indigo].Red, Game.Ressources.Palette[Color_Indigo].Green, Game.Ressources.Palette[Color_Indigo].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[3].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Teal].Red, Game.Ressources.Palette[Color_Teal].Green, Game.Ressources.Palette[Color_Teal].Blue,
-                   255);
-  FilledCircleRGBA(Game.Lines_Buttons[4].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Green].Red, Game.Ressources.Palette[Color_Green].Green, Game.Ressources.Palette[Color_Green].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[5].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Yellow].Red, Game.Ressources.Palette[Color_Yellow].Green, Game.Ressources.Palette[Color_Yellow].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[6].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Orange].Red, Game.Ressources.Palette[Color_Orange].Green, Game.Ressources.Palette[Color_Orange].
-                   Blue, 255);
-  FilledCircleRGBA(Game.Lines_Buttons[7].Surface_Released[1], 16, 16, 16, Game.Ressources.Palette[Color_Brown].Red, Game.Ressources.Palette[Color_Brown].Green, Game.Ressources.Palette[Color_Brown].
-                   Blue, 255);
-
-
-  Game.Lines_Buttons[0].Position.Y := Get_Centered_Position(Game.Panel_Bottom.Size.Y, Game.Lines_Buttons[0].Size.Y);
-  Game.Lines_Buttons[0].Position.X := Get_Centered_Position(Game.Panel_Bottom.Size.X, Game.Lines_Buttons[0].Size.X * Game_Maximum_Lines_Number + 16 * (Game_Maximum_Lines_Number - 1));
-  For i := 1 To Game_Maximum_Lines_Number - 1 Do
-    Begin
-      Game.Lines_Buttons[i].Position.Y := Game.Lines_Buttons[0].Position.Y;
-      Game.Lines_Buttons[i].Position.X := Game.Lines_Buttons[i - 1].Position.X + Game.Lines_Buttons[i - 1].Size.X + 16;
-    End;
 
   // Panneau de gauche
 
@@ -511,10 +461,10 @@ Begin
   // - Nettoyage des panneaux
   // TODO : Remplacer avec Panel.Color.
   SDL_FillRect(Game.Window.Surface, Nil, SDL_MapRGBA(Game.Window.Surface^.format, 255, 255, 255, 255));
-  SDL_FillRect(Game.Panel_Top.Surface, Nil, Color_To_Longword(Get_Color(255, 255, 255, 255)));
-  SDL_FillRect(Game.Panel_Bottom.Surface, Nil, Color_To_Longword(Get_Color(255, 255, 255, 255)));
-  SDL_FillRect(Game.Panel_Left.Surface, Nil, Color_To_Longword(Get_Color(255, 255, 255, 255)));
-  SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Get_Color(255, 255, 255, 255)));
+  SDL_FillRect(Game.Panel_Top.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+  SDL_FillRect(Game.Panel_Bottom.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+  SDL_FillRect(Game.Panel_Left.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+  SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
   // - Rendu dans le panneau de droite.
 

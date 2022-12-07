@@ -38,29 +38,42 @@ Procedure Mouse_Train_Add_Wagon(Var Game : Type_Game);
 
 Function Mouse_Set_Mouse_Mode(Var Game : Type_Game);
 
-Procedure Mouse_Pressed_On_Line(Var Game : Type_Game);
+Function Mouse_Pressed_On_Line(Var Game : Type_Game) : Boolean;
+Function Mouse_Pressed_On_Station(Var Game : Type_Game) : Boolean;
+
+
 
 Implementation
 
 Procedure Mouse_Line_Delete_Station(Var Game : Type_Game);
+
 Var i : Byte;
-    Selected_Line : Type_Line_Pointer;
+  Selected_Line : Type_Line_Pointer;
 Begin
 
 End;
 
-// Fonction qui vérifie que la sourie est sur une station et l'ajoute à la station actuellement maintenant par la souris.
+// Fonction qui vérifie que la souris est sur une station et l'ajoute à la ligne actuellement maintenue par la souris.
 Procedure Mouse_Line_Add_Station(Var Game : Type_Game);
+
 Var i : Byte;
+  Mouse_Position : Type_Coordinates;
 Begin
+  Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Release_Position(Game), Game.Panel_Right);
   For i := low(Game.Stations) To high(Game.Station) Do
-  Begin
-    If (Mouse_On_Object(Mouse_Get_Release_Position(), Game.Stations[i].Position, Game.Stations[i].Size)) Then
     Begin
-      Line_Add_Station(Game.Mouse.Selected_Last_Station, @Game.Stations[i], Game.Mouse.Selected_Line);
-      Break:
+      If (Mouse_On_Object(Mouse_Position, Game.Stations[i].Position, Game.Stations[i].Size)) Then
+        Begin
+          If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
+            Line_Add_Station(Game.Mouse.Selected_Last_Station, @Game.Stations[i], Game.Mouse.Selected_Line)
+          Else If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Then
+          Begin
+            Line_Add_Station(Game.Mouse.Selected_Last_Station, Game.Mouse.Selected_Line);
+            Line_Add_Station(@Game.Stations[i], Game.Mouse.Selected_Line);
+          End;
+          Break;
+        End;
     End;
-  End;
 End;
 
 // Procedure qui détermine le mode du curseur en fonction de la première interraction de l'utilisateur.
@@ -69,49 +82,105 @@ Begin
 
 End;
 
+// Fonction uqui vérifie si la souris est sur une station et détermine la ligne actuellement sélectionnée.
+Function Mouse_Pressed_On_Station(Var Game : Type_Game) : Boolean;
 
-Procedure Mouse_Pressed_On_Line(Var Game : Type_Game);
+Var Line : Type_Line_Pointer;
+  Mouse_Position : Byte;
+Begin
+  Line := Lines_Get_Selected(Game);
+
+  Mouse_Pressed_On_Station := false;
+
+  If (Line <> Nil) Then
+    Begin
+      Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Press_Position(Game), Game.Panel_Right);
+      // - Ajout des 2 premières stations à la ligne.
+      // Vérifie si la ligne ne contient aucune station.
+      If (length(Line^.Stations) = 0) Then
+        Begin
+          For i := low(Game.Stations) To high(Game.Stations) Do
+            Begin
+              If (Mouse_On_Object(Mouse_Position, Game.Stations[i].Position, Game.Stations[i].Size)) Then
+                Begin
+                  Game.Mouse.Selected_Line := @Game.Lines[i];
+                  Game.Mouse.Selected_Last_Station := @Game.Lines[i].Stations[i];
+                  Game.Mouse.Mode := Type_Mouse_Mode.Line_Add_Station;
+                  Mouse_Pressed_On_Station := true;
+                  Break;
+                End;
+            End;
+        End;
+      // - Suppression d'une station de la ligne.
+      // Si la ligne contient des stations.
+      Else
+        Begin
+          For i := low(Line^.Stations) To high(Line^.Stations) Do
+            Begin
+              If (Mouse_On_Object(Mouse_Position, Line^.Stations[i]^.Position, Line^.Stations[i]^.Size)) Then
+                Begin
+// ! Attention : La suppression de la station dans la ligne étant imédiate, il faudrait vérifier et / ou attendre que le train actuellement en transit sur l'axe passant par la station ait passé l'axe, au risque d'avoir des comportements étranges.
+                  Line_Remove_Station(Line^.Stations[i]), Line);
+                  Mouse_Pressed_On_Station := true;
+                  Break;
+                End;
+            End;
+        End;
+    End;
+
+End;
+
+// Fonction qui prend détermine si le souris est pressé sur une ligne et détermine la station précédente et la station suivante qui servira à l'insertion de la nouvelle station.
+Function Mouse_Pressed_On_Line(Var Game : Type_Game) : Boolean;
 
 Var Mouse_Size, Mouse_Position;
+  i : Byte;
+  Line : Type_Line_Pointer;
 Begin
+  Mouse_Pressed_On_Line := false;
   // Vérifie si la souris se trouve sur une ligne.
   // Vérifie qu'il y a bien des lignes dans la partie.
-  If (length(Game.Lines) > 0) Then
+
+  Line := Lines_Get_Selected(Game);
+
+  If (Line <> Nil) Then
     Begin
+
       Mouse_Size.X := Mouse_Hit_Box_Size;
       Mouse_Size.Y := Mouse_Hit_Box_Size;
-      Mouse_Position := Mouse_Get_Press_Position(Game, Mouse_Size).;
-      // Itère parmis les lignes.
-      // TODO : FAUX remplacer avec la ligne sélectionnée.
-      For i := low(Game.Lines) To high(Game.Liens) Do
+
+      Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Press_Position(Game), Game.Panel_Right);
+
+      Mouse_Position.X := Mouse_Position.X - (Mouse_Size.X Div 2);
+      Mouse_Position.Y := Mouse_Position.Y - (Mouse_Size.Y Div 2);
+
+
+      // Vérifie que la ligne contient des stations
+      If (length(Line^.Stations) > 0) Then
         Begin
-          // Vérifie que la ligne contient des stations
-          If (length(Game.Lines[i].Stations) > 0) Then
+          // Itère parmis les stations de la ligne selectionnée.
+          For j := low(Line^.Stations) To high(Line^.Stations) - 1 Do
             Begin
-              // Itère parmis les stations de la ligne.
-              For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
+              If (Line_Rectangle_Colliding(Line^.Stations[i]^.Position_Centered, Line^.Intermediate_Positions[i], Mouse_Position, Mouse_Size)) Then
                 Begin
-                  If (Line_Rectangle_Colliding(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Intermediate_Positions[j], Panel_Get_Relative_Position(Mouse_Get_Release_Position(
-                     Game), Game.Panel_Right), Vehicle_Size)) Then
-                    Begin
-                      Game.Mouse.Selected_Line := @Game.Lines[i];
-                      Game.Mouse.Selected_Last_Station := @Game.Lines[i].Stations[i];
-                      Game.Mouse.Selected_Next_Station := @Game.Lines[i].Stations[i + 1];
-                      Game.Mouse.Mode := Mouse_Mode_Line_Add_Station;
-                      Break;
-                      Break;
-                    End;
-                  // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
-                  If (Line_Rectangle_Colliding(Game.Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position_Centered, Panel_Get_Relative_Position(Mouse_Get_Release_Position
-                     (Game), Game.Panel_Right), Vehicle_Size)) Then
-                    Begin
-                      Game.Mouse.Selected_Line := @Game.Lines[i];
-                      Game.Mouse.Selected_Last_Station := @Game.Lines[i].Stations[i];
-                      Game.Mouse.Selected_Next_Station := @Game.Lines[i].Stations[i + 1];
-                      Game.Mouse.Mode := Mouse_Mode_Line_Add_Station;
-                      Break;
-                      Break;
-                    End;
+                  Game.Mouse.Selected_Line := @Line^;
+                  Game.Mouse.Selected_Last_Station := @Line^.Stations[i];
+                  Game.Mouse.Selected_Next_Station := @Line^.Stations[i + 1];
+                  Game.Mouse.Mode := Type_Mouse_Mode.Line_Insert_Station;
+                  Mouse_Pressed_On_Line := true;
+                  Break;
+                  Break;
+                End;
+              // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
+              If (Line_Rectangle_Colliding(Line^.Intermediate_Positions[i], Line^.Stations[i + 1]^.Position_Centered, Mouse_Position, Mouse_Size)) Then
+                Begin
+                  Game.Mouse.Selected_Line := @Line^;
+                  Game.Mouse.Selected_Last_Station := @Line^.Stations[i];
+                  Game.Mouse.Selected_Next_Station := @Line^.Stations[i + 1];
+                  Game.Mouse.Mode := Type_Mouse_Mode.Line_Insert_Station;
+                  Mouse_Pressed_On_Line := true;
+                  Break;
+                  Break;
                 End;
             End;
         End;
@@ -121,13 +190,19 @@ End;
 // Fonction qui prend détermine si le souris est relaché sur une ligne et détermine comment ajouter le train.
 Procedure Mouse_Line_Add_Train(Var Game : Type_Game);
 
-Var Vehcile_Size : Type_Coordinates;
+Var Vehicle_Size, Mouse_Position : Type_Coordinates;
   i, j : Byte;
 Begin
   If (length(Game.Lines) > 0) Then
     Begin
       Vehicle_Size.X := Game.Ressources.Vehicle_0_Degree^.w;
       Vehicle_Size.Y := Game.Ressources.Vehicle_0_Degree^.h;
+
+      Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Release_Position(Game), Game.Panel_Right);
+
+      Mouse_Position.X := Mouse_Position.X - (Vehicle_Size.X Div 2);
+      Mouse_Position.Y := Mouse_Position.Y - (Vehicle_Size.Y Div 2);
+
       // Parcourt les lignes.
       For i := low(Game.Lines) To high(Game.Lines) Do
         Begin
@@ -136,20 +211,19 @@ Begin
             Begin
               // Vérifie que le pointeur est en collision avec la première partie d'une ligne.
 
-              If (Line_Rectangle_Colliding(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Intermediate_Positions[j], Panel_Get_Relative_Position(Mouse_Get_Release_Position(
-                 Game), Game.Panel_Right), Vehicle_Size))
+              If (Line_Rectangle_Colliding(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Intermediate_Positions[j], Mouse_Position, Vehicle_Size))
                 Then
                 Begin
+                  // Créer un train qui par de la station précédente, dans le sens indirect.
                   Train_Create(Game.Lines[i].Stations[j], false, Game.Lines[i], Game);
                   Break;
                   Break;
                 End;
               // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
-              If (Line_Rectangle_Colliding(Game.Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position_Centered, Panel_Get_Relative_Position(Mouse_Get_Release_Position
-                 (Game), Game.Panel_Right), Vehicle_Size)) Then
+              If (Line_Rectangle_Colliding(Game.Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position_Centered, Mouse_Position, Vehicle_Size)) Then
                 Begin
+                  // Créer un train qui part de la station suivante, dans le sens direct.
                   Train_Create(Game.Lines[i].Stations[j + 1], true, Game.Lines[i], Game);
-
                   Break;
                   Break;
                 End;
@@ -247,7 +321,9 @@ Begin
       // Si la souri se trouve sur le panneau de droite.
       If (Mouse_On_Pannel(Mouse_Get_Release_Position(Game), Game.Panel_Right)) Then
         Begin
-          Mouse_Pressed_On_Line(Game);
+          If (Mouse_Pressed_On_Line(Game)) Then
+
+
         End;
 
     End
@@ -266,16 +342,17 @@ Begin
       If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Right)) Then
         Begin
           // Si le curseur est en mode ajout de locomotive.
-          If (Game.Mouse.Mode = Mouse_Mode_Add_Locomotive) Then
+          If (Game.Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Then
             Mouse_Add_Locomotive(Game);
 
           // Si le curseur est en mode ajout de wagons.
-          Else If (Game.Mouse.Mode = Mouse_Mode_Add_Wagon) Then
+          Else If (Game.Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
                  Mouse_Train_Add_Wagon(Game);
 
           // Si le curseur est en mode ajout de station.
-          Else If (Gaem.Mouse.Mode = Mouse_Mode_Line_Add_Station) Then
-                  Mouse_Mode_Line_Add_Station(Game);
+          Else If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Or (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
+                 Mouse_Line_Add_Station(Game);
+        
 
         End;
 
@@ -292,10 +369,9 @@ Begin
             End;
         End;
 
-      Game.Mouse.Mode := Mouse_Mode_Normal;
+      Game.Mouse.Mode := Type_Mouse_Mode.Normal;
 
     End;
-
 End;
 
 
