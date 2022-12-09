@@ -80,6 +80,8 @@ Implementation
 
 // Procédure qui charge les ressources graphiques.
 Procedure Ressources_Load(Var Ressources : Type_Ressources);
+Var Position : Type_Coordinates;
+    i : Byte;
 Begin
 
   // - - Station
@@ -98,7 +100,31 @@ Begin
 
 
   // - - Véhicule (Locomotive et Wagon)
-  Ressources.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
+
+  Position.X := 0;
+  Position.Y := 0;
+
+  // Itère parmis les couleurs de véhicule.
+  For i := 0 To 7 Do
+    Begin
+        // Crée la surface de base (orientation 0 degrée).
+        Ressources.Vehicle[i][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
+        Graphics_Draw_Filled_Rectangle(Ressources.Vehicle[i][0], Position, Vehicle_Size, Color_Get(Color_Red));
+
+        // Génère la deuxième surface (orientation 45 degrée).
+        Ressources.Vehicle[i][1] := rotozoomSurface(Ressources.Vehicle[i][0], 45, 1, 1);
+
+        // Crée la surface de base (orientation 90 degrée).
+        Ressources.Vehicle[i][2] := Graphics_Surface_Create(Vehicle_Size.Y, Vehicle_Size.X);
+        Graphics_Draw_Filled_Rectangle(Ressources.Vehicle[i][2], Position, Vehicle_Size, Color_Get(Color_Red));
+
+        // Génère la deuxième surface (orientation 135 degrée).
+        Ressources.Vehicle[i][3] := rotozoomSurface(Ressources.Vehicle[i][2], 45, 1, 1);
+    End;
+
+
+
+  //Ressources.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
   Ressources.Vehicle_45_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 45, 1, 1);
   Ressources.Vehicle_90_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 90, 1, 1);
   Ressources.Vehicle_135_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 135, 1, 1);

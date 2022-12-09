@@ -32,7 +32,7 @@ Implementation
 
 // - - Fonctions et procédures relatives au passagers 
 
-{Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
+Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
 
 Var iteration : Integer;
 Begin
@@ -179,7 +179,7 @@ begin
     end;
 end;
 
-Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
+{Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
 
 Var k, row, column, iteration, indexStationToConnect, comingFromStationIndex, lightest_Station_Index, i, j : Integer;
   minimum_Weight : Real;

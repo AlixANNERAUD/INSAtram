@@ -102,6 +102,11 @@ Const Mouse_Size : Type_Coordinates = (
                                        Y :  8;
                                       );
 
+Const Vehicle_Size : Type_Coordinates = (
+                                       X :  32;
+                                       Y :  24;
+                                      );
+
 
   // - Sons
 
@@ -263,7 +268,8 @@ Type Type_Ressources = Record
   Stations : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface;
   // Passagers (5 formes différentes).
   Passengers : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface;
-  // Vehicles (locomotive et wagon).
+  // Vehicles (locomotive et wagon), la première dimension est pour les couleurs et la deuxième pour l'orientation (0, 45, 90 et 135 degrees).
+  Vehicles : Array [0 .. 7, 0 .. 3] of PSDL_Surface;
   Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : PSDL_Surface;
   // Sons
   Music : pMIX_MUSIC;
@@ -547,6 +553,8 @@ Function Lines_Intersects(a1, a2, b1, b2 : Type_Coordinates) : Boolean;
 
 Procedure Graphics_Draw_Filled_Circle(Surface : PSDL_Surface; Center : Type_Coordinates; Radius : Integer; Color : Type_Color);
 
+Procedure Graphics_Draw_Filled_Rectangle(Surface : PSDL_Surface; Position, Size : Type_Coordinates; Color : Type_Color);
+
 
 Function Color_Get(Color_Name : Type_Color_Name) : Type_Color;
 Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
@@ -558,6 +566,11 @@ Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; 
 Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
 
 Implementation
+
+Procedure Graphics_Draw_Filled_Rectangle(Surface : PSDL_Surface; Position, Size : Type_Coordinates; Color : Type_Color);
+Begin
+  BoxRGBA(Surface, Position.X, Position.Y, Position.X + Size.X, Position.Y + Size.Y, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+End;
 
 Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
 Begin
@@ -881,7 +894,7 @@ Begin
           // Suppression du passager.
           Passenger_Delete(Game.Stations[i].Passengers[j]);
           // Suppression de l'emplacement du passager dans la station.
-          delete(Game.Stations[i].Passengers , j, 1);
+          delete(Game.Stations[i].Passengers, j, 1);
         End;
       // Suppression de la station.
       delete(Game.Stations, i, 1);
