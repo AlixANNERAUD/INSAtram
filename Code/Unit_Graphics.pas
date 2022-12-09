@@ -54,11 +54,6 @@ Function Color_To_Longword(Color : Type_Color) : Longword;
 
 // - - - Etiquette
 
-Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : pTTF_Font; Color : Type_Color);
-Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
-Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
-Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
-Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
 // - - - Panneaux
 
@@ -80,8 +75,10 @@ Implementation
 
 // Procédure qui charge les ressources graphiques.
 Procedure Ressources_Load(Var Ressources : Type_Ressources);
+
 Var Position : Type_Coordinates;
-    i : Byte;
+  i : Byte;
+  Color : Type_Color_Name;
 Begin
 
   // - - Station
@@ -107,27 +104,35 @@ Begin
   // Itère parmis les couleurs de véhicule.
   For i := 0 To 7 Do
     Begin
-        // Crée la surface de base (orientation 0 degrée).
-        Ressources.Vehicle[i][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
-        Graphics_Draw_Filled_Rectangle(Ressources.Vehicle[i][0], Position, Vehicle_Size, Color_Get(Color_Red));
 
-        // Génère la deuxième surface (orientation 45 degrée).
-        Ressources.Vehicle[i][1] := rotozoomSurface(Ressources.Vehicle[i][0], 45, 1, 1);
+      Case i Of 
+        0 : Color := Color_Red;
+        1 : Color := Color_Purple;
+        2 : Color := Color_Indigo;
+        3 : Color := Color_Teal;
+        4 : Color := Color_Green;
+        5 : Color := Color_Yellow;
+        6 : Color := Color_Orange;
+        7 : Color := Color_Brown;
+      End;
 
-        // Crée la surface de base (orientation 90 degrée).
-        Ressources.Vehicle[i][2] := Graphics_Surface_Create(Vehicle_Size.Y, Vehicle_Size.X);
-        Graphics_Draw_Filled_Rectangle(Ressources.Vehicle[i][2], Position, Vehicle_Size, Color_Get(Color_Red));
+      // Crée la surface de base (orientation 0 degrée).
+      Ressources.Vehicles[i][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
+      Graphics_Draw_Filled_Rectangle(Ressources.Vehicles[i][0], Position, Vehicle_Size, Color_Get(Color));
 
-        // Génère la deuxième surface (orientation 135 degrée).
-        Ressources.Vehicle[i][3] := rotozoomSurface(Ressources.Vehicle[i][2], 45, 1, 1);
+      // Génère la deuxième surface (orientation 45 degrée).
+      Ressources.Vehicles[i][1] := rotozoomSurface(Ressources.Vehicles[i][0], 45, 1, 1);
+      Ressources.Vehicles[i][2] := rotozoomSurface(Ressources.Vehicles[i][0], 90, 1, 1);
+      Ressources.Vehicles[i][3] := rotozoomSurface(Ressources.Vehicles[i][0], 135, 1, 1);
     End;
 
+     Ressources.Vehicles[8][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
+      Graphics_Draw_Filled_Rectangle(Ressources.Vehicles[8][0], Position, Vehicle_Size, Color_Get(Color_Black));
 
-
-  //Ressources.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
-  Ressources.Vehicle_45_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 45, 1, 1);
-  Ressources.Vehicle_90_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 90, 1, 1);
-  Ressources.Vehicle_135_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 135, 1, 1);
+      // Génère la deuxième surface (orientation 45 degrée).
+      Ressources.Vehicles[8][1] := rotozoomSurface(Ressources.Vehicles[8][0], 45, 1, 1);
+      Ressources.Vehicles[8][2] := rotozoomSurface(Ressources.Vehicles[8][0], 90, 1, 1);
+      Ressources.Vehicles[8][3] := rotozoomSurface(Ressources.Vehicles[8][0], 135, 1, 1);
 
   // - Fonts loading
   Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 12);
@@ -147,18 +152,19 @@ Begin
   // Si le curseur est en mode ajout de locomotive.
   If (Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Then
     Begin
-      Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
-      Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
-      SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
+      Destination_Rectangle.x := Mouse_Get_Position().X - Vehicle_Size.X Div 2;
+      Destination_Rectangle.y := Mouse_Get_Position().Y - Vehicle_Size.Y Div 2;
+
+      SDL_BlitSurface(Game.Ressources.Vehicles[8][0], Nil, Game.Window.Surface, @Destination_Rectangle);
     End
     // Si le curseur est en mode ajout de wagon.
   Else If (Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
          Begin
-           Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
-           Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
-           SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
+           Destination_Rectangle.x := Mouse_Get_Position().X - Vehicle_Size.X Div 2;
+           Destination_Rectangle.y := Mouse_Get_Position().Y - Vehicle_Size.Y Div 2;
+           SDL_BlitSurface(Game.Ressources.Vehicles[8][0], Nil, Game.Window.Surface, @Destination_Rectangle);
          End
-  // Si le curseur est en mode ajout de station à une ligne.
+         // Si le curseur est en mode ajout de station à une ligne.
   Else If (Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
          Begin
            Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
@@ -174,7 +180,7 @@ Begin
            Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
 
          End
-  // Si le curseur est en mode ajout de station à une ligne.
+         // Si le curseur est en mode ajout de station à une ligne.
   Else If (Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Then
          Begin
            Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
@@ -288,59 +294,6 @@ End;
 
 
 
-
-
-// Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
-Procedure Label_Pre_Render(Var Laabel : Type_Label);
-
-Var Characters : pChar;
-  SDL_Color : PSDL_Color;
-Begin
-  new(SDL_Color);
-
-  SDL_Color^.r := Laabel.Color.Red;
-  SDL_Color^.g := Laabel.Color.Green;
-  SDL_Color^.b := Laabel.Color.Blue;
-
-  SDL_FreeSurface(Laabel.Surface);
-  // Conversion du string en pChar.
-  Characters := String_To_Characters(Laabel.Text);
-  Laabel.Surface := TTF_RENDERTEXT_BLENDED(Laabel.Font, Characters,
-                    SDL_Color^);
-
-  TTF_SizeText(Laabel.Font, Characters, Laabel.Size.X, Laabel.Size.Y);
-  dispose(SDL_Color);
-  strDispose(Characters);
-
-End;
-
-// Procédure qui définit tout les attributs d'un texte à la fois.
-Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : pTTF_Font; Color : Type_Color);
-Begin
-  Laabel.Font := Font;
-  Laabel.Color := Color;
-  Laabel.Text := Text_String;
-  Label_Pre_Render(Laabel);
-End;
-
-Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
-Begin
-  Laabel.Text := Text_String;
-  Label_Pre_Render(Laabel);
-End;
-
-Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
-Begin
-  Laabel.Font := Font;
-  Label_Pre_Render(Laabel);
-End;
-
-Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
-Begin
-  Laabel.Color := Color;
-  Label_Pre_Render(Laabel);
-End;
-
 Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
 
 Var Destionation_Rectangle : TSDL_Rect;
@@ -357,7 +310,6 @@ End;
 Procedure Graphics_Load(Var Game : Type_Game);
 
 Var Video_Informations :   PSDL_VideoInfo;
-  i : Byte;
 Begin
   // - Initialisation de la SDL
   SDL_Init(SDL_INIT_EVERYTHING);
@@ -432,13 +384,13 @@ End;
 
 Procedure Graphics_Unload(Var Game : Type_Game);
 
-Var i : Byte;
+Var i, j : Byte;
 Begin
   // Libération de la mémoire des sprites.
-  SDL_FreeSurface(Game.Ressources.Vehicle_0_Degree);
-  SDL_FreeSurface(Game.Ressources.Vehicle_45_Degree);
-  SDL_FreeSurface(Game.Ressources.Vehicle_90_Degree);
-  SDL_FreeSurface(Game.Ressources.Vehicle_135_Degree);
+
+  For i := 0 To 8 Do
+    For j := 0 To 3 Do
+      SDL_FreeSurface(Game.Ressources.Vehicles[i][j]);
 
   For i := 0 To Shapes_Number - 1 Do
     Begin
@@ -516,8 +468,8 @@ Begin
   Image_Render(Game.Clock_Image, Game.Panel_Top);
   Dual_State_Button_Render(Game.Play_Pause_Button, Game.Panel_Top);
 
-  // - Rendu dans le panneau du bas.
-  For i := 0 To Game_Maximum_Lines_Number - 1 Do
+  // - Rendu dans le panneau du bas.Game_Maximum_Lines_Number
+  For i := low(Game.Lines) To high(Game.Lines) Do
     Dual_State_Button_Render(Game.Lines[i].Button, Game.Panel_Bottom);
 
   // - Panneau de gauche.
@@ -651,7 +603,6 @@ End;
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
-  i : Byte;
   Direction : Integer;
   Norme : Integer;
 Begin
@@ -685,65 +636,53 @@ Begin
     0 :
         Begin
           Train.Position.X := Train.Position.X + Norme;
-          Train.Sprite := Ressources.Vehicle_0_Degree;
-          Train.Size.X := Ressources.Vehicle_0_Degree^.w;
-          Train.Size.Y := Ressources.Vehicle_0_Degree^.h;
+          Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
         End;
     180 :
           Begin
             Train.Position.X := Train.Position.X - Norme;
-            Train.Sprite := Ressources.Vehicle_0_Degree;
-            Train.Size.X := Ressources.Vehicle_0_Degree^.w;
-            Train.Size.Y := Ressources.Vehicle_0_Degree^.h;
+            Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
           End;
     90 :
          Begin
            Train.Position.Y := Train.Position.Y - Norme;
-           Train.Sprite := Ressources.Vehicle_90_Degree;
-           Train.Size.X := Ressources.Vehicle_90_Degree^.w;
-           Train.Size.Y := Ressources.Vehicle_90_Degree^.h;
+           Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
          End;
     -90 :
           Begin
             Train.Position.Y := Train.Position.Y + Norme;
-            Train.Sprite := Ressources.Vehicle_90_Degree;
-            Train.Size.X := Ressources.Vehicle_90_Degree^.w;
-            Train.Size.Y := Ressources.Vehicle_90_Degree^.h;
+            Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
           End;
     -45 :
           Begin
             Train.Position.X := Train.Position.X + Norme;
             Train.Position.Y := Train.Position.Y + Norme;
-            Train.Sprite := Ressources.Vehicle_135_Degree;
-            Train.Size.X := Ressources.Vehicle_135_Degree^.w;
-            Train.Size.Y := Ressources.Vehicle_135_Degree^.h;
+            Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
           End;
     -135 :
            Begin
              Train.Position.X := Train.Position.X - Norme;
              Train.Position.Y := Train.Position.Y + Norme;
-             Train.Sprite := Ressources.Vehicle_45_Degree;
-             Train.Size.X := Ressources.Vehicle_45_Degree^.w;
-             Train.Size.Y := Ressources.Vehicle_45_Degree^.h;
+             Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
            End;
     45:
         Begin
           Train.Position.X := Train.Position.X + Norme;
           Train.Position.Y := Train.Position.Y - Norme;
-          Train.Sprite := Ressources.Vehicle_45_Degree;
-          Train.Size.X := Ressources.Vehicle_45_Degree^.w;
-          Train.Size.Y := Ressources.Vehicle_45_Degree^.h;
+          Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
+
         End;
     135:
          Begin
            Train.Position.X := Train.Position.X - Norme;
            Train.Position.Y := Train.Position.Y - Norme;
-           Train.Sprite := Ressources.Vehicle_135_Degree;
-           Train.Size.X := Ressources.Vehicle_135_Degree^.w;
-           Train.Size.Y := Ressources.Vehicle_135_Degree^.h;
+           Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
          End;
 
   End;
+
+  Train.Size.X := Train.Sprite^.w;
+  Train.Size.Y := Train.Sprite^.h;
 
   Train.Position.X := round(Train.Position.X - (Train.Size.X*0.5));
   Train.Position.Y := round(Train.Position.Y - (Train.Size.X*0.5));

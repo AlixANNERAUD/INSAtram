@@ -32,7 +32,11 @@ Implementation
 
 // - - Fonctions et procédures relatives au passagers 
 
-Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
+
+
+
+
+{Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
 
 Var iteration : Integer;
 Begin
@@ -146,13 +150,12 @@ End;
 Procedure Get_Ending_Station_From_Shape(Game : Type_Game; Passenger : Type_Passenger_Pointer; var Index_Table : array of Integer);
 var i, counter : Integer;
 Begin
-counter := 0;
+counter := 1;
 for i:= low(Game.Stations) to high(Game.Stations) do
   Begin
     if Game.Stations[i].Shape = Passenger^.Shape Then
       begin
-        SetLength(Index_Table, counter+1); //confirmer le +1 avec Alix (est-ce qu'on peut set la taille à 0 ou non ?)
-        Index_Table[counter]:=i;
+        SetLength(Index_Table, counter); 
         counter:=counter+1;
       end;
   end;
@@ -179,7 +182,7 @@ begin
     end;
 end;
 
-{Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
+Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game);
 
 Var k, row, column, iteration, indexStationToConnect, comingFromStationIndex, lightest_Station_Index, i, j : Integer;
   minimum_Weight : Real;
@@ -207,7 +210,7 @@ Begin
       Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isAvailable := False;
     End;
 
-// Inserer une boucle for pour chacune des cases de Index_Table (tous les indexs des stations de la même forme que celle du passager) 
+// Todo : (mais pas dans dijkstra) Inserer une boucle for pour chacune des cases de Index_Table (tous les indexs des stations de la même forme que celle du passager) 
   iteration := low(Game.Dijkstra_Table);
   Repeat
 //  For iteration := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
@@ -253,14 +256,15 @@ Begin
 //    End;
     iteration := iteration +1;
   Until ((iteration = high(Game.Dijkstra_Table)) or (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=True));
-  SetLength(Itinerary_Indexes, length(Game.Dijkstra_Table));
   Itinerary_Indexes[0] := Starting_Station_Index;
   k := 1;
+  SetLenght(Itinerary_Indexes, k);
   For iteration:= low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
     Begin
       For column := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
         If (Game.Dijkstra_Table[iteration][column].isValidated = True) And (Itinerary_Indexes[k-1] <> Game.Dijkstra_Table[iteration][column].comingFromStationIndex) Then
           Begin
+            SetLenght(Itinerary_Indexes, k)
             Itinerary_Indexes[k] := Game.Dijkstra_Table[iteration][column].comingFromStationIndex;
             k := k + 1;
           End;
@@ -270,18 +274,62 @@ End;}
 
 
 
+
+
+
+
 {Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station; Game : Type_Game) : Boolean;
 Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
 
 
 End;
 
-Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
-Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
-Begin
-  Dijkstra(Starting_Station_Index, Ending_Station_Index, Itinerary_Indexes, Game);
- 
+Function Passenger_Get_On(Passenger : Type_Passenger; Game : Type_Game; StationIndex : Integer; Train : Type_Train) : Boolean;
+
+Var i, j, Own_Station_Index, Next_Passenger_Station_Index : Integer;
+Begin // tout ce bordel est à refaire j'arrive plus à réfléchir mais on y est presque
+  Own_Station_Index := get_Absolute_Index_From_Station_Pointer(Train.Next_Station, Game.Stations) - 1;
+  for i := low(Passenger.Itinerary) to high(Passenger.Itinerary) do
+    begin
+      if get_Absolute_Index_From_Station_Pointer(Passenger.Itinerary[i], Game.Stations) = Own_Station_Index then
+        begin
+          Next_Passenger_Station_Index := get_Absolute_Index_From_Station_Pointer(Passenger.Itinerary[i+1], Game.Stations);
+        end; 
+    end;
+  if get_Absolute_Index_From_Station_Pointer(Train.Next_Station, Game.Stations) = Next_Passenger_Station_Index then
+    begin
+      Passenger_Get_On := True;
+    end
+  else
+    begin
+      Passenger_Get_On := False;
+    end;
 End;}
+
+
+
+{
+procedure Passenger_Attribute_Itineraries(Game : Type_Game);
+Var i,j,k,l : Byte;
+    Index_Table_Of_Same_Shape, Itinerary_Indexes : Array of Integer;
+begin
+  for i:= low(Game.Stations) to high(Game.Stations) do // Parcourt toutes les stations pour ensuite parcourir les passagers contenus dans ces stations
+    begin
+      for j:= low(Game.Stations[i].passengers) to high(Game.Stations[i].passengers) do // Parcourt les passagers de la station
+        begin
+          Get_Ending_Station_From_Shape(Game, Game.Stations[i].passengers[j], Index_Table_Of_Same_Shape);
+          for k := low(Index_Table_Of_Same_Shape) to high(Index_Table_Of_Same_Shape) do
+            begin
+              Dijkstra(i, k, Itinerary_Indexes, Game);
+              for l:= low(Itinerary_Indexes) to high(Itinerary_Indexes) do
+                begin
+                  Game.Stations[i].passengers[j].Itinerary[l] := get_Pointer_From_Absolute_Index(Itinerary_Indexes[l], Game.Stations)
+                end;      
+            end;
+        end;
+    end;
+end;
+}
 
 Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
 Begin
@@ -320,8 +368,10 @@ Begin
 
   Game.Day := Day_Monday;
 
+
   // Défintion de la carte d'occupation des stations..
   SetLength(Game.Stations_Map, Game.Panel_Right.Size.X Div 64);
+
   For i := low(Game.Stations_Map) To high(Game.Stations_Map) Do
     Begin
       SetLength(Game.Stations_Map[i], Game.Panel_Right.Size.Y Div 64);
@@ -337,9 +387,8 @@ Begin
 
   // Création de la première ligne
   Line_Create(Game);
-
   Line_Create(Game);
-
+  Line_Create(Game);
 
   For i := low(Game.Stations) + 0 To high(Game.Stations) - 5 Do
     Begin
@@ -347,7 +396,7 @@ Begin
     End;
 
 
-For i := high(Game.Stations) - 5 To high(Game.Stations) Do
+  For i := high(Game.Stations) - 5 To high(Game.Stations) Do
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[1]);
     End;
@@ -362,11 +411,9 @@ For i := high(Game.Stations) - 5 To high(Game.Stations) Do
         End;
     End;
 
-
-
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
- Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
-Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
+  Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
+  Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
 
   Mouse_Load(Game);
 
@@ -452,7 +499,7 @@ Begin
                               Mouse_Event_Handler(Event.button, Game);
         SDL_MOUSEBUTTONUP :
                             // writeln('click released');
-                              Mouse_Event_Handler(Event.button, Game);
+                            Mouse_Event_Handler(Event.button, Game);
       End;
 
     End;
@@ -463,64 +510,63 @@ Procedure Logic_Refresh(Var Game : Type_Game);
 
 Var i, j : Integer;
 Begin
-  // Vérifie les évenements
 
-  If (Game.Graphics_Timer > Time_Get_Current()) Then
+  If (Game.Graphics_Timer < Time_Get_Current()) Then
     Begin
+      Graphics_Refresh(Game);
       Logic_Event_Handler(Game);
-      SDL_Delay(Game.Graphics_Timer - Time_Get_Current());
-    End;
+      Game.Graphics_Timer := Time_Get_Current() + (1000 Div 60);
+    End
+  Else If (Game.Logic_Timer < Time_Get_Current) Then
+         Begin
+           // Si la partie n'est pas en pause.  
+           If (Game.Play_Pause_Button.State = true) Then
+             Begin
+               // Vérifie si le jour affiché est différent du jour actuel.
+               If (Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7)) <> Game.Day) Then
+                 Begin
+                   // Mise à jour de la variable du jour.
+                   Game.Day := Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7));
+                   // Mise à jour de l'étiquette du jour.
+                   Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
+                 End;
 
-  // Si la partie n'est pas en pause.  
-  If (Game.Play_Pause_Button.State = true) Then
-    Begin
-      // Vérifie si le jour affiché est différent du jour actuel.
-      If (Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7)) <> Game.Day) Then
-        Begin
-          // Mise à jour de la variable du jour.
-          Game.Day := Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7));
-          // Mise à jour de l'étiquette du jour.
-          Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
-        End;
+               // Génération aléatoire des passagers.
+               // Vérifie si il y a bien des stations dans une partie.
+               If (length(Game.Stations) > 0) Then
+                 Begin
+                   // Si le timer à été dépassé.
+                   If (Game.Passengers_Timer < Time_Get_Current()) Then
+                     Begin
+                       // Création d'un passager sur une station choisie aléatoirement.
+                       Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
+                       // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
+                       Game.Passengers_Timer := Time_Get_Current() + round((exp(1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
+                     End;
+                 End;
+             End;
 
-      // Génération aléatoire des passagers.
-      // Vérifie si il y a bien des stations dans une partie.
-      If (length(Game.Stations) > 0) Then
-        Begin
-          // Si le timer à été dépassé.
-          If (Game.Passengers_Timer < Time_Get_Current()) Then
-            Begin
-              // Création d'un passager sur une station choisie aléatoirement.
-              Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
-              // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
-              Game.Passengers_Timer := Time_Get_Current() + round((exp(1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
-            End;
-        End;
-    End;
-
-  // Détecte les trains arrivés à quais.
-  // Vérifié qu'il existe une ligne.
-  If (length(Game.Lines) > 0) Then
-    Begin
-      // Itère parmis les lignes
-      For i := low(Game.Lines) To high(Game.Lines) Do
-        Begin
-          // Itère parmis les trains
-          For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
-            Begin
-              // Si le train est arrivé à quais.
-              If (Game.Lines[i].Trains[j].Driving = false) Then
-                Begin
-                  // Effectue la correspondance du train arrivé à quais.
-                  Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j], Game);
-                End;
-            End;
-        End;
-    End;
-
-
-  Graphics_Refresh(Game);
-  Game.Graphics_Timer := Time_Get_Current() + 1000 Div 60;
+           // Détecte les trains arrivés à quais.
+           // Vérifié qu'il existe une ligne.
+           If (length(Game.Lines) > 0) Then
+             Begin
+               // Itère parmis les lignes
+               For i := low(Game.Lines) To high(Game.Lines) Do
+                 Begin
+                   // Itère parmis les trains
+                   For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+                     Begin
+                       // Si le train est arrivé à quais.
+                       If (Game.Lines[i].Trains[j].Driving = false) Then
+                         Begin
+                           // Effectue la correspondance du train arrivé à quais.
+                           Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j], Game);
+                         End;
+                     End;
+                 End;
+             End;
+           Game.Logic_Timer := Time_Get_Current() + 200;
+         End;
 
 End;
 
@@ -615,7 +661,7 @@ Begin
     End;
 
   // - Chargement des passagers de la station dans le train.
-  
+
   // Itère parmis les véhicules d'un train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do
     Begin
@@ -669,12 +715,12 @@ Begin
         End;
     End;
   // Mise à jour de l'étiquette.
-  Label_Set(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number), Game.Ressources.Fonts[Font_Small][Font_Normal], Color_Get(
-  Color_White));
-
+  Label_Set_Text(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number));
 
   // Désallocation de la queue.
   SetLength(Passengers_Queue, 0);
+
+  Train.Start_Time := Time_Get_Current();
 
   // Le train peut repartir.
   Train.Driving := true;

@@ -103,9 +103,9 @@ Const Mouse_Size : Type_Coordinates = (
                                       );
 
 Const Vehicle_Size : Type_Coordinates = (
-                                       X :  32;
-                                       Y :  24;
-                                      );
+                                         X :  32;
+                                         Y :  24;
+                                        );
 
 
   // - Sons
@@ -153,19 +153,6 @@ Const Vehicle_Maximum_Passengers_Number = 6;
 
 Const Train_Maximum_Vehicles_Number = 3;
 
-  // Vitesse maximum d'un train en px/s.
-
-Const Train_Maximum_Speed = 4;
-
-  // Acceleration d'un train.
-
-Const Train_Acceleration = 2;
-
-  // Distance d'accélaration (equation horaires).
-
-Const Train_Acceleration_Distance = 0.5 * ((Train_Maximum_Speed*Train_Maximum_Speed) / Train_Acceleration);
-
-
   // - - - Lignes
 
 Const Lines_Maximum_Number_Stations = 20;
@@ -173,6 +160,9 @@ Const Lines_Maximum_Number_Stations = 20;
 Const Lines_Maximum_Number_Trains = 4;
 
   // - Définition des types
+
+Const Train_Maximum_Speed = 60;
+Const Train_Acceleration_Time = 5;
 
 
 
@@ -269,8 +259,7 @@ Type Type_Ressources = Record
   // Passagers (5 formes différentes).
   Passengers : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface;
   // Vehicles (locomotive et wagon), la première dimension est pour les couleurs et la deuxième pour l'orientation (0, 45, 90 et 135 degrees).
-  Vehicles : Array [0 .. 7, 0 .. 3] of PSDL_Surface;
-  Vehicle_0_Degree, Vehicle_45_Degree, Vehicle_90_Degree, Vehicle_135_Degree : PSDL_Surface;
+  Vehicles : Array [0 .. 8, 0 .. 3] Of PSDL_Surface;
   // Sons
   Music : pMIX_MUSIC;
 End;
@@ -317,7 +306,7 @@ Type Type_Station_Pointer = ^Type_Station;
     Position, Size : Type_Coordinates;
     // Sprite du train.
     Sprite : PSDL_Surface;
-    Timer : Type_Time;
+    Start_Time : Type_Time;
     // Détermine si le train est à l'arrêt ou non.
     Driving : Boolean;
     // Pointeur de la dernière station.
@@ -340,7 +329,8 @@ Type Type_Station_Pointer = ^Type_Station;
     Vehicles : array Of Type_Vehicle;
     // Etiquette 
     Passengers_Label : Type_Label;
-
+    // Indexe de la couleur du train.
+    Color_Index : Byte;
   End;
 
   Type_Train_Pointer = ^Type_Train;
@@ -413,6 +403,8 @@ Type Type_Game = Record
   Graphics_Timer : Type_Time;
   // Temporisateur déterminant quand générer un nouveau passager.
   Passengers_Timer : Type_Time;
+  // Temporisateur déterminant quand rafraishir la logique.
+  Logic_Timer : Type_Time;
 
   // Souris
   Mouse : Type_Mouse;
@@ -565,7 +557,69 @@ Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; 
 
 Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
 
+// - Etiquettes
+
+Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : pTTF_Font; Color : Type_Color);
+Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
+Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
+Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
+
+Procedure Label_Pre_Render(Var Laabel : Type_Label);
+
 Implementation
+
+
+
+// Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
+Procedure Label_Pre_Render(Var Laabel : Type_Label);
+
+Var Characters : pChar;
+  SDL_Color : PSDL_Color;
+Begin
+  new(SDL_Color);
+
+  SDL_Color^.r := Laabel.Color.Red;
+  SDL_Color^.g := Laabel.Color.Green;
+  SDL_Color^.b := Laabel.Color.Blue;
+
+  SDL_FreeSurface(Laabel.Surface);
+  // Conversion du string en pChar.
+  Characters := String_To_Characters(Laabel.Text);
+  Laabel.Surface := TTF_RENDERTEXT_BLENDED(Laabel.Font, Characters,
+                    SDL_Color^);
+
+  TTF_SizeText(Laabel.Font, Characters, Laabel.Size.X, Laabel.Size.Y);
+  dispose(SDL_Color);
+  strDispose(Characters);
+
+End;
+
+// Procédure qui définit tout les attributs d'un texte à la fois.
+Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : pTTF_Font; Color : Type_Color);
+Begin
+  Laabel.Font := Font;
+  Laabel.Color := Color;
+  Laabel.Text := Text_String;
+  Label_Pre_Render(Laabel);
+End;
+
+Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
+Begin
+  Laabel.Text := Text_String;
+  Label_Pre_Render(Laabel);
+End;
+
+Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
+Begin
+  Laabel.Font := Font;
+  Label_Pre_Render(Laabel);
+End;
+
+Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
+Begin
+  Laabel.Color := Color;
+  Label_Pre_Render(Laabel);
+End;
 
 Procedure Graphics_Draw_Filled_Rectangle(Surface : PSDL_Surface; Position, Size : Type_Coordinates; Color : Type_Color);
 Begin
@@ -1063,7 +1117,8 @@ Begin
       // - Recalcul des positions des boutons.
 
       // Centrage vertical du premier boutton.
-      Game.Lines[i].Button.Position.Y := Get_Centered_Position(Game.Panel_Bottom.Size.Y, Game.Lines[i].Button.Position.Y);
+
+      Game.Lines[i].Button.Position.Y := Get_Centered_Position(Game.Panel_Bottom.Size.Y, Game.Lines[i].Button.Size.Y);
 
       // Définition de la position du premier boutton. 
       Game.Lines[low(Game.Lines)].Button.Position.X := Get_Centered_Position(Game.Panel_Bottom.Size.X, (Game.Lines[i].Button.Size.X * length(Game.Lines)) + (16 * (length(Game.Lines) - 1)));
@@ -1150,7 +1205,7 @@ End;
 // Fonction qui enlève une station d'une ligne.
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
 
-Var i : Byte;
+Var i, j : Byte;
 Begin
   Line_Remove_Station := False;
   If (length(Line.Stations) > 0) Then
@@ -1158,12 +1213,22 @@ Begin
       For i := low(Line.Stations) To high(Line.Stations) Do
         If (Line.Stations[i] = Station_Pointer) Then
           Begin
+            For j := low(Line.Trains) To high(Line.Trains) Do
+            Begin
+               
+
+                
+            End;
+
             // Enlève la station.
             Delete(Line.Stations, i, 1);
             // Si il n'y a plus qu'une station dans la ligne, alors, on supprime la seule station restante.
             If (length(Line.Stations) = 1) Then
               SetLength(Line.Stations, 0);
+            
+
             Line_Compute_Intermediate_Positions(Line);
+
             Line_Remove_Station := True;
             Break;
           End;
@@ -1240,8 +1305,27 @@ Begin
                                                          +  Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
                                                          (Line.Trains)].Next_Station^.Position_Centered);
 
+      If (Line.Color = Color_Get(Color_Red)) Then
+        Line.Trains[high(Line.Trains)].Color_Index := 0
+      Else If (Line.Color = Color_Get(Color_Purple)) Then
+             Line.Trains[high(Line.Trains)].Color_Index := 1
+      Else If (Line.Color = Color_Get(Color_Indigo)) Then
+             Line.Trains[high(Line.Trains)].Color_Index := 2
+      Else If (Line.Color = Color_Get(Color_Teal)) Then
+             Line.Trains[high(Line.Trains)].Color_Index := 3
+      Else If (Line.Color = Color_Get(Color_Green)) Then
+             Line.Trains[high(Line.Trains)].Color_Index := 4
+      Else If (Line.Color = Color_Get(Color_Yellow)) Then
+             Line.Trains[high(Line.Trains)].Color_Index := 5
+      Else If (Line.Color = Color_Get(Color_Orange)) Then
+             Line.Trains[high(Line.Trains)].Color_Index := 6
+      Else If (Line.Color = Color_Get(Color_Brown)) Then
+             Line.Trains[high(Line.Trains)].Color_Index := 7;
 
       Line.Trains[high(Line.Trains)].Driving := True;
+
+      Label_Set(Line.Trains[high(Line.Trains)].Passengers_Label, '', Game.Ressources.Fonts[Font_Small][Font_Bold], Color_Get(Color_White));
+
 
       Vehicle_Create(Line.Trains[high(Line.Trains)]);
 
@@ -1253,14 +1337,32 @@ End;
 
 Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 
-Var i : Byte;
+Var i, j, k : Byte;
 Begin
   If (length(Train.Vehicles) < Train_Maximum_Vehicles_Number) Then
     Begin
       SetLength(Train.Vehicles, length(Train.Vehicles) + 1);
+
       Vehicle_Create := True;
+
       For i := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
         Train.Vehicles[high(Train.Vehicles)].Passengers[i] := Nil;
+
+      // - Mise à jour de l'étiquette
+
+      // - - Comptage des passagers.
+      k := 0;
+      For i := low(Train.Vehicles) To high(Train.Vehicles) Do
+        Begin
+          For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+            Begin
+              If (Train.Vehicles[i].Passengers[j] <> Nil) Then
+                inc(k);
+            End;
+        End;
+
+      Label_Set_Text(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number));
+
     End
   Else
     Vehicle_Create := False;
