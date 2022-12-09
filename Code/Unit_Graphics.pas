@@ -12,14 +12,14 @@ Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Ma
 // - - Graphismes généraux
 
 Procedure Graphics_Load(Var Game : Type_Game);
+Procedure Graphics_Unload(Var Game : Type_Game);
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
 // - - - Outils
 
-Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
 Function Graphics_Get_Direction(Angle : Real) : Integer;
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
-                             Type_Coordinates; Integer; Color :
+                             Type_Coordinates; Color :
                              Type_Color; Var Panel : Type_Panel);
 
 
@@ -28,7 +28,6 @@ Procedure Graphics_Draw_Line(Position_1, Position_2 :
 // - - - Ressources
 
 Procedure Ressources_Load(Var Ressources : Type_Ressources);
-Procedure Ressources_Unload(Var Ressources : Type_Ressources);
 
 // - - - Curseur
 
@@ -42,7 +41,7 @@ Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released
 // - - - Bouton à deux états.
 
 Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
-Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
+
 
 // - - - Images
 
@@ -50,8 +49,6 @@ Procedure Image_Render(Var Image : Type_Image; Destination_Panel : Type_Panel);
 Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
 
 // - - - Couleurs
-
-Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
 
 Function Color_To_Longword(Color : Type_Color) : Longword;
 
@@ -80,39 +77,40 @@ Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources 
 
 Implementation
 
+
 // Procédure qui charge les ressources graphiques.
 Procedure Ressources_Load(Var Ressources : Type_Ressources);
 Begin
 
   // - - Station
-  Game.Ressources.Stations[0] := IMG_Load(Path_Image_Station_Circle);
-  Game.Ressources.Stations[1] := IMG_Load(Path_Image_Station_Lozenge);
-  Game.Ressources.Stations[2] := IMG_Load(Path_Image_Station_Pentagon);
-  Game.Ressources.Stations[3] := IMG_Load(Path_Image_Station_Square);
-  Game.Ressources.Stations[4] := IMG_Load(Path_Image_Station_Triangle);
+  Ressources.Stations[0] := IMG_Load(Path_Image_Station_Circle);
+  Ressources.Stations[1] := IMG_Load(Path_Image_Station_Lozenge);
+  Ressources.Stations[2] := IMG_Load(Path_Image_Station_Pentagon);
+  Ressources.Stations[3] := IMG_Load(Path_Image_Station_Square);
+  Ressources.Stations[4] := IMG_Load(Path_Image_Station_Triangle);
 
   // - - Passenger
-  Game.Ressources.Passengers[0] := IMG_Load(Path_Image_Passenger_Circle);
-  Game.Ressources.Passengers[1] := IMG_Load(Path_Image_Passenger_Lozenge);
-  Game.Ressources.Passengers[2] := IMG_Load(Path_Image_Passenger_Pentagon);
-  Game.Ressources.Passengers[3] := IMG_Load(Path_Image_Passenger_Square);
-  Game.Ressources.Passengers[4] := IMG_Load(Path_Image_Passenger_Triangle);
+  Ressources.Passengers[0] := IMG_Load(Path_Image_Passenger_Circle);
+  Ressources.Passengers[1] := IMG_Load(Path_Image_Passenger_Lozenge);
+  Ressources.Passengers[2] := IMG_Load(Path_Image_Passenger_Pentagon);
+  Ressources.Passengers[3] := IMG_Load(Path_Image_Passenger_Square);
+  Ressources.Passengers[4] := IMG_Load(Path_Image_Passenger_Triangle);
 
 
   // - - Véhicule (Locomotive et Wagon)
-  Game.Ressources.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
-  Game.Ressources.Vehicle_45_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 45, 1, 1);
-  Game.Ressources.Vehicle_90_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 90, 1, 1);
-  Game.Ressources.Vehicle_135_Degree := rotozoomSurface(Game.Ressources.Vehicle_0_Degree, 135, 1, 1);
+  Ressources.Vehicle_0_Degree := IMG_Load(Path_Image_Vehicle);
+  Ressources.Vehicle_45_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 45, 1, 1);
+  Ressources.Vehicle_90_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 90, 1, 1);
+  Ressources.Vehicle_135_Degree := rotozoomSurface(Ressources.Vehicle_0_Degree, 135, 1, 1);
 
   // - Fonts loading
-  Game.Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 12);
-  Game.Ressources.Fonts[Font_Medium][Font_Normal] := TTF_OpenFont(Path_Font, 24);
-  Game.Ressources.Fonts[Font_Big][Font_Normal] := TTF_OpenFont(Path_Font, 32);
+  Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 12);
+  Ressources.Fonts[Font_Medium][Font_Normal] := TTF_OpenFont(Path_Font, 24);
+  Ressources.Fonts[Font_Big][Font_Normal] := TTF_OpenFont(Path_Font, 32);
 
-  Game.Ressources.Fonts[Font_Small][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 12);
-  Game.Ressources.Fonts[Font_Medium][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 24);
-  Game.Ressources.Fonts[Font_Big][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 32);
+  Ressources.Fonts[Font_Small][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 12);
+  Ressources.Fonts[Font_Medium][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 24);
+  Ressources.Fonts[Font_Big][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 32);
 End;
 
 Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
@@ -133,8 +131,8 @@ Begin
            Destination_Rectangle.x := Mouse_Get_Position().X - Game.Ressources.Vehicle_0_Degree^.w Div 2;
            Destination_Rectangle.y := Mouse_Get_Position().Y - Game.Ressources.Vehicle_0_Degree^.h Div 2;
            SDL_BlitSurface(Game.Ressources.Vehicle_0_Degree, Nil, Game.Window.Surface, @Destination_Rectangle);
-         End;
-  // Si le curseur est en mode ajout de station à une ligne/
+         End
+  // Si le curseur est en mode ajout de station à une ligne.
   Else If (Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
          Begin
            Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
@@ -149,8 +147,9 @@ Begin
 
            Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
 
-         End;
-  Else If (Mouse.Mode = Type_Mouse.Line_Add_Station) Then
+         End
+  // Si le curseur est en mode ajout de station à une ligne.
+  Else If (Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Then
          Begin
            Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
            Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
@@ -182,22 +181,8 @@ Begin
 End;
 
 
-Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
-Begin
-  Dual_State_Button.Surface_Pressed[0] := Surface_Pressed_Disabled;
-  Dual_State_Button.Surface_Pressed[1] := Surface_Pressed_Enabled;
-  Dual_State_Button.Surface_Released[0] := Surface_Released_Disabled;
-  Dual_State_Button.Surface_Released[1] := Surface_Released_Enable;
-  Dual_State_Button.Size.X := Surface_Released_Disabled^.w;
-  Dual_State_Button.Size.Y := Surface_Released_Disabled^.h;
-  Dual_State_Button.State := False;
-End;
 
-Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
-Begin
-  // Création d'une surface SDL avec les masques de couleurs aproriés.
-  Graphics_Surface_Create := SDL_CreateRGBSurface(0, Width, Height, Color_Depth, Mask_Red, Mask_Green, Mask_Blue,Mask_Alpha);
-End;
+
 
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
 Begin
@@ -225,13 +210,6 @@ Begin
   Color_To_Longword := (Color.Red << 16) Or (Color.Green << 8) Or (Color.Blue) Or (Color.Alpha << 24);
 End;
 
-Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
-Begin
-  Color_Get.Red := Red;
-  Color_Get.Green := Green;
-  Color_Get.Blue := Blue;
-  Color_Get.Alpha := Alpha;
-End;
 
 Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
 
@@ -392,11 +370,11 @@ Begin
   Game.Score_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Score_Image.Size.Y);
   Game.Score_Image.Position.X := Game.Panel_Top.Size.X Div 2 + 16;
 
-  Label_Set(Game.Score_Label, '0', Game.Ressources.Fonts[Font_Medium][Font_Normal], Game.Ressources.Palette[Color_Black]);
+  Label_Set(Game.Score_Label, '0', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
   Game.Score_Label.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Score_Label.Size.Y);
   Game.Score_Label.Position.X := Game.Score_Image.Position.X + Game.Score_Image.Size.X + 16;
 
-  Label_Set(Game.Clock_Label, 'Wednesday', Game.Ressources.Fonts[Font_Medium][Font_Normal], Game.Ressources.Palette[Color_Black]);
+  Label_Set(Game.Clock_Label, 'Wednesday', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
   Game.Clock_Label.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Label.Size.Y);
   Game.Clock_Label.Position.X := Game.Panel_Top.Size.X Div 2 - 16 - Game.Clock_Label.Size.X;
   Label_Set_Text(Game.Clock_Label, 'Monday');
@@ -514,7 +492,7 @@ Begin
 
   // - Rendu dans le panneau du bas.
   For i := 0 To Game_Maximum_Lines_Number - 1 Do
-    Dual_State_Button_Render(Game.Lines_Buttons[i], Game.Panel_Bottom);
+    Dual_State_Button_Render(Game.Lines[i].Button, Game.Panel_Bottom);
 
   // - Panneau de gauche.
 

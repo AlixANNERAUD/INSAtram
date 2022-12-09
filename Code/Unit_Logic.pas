@@ -207,7 +207,7 @@ Begin
       Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isAvailable := False;
     End;
 
-// Inserer une boucler for pour chacune des cases de Index_Table (tous les indexs des stations de la meme forme que celle du passager) 
+// Inserer une boucle for pour chacune des cases de Index_Table (tous les indexs des stations de la même forme que celle du passager) 
   iteration := low(Game.Dijkstra_Table);
   Repeat
 //  For iteration := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
@@ -279,7 +279,7 @@ End;
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
 Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
 Begin
-  Dijkstra()
+  Dijkstra(Starting_Station_Index, Ending_Station_Index, Itinerary_Indexes, Game);
  
 End;}
 
@@ -336,18 +336,18 @@ Begin
     End;
 
   // Création de la première ligne
-  Line_Create(Game.Ressources.Palette[Color_Red], Game, Game.Stations[low(Game.Stations)], Game.Stations[low(Game.Stations)+1]);
+  Line_Create(Game);
 
-  Line_Create(Game.Ressources.Palette[Color_Purple], Game, Game.Stations[high(Game.Stations)], Game.Stations[high(Game.Stations) - 1]);
+  Line_Create(Game);
 
 
-  For i := low(Game.Stations) + 2 To high(Game.Stations) - 5 Do
+  For i := low(Game.Stations) + 0 To high(Game.Stations) - 5 Do
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
     End;
 
 
-For i := high(Game.Stations) - 5 To high(Game.Stations) - 2 Do
+For i := high(Game.Stations) - 5 To high(Game.Stations) Do
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[1]);
     End;
@@ -446,7 +446,7 @@ Begin
       Case Event.type_ Of 
         // Si la fenêtre est fermée.
         SDL_QUITEV :
-                     Game.Quit := True;
+                     HALT();
         SDL_MOUSEBUTTONDOWN :
                               //Mouse_Event_Handler(Event, Game);
                               Mouse_Event_Handler(Event.button, Game);
@@ -537,6 +537,9 @@ Begin
   Train.Last_Station := Train.Next_Station;
   // Réinitialisation de la distance.
   Train.Distance := 0;
+
+  // - Détermination de la prochaine station du train.
+
   // Parcourt toute les station de la ligne du train.
   For i := low(Line.Stations) To high(Line.Stations) Do
     Begin
@@ -579,6 +582,8 @@ Begin
 
   Train.Maximum_Distance := Train.Maximum_Distance +  Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered);
 
+  // - Déchargement des passagers du train.
+
   // Itère parmis les véhicules du train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do
     Begin
@@ -609,7 +614,9 @@ Begin
         End;
     End;
 
-  //  Chargement des passagers de la station dans le train.
+  // - Chargement des passagers de la station dans le train.
+  
+  // Itère parmis les véhicules d'un train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do
     Begin
       // Itère parmis les places du véhicule.
@@ -662,8 +669,8 @@ Begin
         End;
     End;
   // Mise à jour de l'étiquette.
-  Label_Set(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number), Game.Ressources.Fonts[Font_Small][Font_Normal], Game.Ressources.Palette[
-  Color_White]);
+  Label_Set(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number), Game.Ressources.Fonts[Font_Small][Font_Normal], Color_Get(
+  Color_White));
 
 
   // Désallocation de la queue.
