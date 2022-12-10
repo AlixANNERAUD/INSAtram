@@ -120,6 +120,7 @@ Begin
               If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Line^.Stations[i]^.Position, Line^.Stations[i]^.Size, Game.Panel_Right)) Then
                 Begin
 
+
 // ! Attention : La suppression de la station dans la ligne étant imédiate, il faudrait vérifier et / ou attendre que le train actuellement en transit sur l'axe passant par la station ait passé l'axe, au risque d'avoir des comportements étranges.
                   Line_Remove_Station(Line^.Stations[i], Line^);
                   Mouse_Pressed_On_Station := true;
@@ -239,16 +240,19 @@ Begin
       // Itère parmis les lignes.
       For i := low(Game.Lines) To high(Game.Lines) Do
         Begin
-          // Itère parmis les trains d'une ligne.
-          For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+          If (length(Game.Lines[i].Trains) > 0) Then
             Begin
-              // Détecte si le pointeur est sur un train.
-              If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Lines[i].Trains[j].Position, Game.Lines[i].Trains[j].Size, Game.Panel_Right)) Then
+              // Itère parmis les trains d'une ligne.
+              For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
                 Begin
-                  // Ajoute un wagon au train.
-                  Vehicle_Create(Game.Lines[i].Trains[j]);
-                  Break;
-                  Break;
+                  // Détecte si le pointeur est sur un train.
+                  If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Lines[i].Trains[j].Position, Game.Lines[i].Trains[j].Size, Game.Panel_Right)) Then
+                    Begin
+                      // Ajoute un wagon au train.
+                      Vehicle_Create(Game.Lines[i].Trains[j]);
+                      Break;
+                      Break;
+                    End;
                 End;
             End;
         End;
