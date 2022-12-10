@@ -187,6 +187,7 @@ Type Type_Panel = Record
   Position, Size : Type_Coordinates;
   Surface : PSDL_Surface;
   Color : Type_Color;
+  State : Boolean;
 End;
 
 Type Type_Image = Record
@@ -263,6 +264,8 @@ Type Type_Ressources = Record
   // Sons
   Music : pMIX_MUSIC;
 End;
+
+
 
 // - - Entités du jeux.
 
@@ -358,7 +361,8 @@ Type Type_Player = Record
   Locomotive_Token : Byte;
   Wagon_Token : Byte;
   Tunnel_Token : Byte;
-  Show : Boolean;
+  // Etat d'un panneau (affiché ou masqué)
+  State : Boolean;
 End;
 
 // - Itineraries
@@ -392,12 +396,19 @@ Type Type_Mouse = Record
 
 End;
 
+Type Type_Animation = Record
+  Constants : array[0 .. 1] of Real;
+  Acceleration_Distance : Integer;
+End;
+
 // - - Partie
 
 Type Type_Game = Record
 
   Start_Time : Type_Time;
   Day : Type_Day;
+
+  Pause_Time : Type_Time;
 
   // Temporisateur déterminant rendre les graphismes.
   Graphics_Timer : Type_Time;
@@ -566,7 +577,43 @@ Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
 
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
+Procedure Game_Play(Var Game : Type_Game);
+Procedure Game_Pause(Var Game : Type_Game);
+
+Procedure Panel_Set_State(State : Boolean; Var Panel : Type_Panel);
+
 Implementation
+
+Procedure Panel_Set_State(State : Boolean; Var Panel : Type_Panel);
+Begin
+  Panel.State := State;
+End;
+
+Procedure Game_Pause(Var Game : Type_Game);
+Begin
+  Game.Pause_Time := Time_Get_Current();
+End;
+
+Procedure Game_Play(Var Game : Type_Game);
+var i, j : Byte;
+Begin
+  Game.Pause_Time := Time_Get_Current() - Game.Pause_Time;
+
+  // - Mise à jour du temps de début du jeu.
+  Game.Start_Time := Game.Start_Time + Game.Pause_Time;
+
+  // - Mise à jour des temps de départ des trains.
+  // Vérifie que la partie contient des lignes.
+  If (length(Game.Lines) > 0) Then
+    // Itère parmis les lignes.
+    For i := low(Game.Lines) To high(Game.Lines) Do
+      // Vérifie que la ligne contient des trains.
+      If (length(Game.Lines[i].Trains) > 0) Then
+        // Itère parmis les trains de la ligne.
+        For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+          Game.Lines[i].Trains[j].Start_Time := Game.Lines[i].Trains[j].Start_Time + Game.Pause_Time;
+
+End;
 
 
 

@@ -1,0 +1,548 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style french
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Rapport de projet informatique
+\end_layout
+
+\begin_layout Section
+Introduction.
+\end_layout
+
+\begin_layout Subsection
+Présentation
+\end_layout
+
+\begin_layout Standard
+Le but de ce projet ...
+\end_layout
+
+\begin_layout Subsection
+Cahier des charges
+\end_layout
+
+\begin_layout Standard
+Les fonctionalités.
+\end_layout
+
+\begin_layout Subsection
+Structure
+\end_layout
+
+\begin_layout Standard
+Le projet était structuré en plusieurs fichiers de la manière suivante :
+\end_layout
+
+\begin_layout Section
+Organisation
+\end_layout
+
+\begin_layout Subsection
+Outils utilisés
+\end_layout
+
+\begin_layout Standard
+Afin de faciliter le développement, nous avons choisi des outils adéquat
+ :
+\end_layout
+
+\begin_layout Itemize
+Visual Studio Code :
+\end_layout
+
+\begin_layout Itemize
+Git et GitHub :
+\end_layout
+
+\begin_layout Itemize
+Live Share : Une extension de visual studio code permettant une collaboration
+ en direct.
+\end_layout
+
+\begin_layout Itemize
+Inkscape : C'est un de dessiner les ressources graphiques du jeu.
+\end_layout
+
+\begin_layout Subsection
+Répartition des tâches
+\end_layout
+
+\begin_layout Standard
+La répartition des tâches à été faite de la manière la plus homogène possible.
+ Ainsi, chaque personne à pu .
+\end_layout
+
+\begin_layout Section
+Difficultés rencontrés
+\end_layout
+
+\begin_layout Subsection
+Traçage des lignes
+\end_layout
+
+\begin_layout Subsubsection
+Géométrie des lignes
+\end_layout
+
+\begin_layout Itemize
+Afin de donner un aspect de 
+\begin_inset Quotes fld
+\end_inset
+
+plan de métro
+\begin_inset Quotes frd
+\end_inset
+
+ aux lignes affichés, l'affichage de ces dernières doit se faire uniquement
+ avec des droites horizontales, verticales et obliques (45°).
+ Afin de pouvoir résoudre ce problème, nous avons schématisé un cas, voici
+ notre démarche :
+\end_layout
+
+\begin_layout Itemize
+Ainsi, deux stations, représentées par les points 
+\begin_inset Formula $A=\left(A_{x},A_{y}\right)$
+\end_inset
+
+ et 
+\begin_inset Formula $B=\left(B_{x},B_{y}\right)$
+\end_inset
+
+ sont séparé par les distances 
+\begin_inset Formula $\Delta_{x}=B_{x}-A_{x}$
+\end_inset
+
+ et 
+\begin_inset Formula $\Delta_{y}=B_{y}-A_{y}$
+\end_inset
+
+.
+ Les deux stations forment un angle 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ par rapport à l'axe des abscisses.
+\end_layout
+
+\begin_layout Itemize
+Si on souhaite relier les deux stations avec un segment vertical/horizontal
+ et un obliques, il existe plusieurs possibilité : 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ oblique et 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+ vertical
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ vertical et 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+ oblique
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Nous avons choisi comme convention de toujours avoir 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ vertical où horizontal et 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+ oblique.
+ De plus, le sens et la direction de 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ sera alors déterminé avec 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ Par exemple : si on a : 
+\begin_inset Formula $-45°<\alpha<45°$
+\end_inset
+
+ alors 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ est horizontal et part à gauche de 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ Il est alors facile de transposer ce raisonnement à un tableau ordonné
+ de stations, où 
+\begin_inset Formula $A$
+\end_inset
+
+ est la station d'index 
+\begin_inset Formula $i$
+\end_inset
+
+ et 
+\begin_inset Formula $B$
+\end_inset
+
+ la station d'indice 
+\begin_inset Formula $i+1$
+\end_inset
+
+.
+ Ici 
+\begin_inset Formula $-135°<a=-63,43°<-45°$
+\end_inset
+
+, 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ est verticale et part de 
+\begin_inset Formula $A$
+\end_inset
+
+ vers le bas.
+\end_layout
+
+\begin_layout Itemize
+Afin de dessiner ces segments, la SDL à besoin des coordonnées de départ
+ et d'arrivé pour tracer un segment (donc de 
+\begin_inset Formula $A$
+\end_inset
+
+ et 
+\begin_inset Formula $I$
+\end_inset
+
+ pour 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ et de 
+\begin_inset Formula $I$
+\end_inset
+
+ et 
+\begin_inset Formula $B$
+\end_inset
+
+ pour 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+).
+ Notre objectif est alors de déterminer les coordonnées du point 
+\begin_inset Formula $I$
+\end_inset
+
+ tel que 
+\begin_inset Formula $I=\left(I_{x},I_{y}\right)$
+\end_inset
+
+ en fonction des coordonnées des stations 
+\begin_inset Formula $A$
+\end_inset
+
+ et 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ Par la suite, nous appelleront 
+\begin_inset Formula $I$
+\end_inset
+
+ la position intermédiaire.
+ 
+\end_layout
+
+\begin_layout Itemize
+Tout d'abord, 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ étant vertical, on a 
+\begin_inset Formula $I_{x}=A_{x}$
+\end_inset
+
+.
+ On place maintenant le point 
+\begin_inset Formula $E$
+\end_inset
+
+, l'intersection de la droite 
+\begin_inset Formula $(IB)$
+\end_inset
+
+ et de la droite horizontale passant par 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ On a alors 
+\begin_inset Formula $E=\left(A_{x},B_{y}\right)$
+\end_inset
+
+.
+ Or, 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+ possède un angle de 
+\begin_inset Formula $\widehat{EIB}=45°$
+\end_inset
+
+ par rapport à l'axe des ordonnées (par définition).
+ De plus, l'angle 
+\begin_inset Formula $\widehat{IEB}=90°$
+\end_inset
+
+ il s'agit de l'intersection droite verticale et horizontale (donc perpendiculai
+res).
+ Le triangle 
+\begin_inset Formula $IBE$
+\end_inset
+
+ étant rectangle en 
+\begin_inset Formula $E$
+\end_inset
+
+ et possédant un angles à 
+\begin_inset Formula $45°$
+\end_inset
+
+, il est donc rectangle isocèle en 
+\begin_inset Formula $E$
+\end_inset
+
+.
+ Cela permet d'en déduire que 
+\begin_inset Formula $\overline{IE}=-\overline{EB}$
+\end_inset
+
+, or 
+\begin_inset Formula $E=\left(A_{x},B_{y}\right)$
+\end_inset
+
+ on a donc :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overline{IE}=-\overline{EB}\Rightarrow E_{y}-I_{y}=-\left(B_{x}-E_{x}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow I_{y}=-B_{x}+E_{x}-E_{y}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow I_{y}=-B_{x}+A_{x}-B_{y}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow I_{y}=B_{y}-\Delta_{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On a donc 
+\begin_inset Formula $I=\left(A_{x},B_{y}-\Delta_{x}\right)$
+\end_inset
+
+.
+ Il suffit
+\end_layout
+
+\begin_layout Standard
+Pour les autres configuration de 
+\begin_inset Formula $\alpha$
+\end_inset
+
+, le même raisonnement peut être appliqué.
+ Il faut cependant faire attention aux signes des différentes composantes
+ qui change Ce même raisonnement peut s'appliquer aisément à différents
+ 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Ainsi, pour les autres cas
+\end_layout
+
+\begin_layout Itemize
+.
+ On remarque assez vite que le triangle formé en bas.
+ 
+\end_layout
+
+\begin_layout Standard
+peut être simplifié par l'utilisation de ce qu'on à appelé un point intermédiair
+e.
+ En effets, sur un plan de métro, on constate que les lignes.
+\end_layout
+
+\begin_layout Standard
+Un autre aspect à été celui de la cohabitation de plusieurs lignes
+\end_layout
+
+\begin_layout Subsubsection
+Épaisseur des lignes
+\end_layout
+
+\begin_layout Standard
+Plus tard dans le développement, nous nous somme rendu compte que l'utilisation
+ de lignes sans épaisseur pour repérer les lignes les rendaient peu distinguable
+s du reste.
+ Nous avons donc décidé .
+ Or la SDL ne supportant pas nativement le traçage des lignes d'une épaisseur
+ donnée, nous nous somme tourné vers la librairie 
+\begin_inset Quotes fld
+\end_inset
+
+SDL_GFX
+\begin_inset Quotes frd
+\end_inset
+
+ qui possède une fonction 
+\begin_inset Quotes fld
+\end_inset
+
+thickLineRGBA
+\begin_inset Quotes frd
+\end_inset
+
+ permetant de dessiner .
+ Or, la fonction n'est pas disponible avec le lien fait entre fpc et SDL_GFX.
+ On a donc du réfléchir à une implémentation manuelle de cette dernière.
+\end_layout
+
+\begin_layout Subsection
+Résolution des itinéraires.
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\end_body
+\end_document

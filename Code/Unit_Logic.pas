@@ -389,16 +389,21 @@ Begin
   Line_Create(Game);
   Line_Create(Game);
   Line_Create(Game);
+    Line_Create(Game);
 
-  For i := low(Game.Stations) + 0 To high(Game.Stations) - 5 Do
+  For i := low(Game.Stations) To low(Game.Stations) + 3 Do
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
     End;
 
-
-  For i := high(Game.Stations) - 5 To high(Game.Stations) Do
+  For i := high(Game.Stations) - 2 To high(Game.Stations) Do
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[1]);
+    End;
+
+  For i := high(Game.Stations) - 6 To high(Game.Stations) - 3 Do
+    Begin
+      Line_Add_Station(@Game.Stations[i], Game.Lines[2]);
     End;
 
 

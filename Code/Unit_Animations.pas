@@ -7,7 +7,17 @@ Uses Unit_Types, sdl;
 
 Procedure Animation_Refresh(Var Game : Type_Game);
 
+Procedure Animation_Load(Var Animation : Type_Animation);
+
 Implementation
+
+Procedure Animation_Load(Var Animation : Type_Animation);
+Begin
+
+ // Animation.Constants[0] := 
+
+End;
+
 
 // Fonction appelée tout les 1/60 ème de seoncde pour annimer
 Procedure Animation_Refresh(Var Game : Type_Game);

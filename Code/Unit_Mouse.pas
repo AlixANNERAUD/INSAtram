@@ -41,8 +41,10 @@ Function Mouse_Pressed_On_Line(Var Game : Type_Game) : Boolean;
 Function Mouse_Pressed_On_Station(Var Game : Type_Game) : Boolean;
 
 
-
 Implementation
+
+
+
 
 Procedure Mouse_Line_Delete_Station(Var Game : Type_Game);
 
@@ -335,7 +337,13 @@ Begin
         Begin
           // Vérifie si le clic est sur le bouton play pause.
           If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Play_Pause_Button.Position, Game.Play_Pause_Button.Size, Game.Panel_Top)) Then
+          Begin
             Game.Play_Pause_Button.State := Not(Game.Play_Pause_Button.State);
+            if (Game.Play_Pause_Button.State) Then
+              Game_Play(Game)
+            Else
+              Game_Pause(Game);
+          End;
         End;
 
       // Si la souris se trouve sur le panneau de droite.

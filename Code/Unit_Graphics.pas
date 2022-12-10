@@ -126,13 +126,13 @@ Begin
       Ressources.Vehicles[i][3] := rotozoomSurface(Ressources.Vehicles[i][0], 135, 1, 1);
     End;
 
-     Ressources.Vehicles[8][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
-      Graphics_Draw_Filled_Rectangle(Ressources.Vehicles[8][0], Position, Vehicle_Size, Color_Get(Color_Black));
+  Ressources.Vehicles[8][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
+  Graphics_Draw_Filled_Rectangle(Ressources.Vehicles[8][0], Position, Vehicle_Size, Color_Get(Color_Black));
 
-      // Génère la deuxième surface (orientation 45 degrée).
-      Ressources.Vehicles[8][1] := rotozoomSurface(Ressources.Vehicles[8][0], 45, 1, 1);
-      Ressources.Vehicles[8][2] := rotozoomSurface(Ressources.Vehicles[8][0], 90, 1, 1);
-      Ressources.Vehicles[8][3] := rotozoomSurface(Ressources.Vehicles[8][0], 135, 1, 1);
+  // Génère la deuxième surface (orientation 45 degrée).
+  Ressources.Vehicles[8][1] := rotozoomSurface(Ressources.Vehicles[8][0], 45, 1, 1);
+  Ressources.Vehicles[8][2] := rotozoomSurface(Ressources.Vehicles[8][0], 90, 1, 1);
+  Ressources.Vehicles[8][3] := rotozoomSurface(Ressources.Vehicles[8][0], 135, 1, 1);
 
   // - Fonts loading
   Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 12);
@@ -277,18 +277,22 @@ Begin
   Panel.Size.X := Width;
   Panel.Size.Y := Height;
   Panel.Surface := Graphics_Surface_Create(Width, Height);
+  Panel.State := true;
 End;
 
 Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
 Begin
-  Destination_Rectangle.x := Panel.Position.X;
-  Destination_Rectangle.y := Panel.Position.Y;
-  Destination_Rectangle.w := Panel.Size.X;
-  Destination_Rectangle.h := Panel.Size.Y;
+  If (Panel.State) Then
+    Begin
+      Destination_Rectangle.x := Panel.Position.X;
+      Destination_Rectangle.y := Panel.Position.Y;
+      Destination_Rectangle.w := Panel.Size.X;
+      Destination_Rectangle.h := Panel.Size.Y;
 
-  SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
+      SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
+    End;
 End;
 
 
