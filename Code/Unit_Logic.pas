@@ -207,7 +207,7 @@ Begin
   Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isValidated := True;
   For iteration := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
     Begin
-      Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isAvailable := False;
+      Game.Dijkstra_Table[iteration][Starting_Station_Index].isAvailable := False;
     End;
 
 // Todo : (mais pas dans dijkstra) Inserer une boucle for pour chacune des cases de Index_Table (tous les indexs des stations de la même forme que celle du passager) 
@@ -228,7 +228,7 @@ Begin
         End;
       // - Compare et détermine l'index de la station dont le poids est le plus faible. 
       minimum_Weight := 2203;
-      //diagonale d'un écran 1920*1080
+      //diagonale d'un écran 1920*1080 (peut etre pas suffisant)
       For i := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
         Begin
           For column:= (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
@@ -284,7 +284,7 @@ Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
 
 End;
 
-Function Passenger_Get_On(Passenger : Type_Passenger; Game : Type_Game; StationIndex : Integer; Train : Type_Train) : Boolean;
+Function Passenger_Get_On(Passenger : Type_Passenger; Game : Type_Game; StationIndex : Integer; Train : Type_Train) : Boolean; //StationIndex sert à rien je crois grace à ma détermination de OwnStationIndex.
 
 Var i, j, Own_Station_Index, Next_Passenger_Station_Index : Integer;
 Begin // tout ce bordel est à refaire j'arrive plus à réfléchir mais on y est presque
