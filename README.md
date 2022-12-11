@@ -53,3 +53,4 @@ This project uses the following resources :
 - [SDL 1.2](https://www.libsdl.org/index.php)
 - [Free Pascal Compiler](https://www.freepascal.org/)
 - [Font Awesome](https://fontawesome.com/)
+- [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) -  [Accademia di Belle Arti di Urbino](https://fonts.google.com/?query=Accademia%20di%20Belle%20Arti%20di%20Urbino)
