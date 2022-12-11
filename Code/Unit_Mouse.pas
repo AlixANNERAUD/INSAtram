@@ -127,6 +127,10 @@ Begin
 
 
 
+
+
+
+
 // ! Attention : La suppression de la station dans la ligne étant imédiate, il faudrait vérifier et / ou attendre que le train actuellement en transit sur l'axe passant par la station ait passé l'axe, au risque d'avoir des comportements étranges.
                   Line_Remove_Station(Line^.Stations[i], Line^);
                   Mouse_Pressed_On_Station := true;
@@ -212,22 +216,23 @@ Begin
               // Parcourt les stations (et point intermédiaires) d'une ligne.
               For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
                 Begin
-                  // Vérifie que le pointeur est en collision avec la première partie d'une ligne.
-                  If (Line_Rectangle_Colliding(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Intermediate_Positions[j], Mouse_Position, Vehicle_Size))
+                  // Vérifie que le pointeur est en collision avec les deux partie d'une ligne.
+                  If (Line_Rectangle_Colliding(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Intermediate_Positions[j], Mouse_Position, Vehicle_Size) Or Line_Rectangle_Colliding(Game.
+                     Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position_Centered, Mouse_Position, Vehicle_Size))
                     Then
                     Begin
-                      // Créer un train qui par de la station précédente, dans le sens indirect.
+                      // Si le curseur est plus proche de la première station.
+                      If (Get_Distance(Mouse_Position, Game.Lines[i].Stations[j]^.Position_Centered) <= Get_Distance(Mouse_Position, Game.Lines[i].Stations[j + 1]^.Position_Centered)) Then
+                        Begin
+                          // Créer un train qui par de la station précédente, dans le sens indirect.
                           Train_Create(Game.Lines[i].Stations[j], false, Game.Lines[i], Game);
-                          dec(Game.Player.Locomotive_Token);
-                      Break;
-                      Break;
-                    End;
-                  // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
-                  If (Line_Rectangle_Colliding(Game.Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position_Centered, Mouse_Position, Vehicle_Size)) Then
-                    Begin
-                      If (Game.Player.Locomotive_Token > 0) Then
+                        End
+                      // Si le curseur est plus proche de la seconde station.
+                      Else
+                        Begin
                           // Créer un train qui part de la station suivante, dans le sens direct.
                           Train_Create(Game.Lines[i].Stations[j + 1], true, Game.Lines[i], Game);
+                        End;
                           dec(Game.Player.Locomotive_Token);
                       Break;
                       Break;

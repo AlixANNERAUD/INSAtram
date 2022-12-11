@@ -39,7 +39,6 @@ Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; 
 
 Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
-Procedure Button_Set_Hidden(Hidden : Boolean; Var Button : Type_Button);
 
 // - - - Bouton à deux états.
 
@@ -74,62 +73,107 @@ Procedure Line_Render(Line : Type_Line; Var Panel : Type_Panel);
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
 Procedure Left_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
-Procedure Right_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+Procedure Panel_Right_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 Function Image_Load(Path : String) : PSDL_Surface;
 
+Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
+
+Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+
 Implementation
 
+
+Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+
+Var i : Byte;
+Begin
+  If (Not(Game.Panel_Reward.Hidden)) Then
+    Begin
+      // - Remplissage du panneau en blanc.
+      SDL_FillRect(Game.Panel_Reward.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+
+      // - Rendu des bordures.
+      For i := 0 To 5 Do
+        Begin
+          hlineRGBA(Game.Panel_Reward.Surface, 0, Game.Panel_Reward.Size.X, i, 0, 0, 0, 255);
+          hlineRGBA(Game.Panel_Reward.Surface, 0, Game.Panel_Reward.Size.X, Game.Panel_Reward.Size.Y - i, 0, 0, 0, 255);
+          vlineRGBA(Game.Panel_Reward.Surface, i, 0, Game.Panel_Reward.Size.Y, 0, 0, 0, 255);
+          vlineRGBA(Game.Panel_Reward.Surface, Game.Panel_Reward.Size.X - i, 0, Game.Panel_Reward.Size.Y, 0, 0, 0, 255);
+        End;
+
+
+      Label_Render(Game.Title_Label, Game.Panel_Reward);
+      Label_Render(Game.Message_Label, Game.Panel_Reward);
+
+      Panel_Render(Game.Panel_Reward, Destination_Panel);
+    End;
+End;
+
+
+Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
+
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+  Destination_Rectangle.x := Pie.Position.X;
+  Destination_Rectangle.y := Pie.Position.Y;
+
+  SDL_BlitSurface(Pie.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
+End;
+
 // Fonction qui rend le panneau de droite dans la fenêtre principale.
-Procedure Right_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+Procedure Panel_Right_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 Var i, j : Byte;
 Begin
 
-  // Nettoyage du panneau de droite.
-  SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
-
-  // - Rendu de la rivière.
-  For i := low(Game.River) + 1 To high(Game.River) Do
-    Graphics_Draw_River(Game.River[i - 1], Game.River[i], Color_Get(Color_Cyan), Game.Panel_Right);
-
-
-  // - Affichage des lignes et des trains.
-
-  // Vérifie qu'il y a bien des lignes dans la partie.
-  If (length(Game.Lines) > 0) Then
+  If (Game.Play_Pause_Button.State = true) Then
     Begin
-      // Itère parmis les lignes.
-      For i := low(Game.Lines) To high(Game.Lines) Do
+
+      // Nettoyage du panneau de droite.
+      SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+
+      // - Rendu de la rivière.
+      For i := low(Game.River) + 1 To high(Game.River) Do
+        Graphics_Draw_River(Game.River[i - 1], Game.River[i], Color_Get(Color_Cyan), Game.Panel_Right);
+
+
+      // - Affichage des lignes et des trains.
+
+      // Vérifie qu'il y a bien des lignes dans la partie.
+      If (length(Game.Lines) > 0) Then
         Begin
-
-          Line_Render(Game.Lines[i], Game.Panel_Right);
-
-          // Si la ligne contient des trains.
-          If (length(Game.Lines[i].Trains) > 0) Then
+          // Itère parmis les lignes.
+          For i := low(Game.Lines) To high(Game.Lines) Do
             Begin
-              // Itère parmis les trains d'une ligne.
-              For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+
+              Line_Render(Game.Lines[i], Game.Panel_Right);
+
+              // Si la ligne contient des trains.
+              If (length(Game.Lines[i].Trains) > 0) Then
                 Begin
-                  // Affichage des trains sur la ligne.
-                  Train_Render(Game.Lines[i].Trains[j], Game.Lines[i], Game.Ressources, Game.Panel_Right);
+                  // Itère parmis les trains d'une ligne.
+                  For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+                    Begin
+                      // Affichage des trains sur la ligne.
+                      Train_Render(Game.Lines[i].Trains[j], Game.Lines[i], Game.Ressources, Game.Panel_Right);
+                    End;
                 End;
             End;
         End;
-    End;
 
-  // - Rendu des stations
+      // - Rendu des stations
 
-  // Vérifie qu'il y a bien des stations dans la partie.
-  If (length(Game.Stations) > 0) Then
-    Begin
-      // - Affichage les stations.
-      For i := low(Game.Stations) To high(Game.Stations) Do
+      // Vérifie qu'il y a bien des stations dans la partie.
+      If (length(Game.Stations) > 0) Then
         Begin
-          Station_Render(Game.Stations[i], Game.Panel_Right);
+          // - Affichage les stations.
+          For i := low(Game.Stations) To high(Game.Stations) Do
+            Begin
+              Station_Render(Game.Stations[i], Game.Panel_Right);
+            End;
         End;
     End;
-
 
   Panel_Render(Game.Panel_Right, Game.Window);
 
@@ -151,11 +195,6 @@ Begin
   SDL_SetColorKey(Optimized_Image, SDL_SRCCOLORKEY, Color_Key);
 
   Image_Load := Optimized_Image;
-End;
-
-Procedure Button_Set_Hidden(Hidden : Boolean; Var Button : Type_Button);
-Begin
-  Button.Hidden := Hidden;
 End;
 
 Procedure Left_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
@@ -334,7 +373,6 @@ Begin
   Button.Surface_Released := Surface_Released;
   Button.Size.X := Surface_Released^.w;
   Button.Size.Y := Surface_Released^.h;
-  Button_Set_Hidden(False, Button);
 End;
 
 Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
@@ -405,8 +443,7 @@ Begin
 
 
   Panel.Surface := SDL_DisplayFormat(Graphics_Surface_Create(Width, Height));
-  Panel_Set_Hidden(True,Panel);
-  Panel.Hidden := false;
+  Panel_Set_Hidden(false, Panel);
 End;
 
 Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
@@ -470,8 +507,6 @@ Begin
 
   // - Panneau de droite.
 
-  Create_River(Game);
-
 
   // - Panneau de haut.
 
@@ -491,6 +526,10 @@ Begin
   Image_Set(Game.Clock_Image, Image_Load(Path_Image_Clock));
   Game.Clock_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Image.Size.Y);
   Game.Clock_Image.Position.X := Game.Clock_Label.Position.X - 16 - Game.Clock_Image.Size.X;
+
+  Button_Set(Game.Escape_Button, Image_Load(Path_Image_Button_Escape), Image_Load(Path_Image_Button_Escape));
+  Game.Escape_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Escape_Button.Size.Y);
+  Game.Escape_Button.Position.X := 16;
 
   Dual_State_Button_Set(Game.Play_Pause_Button, Image_Load(Path_Image_Pause), Image_Load(Path_Image_Play), Image_Load(Path_Image_Pause), Image_Load(Path_Image_Play));
 
@@ -528,6 +567,29 @@ Begin
       Game.Tunnel_Button[i].Position.Y := Game.Tunnel_Button[0].Position.Y;
 
     End;
+
+  // Panneau des récompenses.
+
+  Panel_Create(Game.Panel_Reward, 0, 0, Game.Window.Size.X Div 2, Game.Window.Size.Y Div 2);
+
+  Game.Panel_Reward.Position.X := Get_Centered_Position(Game.Window.Size.X, Game.Panel_Reward.Size.X);
+  Game.Panel_Reward.Position.Y := Get_Centered_Position(Game.Window.Size.Y, Game.Panel_Reward.Size.Y);
+
+  Label_Set(Game.Title_Label, 'Week : 00', Game.Ressources.Fonts[Font_Big][Font_Bold], Color_Get(Color_Black));
+
+  // Calcul des coordonnées centré dans le panneau
+  Game.Title_Label.Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X, Game.Title_Label.Size.X);
+  Game.Title_Label.Position.Y := 16;
+
+
+  Label_Set(Game.Message_Label, 'Choose your reward :', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+
+  // Calcul des coordonnées centré dans le panneau
+  Game.Message_Label.Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X, Game.Message_Label.Size.X);
+  Game.Message_Label.Position.Y := Game.Title_Label.Position.Y + Game.Title_Label.Size.Y + 16;
+
+
+  Panel_Set_Hidden(True, Game.Panel_Reward);
 
   Animation_Load(Game.Animation);
 
@@ -578,6 +640,7 @@ Begin
   Label_Render(Game.Clock_Label, Game.Panel_Top);
   Image_Render(Game.Clock_Image, Game.Panel_Top);
   Dual_State_Button_Render(Game.Play_Pause_Button, Game.Panel_Top);
+  Button_Render(Game.Escape_Button, Game.Panel_Top);
 
   // - Rendu dans le panneau du bas.Game_Maximum_Lines_Number
   For i := low(Game.Lines) To high(Game.Lines) Do
@@ -586,12 +649,14 @@ Begin
   // - Panneau de gauche.
 
   Left_Panel_Render(Game, Game.Window);
-  Right_Panel_Render(Game, Game.Window);
+  Panel_Right_Render(Game, Game.Window);
 
   // - Regroupement des surfaces dans la fenêtre.
 
   Panel_Render(Game.Panel_Top, Game.Window);
   Panel_Render(Game.Panel_Bottom, Game.Window);
+
+  Panel_Reward_Render(Game, Game.Window);
 
 
   Cursor_Render(Game.Mouse, Game.Window, Game);
@@ -647,8 +712,8 @@ End;
 
 // Procédure qui dessine une ligne très épaisse (rivière entre deux points).
 Procedure Graphics_Draw_River(Position_1, Position_2 :
-                             Type_Coordinates; Color :
-                             Type_Color; Var Panel : Type_Panel);
+                              Type_Coordinates; Color :
+                              Type_Color; Var Panel : Type_Panel);
 
 Var Direction : Integer;
   i : Integer;
@@ -697,7 +762,7 @@ Begin
                End;
   End;
 
-    Graphics_Draw_Filled_Circle(Panel.Surface, Position_1, 20, Color);
+  Graphics_Draw_Filled_Circle(Panel.Surface, Position_1, 20, Color);
 
 End;
 
@@ -884,7 +949,7 @@ Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
 Var Destination_Rectangle :   TSDL_Rect;
   i :   Byte;
 Begin
-  // Display station
+  // - Affichage de la station.
   Destination_Rectangle.x := Station.Position.X;
   Destination_Rectangle.y := Station.Position.Y;
   Destination_Rectangle.w := Station.Size.X;
@@ -892,7 +957,7 @@ Begin
 
   SDL_BlitSurface(Station.Sprite, Nil, Panel.Surface, @Destination_Rectangle);
 
-  // Display station passengers
+  // - Affichage des passagers de la station.
 
   Destination_Rectangle.w := Passenger_Width;
   Destination_Rectangle.h := Passenger_Height;
@@ -939,6 +1004,15 @@ Begin
                           Destination_Rectangle);
         End;
     End;
+
+  // Affichage du minuteur de la station.
+
+  If (Station.Overfill_Timer <> 0) Then
+    Begin
+      Pie_Set_Percentage(Station.Timer, Time_Get_Elapsed(Station.Overfill_Timer) / (Station_Overfill_Timer * 10));
+      Pie_Render(Station.Timer, Panel);
+    End;
+
 End;
 
 End.

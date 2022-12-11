@@ -83,13 +83,15 @@ Const Path_Image_Button_Wagon = Path_Images + 'Wagon.png';
 
 Const Path_Image_Button_Tunnel = Path_Images + 'Tunnel.png';
 
+Const Path_Image_Button_Escape = Path_Images + 'Escape.png';
+
   // - - - - Polices
 
 Const Path_Fonts = Path_Ressources + 'Fonts/';
 
-Const Path_Font =   Path_Fonts + '/FreeSans.ttf';
+Const Path_Font =   Path_Fonts + '/TitilliumWeb-Regular.ttf';
 
-Const Path_Font_Bold = Path_Fonts + '/FreeSansBold.ttf';
+Const Path_Font_Bold = Path_Fonts + '/TitilliumWeb-Bold.ttf';
 
   // - - - - Sons
 
@@ -106,6 +108,11 @@ Const Vehicle_Size : Type_Coordinates = (
                                          X :  32;
                                          Y :  24;
                                         );
+
+Const Origin_Coordinates : Type_Coordinates = (
+                                               X :  0;
+                                               Y :  0;
+                                              );
 
 Const River_Width = 32;
 
@@ -133,13 +140,14 @@ Const Game_Day_Duration =  10;
 
 Const Shapes_Number = 5;
 
+Const Station_Overfill_Timer = 20;
+
+Const Station_Overfill_Passengers_Number = 6;
+
   // - - - Station
 
   // - - - Véhicules (locomotive et wagon).
 
-Const Vehicle_Width =   32;
-
-Const Vehicle_Height =   24;
 
   // - - - Passagers
 
@@ -150,6 +158,7 @@ Const Passenger_Height =   8;
   // - - - Trains
 
   // - - - - Vehicles
+
 
 Const Vehicle_Maximum_Passengers_Number = 6;
 
@@ -168,7 +177,7 @@ Const Train_Maximum_Speed = 80;
 Const Train_Acceleration_Time = 3;
 
 Const Train_Speed_Constant : Real = Pi / Train_Acceleration_Time;
- 
+
 
 
 
@@ -215,6 +224,13 @@ Type Type_Dual_State_Button = Record
   State : Boolean;
   Surface_Pressed : array[0 .. 1] Of PSDL_Surface;
   Surface_Released : array[0 .. 1] Of PSDL_Surface;
+End;
+
+Type Type_Pie = Record
+  Position, Size : Type_Coordinates;
+  Surface : PSDL_Surface;
+  Color : Type_Color;
+  Percentage : Real;
 End;
 
 // - - Temps
@@ -304,6 +320,10 @@ Type Type_Station_Pointer = ^Type_Station;
     Sprite : PSDL_Surface;
     // Passagers de la station.
     Passengers : array Of Type_Passenger_Pointer;
+    // 
+    Timer : Type_Pie;
+    // 
+    Overfill_Timer : Type_Time;
   End;
 
   Type_Vehicle = Record
@@ -363,7 +383,8 @@ Type Type_Line_Colors = (Red, Purple, Indigo, Teal, Green, Yellow, Orange, Brown
 
   Type_Line_Pointer = ^Type_Line;
 
-// Structure renfermant les données du joueur.
+  // Structure renfermant les données du joueur.
+
 Type Type_Player = Record
   // Score du joueur (nombre de passager transporté)
   Score : Integer;
@@ -445,6 +466,8 @@ Type Type_Game = Record
 
   // Panneau contenant l'interface du haut (score, heure ...).
   Panel_Top : Type_Panel;
+  Escape_Button : Type_Button;
+
   Play_Pause_Button : Type_Dual_State_Button;
   Score_Label : Type_Label;
   Score_Image : Type_Image;
@@ -503,6 +526,8 @@ Type Type_Options = Record
 End;
 
 Type Type_Game_Pointer = ^Type_Game;
+
+
 
 
   // - Function declaration
@@ -602,93 +627,138 @@ Procedure Game_Pause(Var Game : Type_Game);
 
 Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
 
-Procedure Create_River(Var Game : Type_Game);
+Procedure River_Create(Var Game : Type_Game);
+
+Procedure Pie_Create(Var Pie : Type_Pie; Radius : Integer; Color : Type_Color; Percentage : Real);
+Procedure Pie_Set_Percentage(Var Pie : Type_Pie; Percentage : Real);
+Procedure Pie_Pre_Render(Var Pie : Type_Pie);
 
 Implementation
 
+Procedure Pie_Create(Var Pie : Type_Pie; Radius : Integer; Color : Type_Color; Percentage : Real);
+Begin
+  Pie.Color := Color;
+  Pie.Percentage := Percentage;
+  Pie.Size.X := Radius * 2;
+  Pie.Size.Y := Radius * 2;
+  Pie.Surface := Graphics_Surface_Create(Radius * 2, Radius * 2);
+  Pie_Pre_Render(Pie);
+End;
+
+
+Procedure Pie_Set_Percentage(Var Pie : Type_Pie; Percentage : Real);
+Begin
+  Pie.Percentage := Percentage;
+  Pie_Pre_Render(Pie);
+End;
+
+Procedure Pie_Pre_Render(Var Pie : Type_Pie);
+
+Var Angle : Integer;
+  i : Integer;
+Begin
+  // Convertino du pourcentage en angle, Angle en degrés.
+  Angle := round(360 * (Pie.Percentage / 100) - 90);
+
+  // On efface la surface.
+  SDL_FillRect(Pie.Surface, Nil, $00000000);
+
+  // On dessine le .
+  filledPieRGBA(Pie.Surface, Pie.Size.X Div 2, Pie.Size.Y Div 2, Pie.Size.X Div 2, -90, Angle, Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
+End;
+
 // Fonction qui génère aléatoire une rivière.
-Procedure Create_River(Var Game : Type_Game);
-Var Side : Array[0 .. 1] of Byte;
-    i : Integer;
+Procedure River_Create(Var Game : Type_Game);
+
+Var Side : Array[0 .. 1] Of Byte;
+  i : Integer;
 Begin
 
   // Nombre de points de la rivière.
-  SetLength(Game.River, 2 * (Random(5) + 2) - 1);
-  writeln('length = ', length(Game.River));
+  SetLength(Game.River, 2 * (Random(3) + 2) - 1);
 
   // Choix du côté de départ.
-
-  Side[0] := Random(4);
-
-  Case Side[0] of
-    // Côté gauche.
-    0 : Begin
-          Game.River[low(Game.River)].X := 0 - River_Width;
-          Game.River[low(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
-        End;
-    // Côté haut.
-    1 : Begin
-          Game.River[low(Game.River)].X := Random(Game.Panel_Right.Size.X);
-          Game.River[low(Game.River)].Y := 0 - River_Width;
-        End;
-    // Côté droit.
-    2 : Begin
-          Game.River[low(Game.River)].X := Game.Panel_Right.Size.X + River_Width;
-          Game.River[low(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
-        End;
-    // Côté bas.
-    3 : Begin
-          Game.River[low(Game.River)].X := Random(Game.Panel_Right.Size.X);
-          Game.River[low(Game.River)].Y := Game.Panel_Right.Size.Y + River_Width;
-        End;
-  End;
-
-  // Choix du côté d'arrivée.
-
   Repeat
-    Side[1] := Random(4);
-  Until Side[0] <> Side[1];
+    Side[0] := Random(4);
 
-  Case Side[1] of
-    0 : Begin
-          Game.River[high(Game.River)].X := 0 - River_Width;
-          Game.River[high(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
-        End;
-    1 : Begin
-          Game.River[high(Game.River)].X := Random(Game.Panel_Right.Size.X);
-          Game.River[high(Game.River)].Y := 0 - River_Width;
-        End;
-    2 : Begin
-          Game.River[high(Game.River)].X := Game.Panel_Right.Size.X + River_Width;
-          Game.River[high(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
-        End;
-    3 : Begin
-          Game.River[high(Game.River)].X := Random(Game.Panel_Right.Size.X);
-          Game.River[high(Game.River)].Y := Game.Panel_Right.Size.Y + River_Width;
-        End;
-  End;
+    Case Side[0] Of 
+      // Côté gauche.
+      0 :
+          Begin
+            Game.River[low(Game.River)].X := 0 - River_Width;
+            Game.River[low(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
+          End;
+      // Côté haut.
+      1 :
+          Begin
+            Game.River[low(Game.River)].X := Random(Game.Panel_Right.Size.X);
+            Game.River[low(Game.River)].Y := 0 - River_Width;
+          End;
+      // Côté droit.
+      2 :
+          Begin
+            Game.River[low(Game.River)].X := Game.Panel_Right.Size.X + River_Width;
+            Game.River[low(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
+          End;
+      // Côté bas.
+      3 :
+          Begin
+            Game.River[low(Game.River)].X := Random(Game.Panel_Right.Size.X);
+            Game.River[low(Game.River)].Y := Game.Panel_Right.Size.Y + River_Width;
+          End;
+    End;
+
+    // Choix du côté d'arrivée.
+
+    Repeat
+      Side[1] := Random(4);
+    Until Side[0] <> Side[1];
+
+    Case Side[1] Of 
+      0 :
+          Begin
+            Game.River[high(Game.River)].X := 0 - River_Width;
+            Game.River[high(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
+          End;
+      1 :
+          Begin
+            Game.River[high(Game.River)].X := Random(Game.Panel_Right.Size.X);
+            Game.River[high(Game.River)].Y := 0 - River_Width;
+          End;
+      2 :
+          Begin
+            Game.River[high(Game.River)].X := Game.Panel_Right.Size.X + River_Width;
+            Game.River[high(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
+          End;
+      3 :
+          Begin
+            Game.River[high(Game.River)].X := Random(Game.Panel_Right.Size.X);
+            Game.River[high(Game.River)].Y := Game.Panel_Right.Size.Y + River_Width;
+          End;
+    End;
+  Until Get_Distance(Game.River[low(Game.River)], Game.River[high(Game.River)]) > 600;
 
   // Détermination des coordonnées des points.
-  For i := low(Game.River) + 1 to high(Game.River) - 1 do
-  Begin
-    // Index pair (points de contrôle)
-    If i mod 2 = 0 then
+  For i := low(Game.River) + 1 To high(Game.River) - 1 Do
     Begin
-      Game.River[i].X := Random(Game.Panel_Right.Size.X - River_Width) + River_Width;
-      Game.River[i].Y := Random(Game.Panel_Right.Size.Y - River_Width) + River_Width;
-    End
-  End;
+      // Index pair (points de contrôle)
+      If i Mod 2 = 0 Then
+        Begin
+          Game.River[i].X := Random(Game.Panel_Right.Size.X - River_Width) + River_Width;
+          Game.River[i].Y := Random(Game.Panel_Right.Size.Y - River_Width) + River_Width;
+        End
+    End;
 
   // - Calcul des points intermédiaires.
-  For i := low(Game.River) + 1 to high(Game.River) - 1 Do
-  Begin
-    // Index impair (positions intermédiaires)
-    If (i mod 2) <> 0 then
+  For i := low(Game.River) + 1 To high(Game.River) - 1 Do
     Begin
-      // Calcul de la position intermédiaire.
-      Game.River[i] := Station_Get_Intermediate_Position(Game.River[i - 1], Game.River[i + 1]);
+      // Index impair (positions intermédiaires)
+      If (i Mod 2) <> 0 Then
+        Begin
+          // Calcul de la position intermédiaire.
+          Game.River[i] := Station_Get_Intermediate_Position(Game.River[i - 1], Game.River[i + 1]);
+        End;
     End;
-  End;
 
 End;
 
@@ -712,6 +782,7 @@ Begin
   Game.Start_Time := Game.Start_Time + Game.Pause_Time;
 
   // - Mise à jour des temps de départ des trains.
+
   // Vérifie que la partie contient des lignes.
   If (length(Game.Lines) > 0) Then
     // Itère parmis les lignes.
@@ -722,7 +793,18 @@ Begin
         For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
           Game.Lines[i].Trains[j].Start_Time := Game.Lines[i].Trains[j].Start_Time + Game.Pause_Time;
 
+  // - Mise à jour des timer de surcharge des stations.
+
+  // Itère parmis les stations.
+    For i := low(Game.Stations) To high(Game.Stations) Do
+      // Si la station est surchargée.
+      If (Game.Stations[i].Overfill_Timer <> 0) Then
+        Game.Stations[i].Overfill_Timer := Game.Stations[i].Overfill_Timer + Game.Pause_Time;
+
+
+  Game.Pause_Time := 0;
 End;
+
 
 
 
@@ -1143,12 +1225,14 @@ Function Station_Create(Var Game : Type_Game) : Boolean;
 
 Var Shape : Byte;
   Position : Type_Coordinates;
-  i : Byte;
+  i, j : Byte;
 Begin
   If (length(Game.Stations) < Maximum_Number_Stations) Then
     Begin
       // Allocation de la station dans le tableau.
       SetLength(Game.Stations, length(Game.Stations) + 1);
+      // Définition de l'index de la station créee.
+      i := high(Game.Stations);
 
       // Initialisation des attributs par défaut.
       // Détermination de la forme de la station.
@@ -1159,13 +1243,13 @@ Begin
         // Les stations suivantes peuvent avoir une forme aléatoire.
         Shape := Random(5);
 
-      Game.Stations[high(Game.Stations)].Shape := Number_To_Shape(Shape);
-      Game.Stations[high(Game.Stations)].Sprite := Game.Ressources.Stations[Shape];
+      Game.Stations[i].Shape := Number_To_Shape(Shape);
+      Game.Stations[i].Sprite := Game.Ressources.Stations[Shape];
 
 
-      Game.Stations[high(Game.Stations)].Size.X := Game.Stations[high(Game.Stations)].Sprite^.w;
+      Game.Stations[i].Size.X := Game.Stations[i].Sprite^.w;
 
-      Game.Stations[high(Game.Stations)].Size.Y := Game.Stations[high(Game.Stations)].Sprite^.h;
+      Game.Stations[i].Size.Y := Game.Stations[i].Sprite^.h;
 
       // Détermination de la position de la station.
       Repeat
@@ -1175,20 +1259,30 @@ Begin
 
       Game.Stations_Map[Position.X][Position.Y] := true;
 
-      Game.Stations[high(Game.Stations)].Position.X := 64 * Position.X;
-      Game.Stations[high(Game.Stations)].Position.Y := 64 * Position.Y;
+      Game.Stations[i].Position.X := 64 * Position.X;
+      Game.Stations[i].Position.Y := 64 * Position.Y;
 
       // Augmentation du nombre d'entrée dans le tableau de résolutions.
       SetLength(Game.Graph_Table, length(Game.Stations));
-      For i := low(Game.Graph_Table) To high(Game.Graph_Table) Do
-        SetLength(Game.Graph_Table[i], length(Game.Stations));
+      For j := low(Game.Graph_Table) To high(Game.Graph_Table) Do
+        SetLength(Game.Graph_Table[j], length(Game.Stations));
 
       SetLength(Game.Dijkstra_Table, length(Game.Stations));
-      For i := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
-        SetLength(Game.Dijkstra_Table[i], length(Game.Stations));
+      For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+        SetLength(Game.Dijkstra_Table[j], length(Game.Stations));
 
       // Calcul les coordoonées centré de la station.
-      Game.Stations[high(Game.Stations)].Position_Centered := Get_Center_Position(Game.Stations[high(Game.Stations)].Position, Game.Stations[high(Game.Stations)].Size);
+      Game.Stations[i].Position_Centered := Get_Center_Position(Game.Stations[i].Position, Game.Stations[i].Size);
+
+      // Création du timer de la station.
+      Pie_Create(Game.Stations[i].Timer, 10, Color_Get(Color_Blue_Grey), 80);
+
+      Game.Stations[i].Timer.Position.X := Game.Stations[i].Position_Centered.X + Game.Stations[i].Size.Y Div 2;
+      Game.Stations[i].Timer.Position.Y := Game.Stations[i].Position.Y - Game.Stations[i].Size.Y Div 2 - 10;
+
+
+
+      Game.Stations[i].Overfill_Timer := 0;
 
       Station_Create := True;
     End
@@ -1437,10 +1531,10 @@ Begin
                   // Si la station est la dernière ou la première station d'une ligne.
                   If (i = low(Line.Stations)) Then
                     Line.Trains[high(Line.Trains)].Direction := true
-                  
+
                   Else If (i = high(Line.Stations)) Then
-                    // On inverse la direction.
-                    Line.Trains[high(Line.Trains)].Direction := false;
+                         // On inverse la direction.
+                         Line.Trains[high(Line.Trains)].Direction := false;
 
                   If (Line.Trains[high(Line.Trains)].Direction = true) Then
                     Begin
@@ -1495,7 +1589,7 @@ Begin
 
       Label_Set(Line.Trains[high(Line.Trains)].Passengers_Label, '', Game.Ressources.Fonts[Font_Small][Font_Bold], Color_Get(Color_White));
 
-        Line.Trains[high(Line.Trains)].Start_Time := Time_Get_Current();
+      Line.Trains[high(Line.Trains)].Start_Time := Time_Get_Current();
 
       Vehicle_Create(Line.Trains[high(Line.Trains)]);
 
