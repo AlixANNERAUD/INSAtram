@@ -157,11 +157,20 @@ Traçage des lignes.
 \end_layout
 
 \begin_layout Standard
-Afin de donner un aspect de plan de métro aux lignes tracés, il fallait
- utiliser uniquement des droites à horizontales, verticales et à 45° afin
- de tracer les lignes.
- Cette tâche, au premier abord compliqué, peut être simplifié par l'utilisation
- de ce qu'on à appelé un point intermédiaire.
+Afin de donner un aspect de plan de métro aux lignes tracés, l'affichage
+ des lignes doit se faire uniquement avec des droites horizontales, verticales
+ et obliques (45°).
+ Afin de pouvoir résoudre ce problème nous avons schématisé la situation.
+ 
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+peut être simplifié par l'utilisation de ce qu'on à appelé un point intermédiair
+e.
  En effets, sur un plan de métro, on constate que les lignes.
 \end_layout
 
