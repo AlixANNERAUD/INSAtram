@@ -107,6 +107,8 @@ Const Vehicle_Size : Type_Coordinates = (
                                          Y :  24;
                                         );
 
+Const River_Width = 32;
+
 
   // - Sons
 
@@ -577,6 +579,7 @@ Procedure Graphics_Draw_Filled_Rectangle(Surface : PSDL_Surface; Position, Size 
 
 
 Function Color_Get(Color_Name : Type_Color_Name) : Type_Color;
+Function Color_Get(Color_Name : Type_Color_Name; Alpha : Byte) : Type_Color;
 Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
 
 operator = (x, y: Type_Color) b : Boolean;
@@ -605,15 +608,87 @@ Implementation
 
 // Fonction qui génère aléatoire une rivière.
 Procedure Create_River(Var Game : Type_Game);
-Var Side : Byte;
+Var Side : Array[0 .. 1] of Byte;
+    i : Integer;
 Begin
 
-  length(Game.River) := 0;
+  // Nombre de points de la rivière.
+  SetLength(Game.River, 2 * (Random(5) + 2) - 1);
+  writeln('length = ', length(Game.River));
 
-  // Choix du côté de la rivière.
-  Side := Random(4);
-  
+  // Choix du côté de départ.
 
+  Side[0] := Random(4);
+
+  Case Side[0] of
+    // Côté gauche.
+    0 : Begin
+          Game.River[low(Game.River)].X := 0 - River_Width;
+          Game.River[low(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
+        End;
+    // Côté haut.
+    1 : Begin
+          Game.River[low(Game.River)].X := Random(Game.Panel_Right.Size.X);
+          Game.River[low(Game.River)].Y := 0 - River_Width;
+        End;
+    // Côté droit.
+    2 : Begin
+          Game.River[low(Game.River)].X := Game.Panel_Right.Size.X + River_Width;
+          Game.River[low(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
+        End;
+    // Côté bas.
+    3 : Begin
+          Game.River[low(Game.River)].X := Random(Game.Panel_Right.Size.X);
+          Game.River[low(Game.River)].Y := Game.Panel_Right.Size.Y + River_Width;
+        End;
+  End;
+
+  // Choix du côté d'arrivée.
+
+  Repeat
+    Side[1] := Random(4);
+  Until Side[0] <> Side[1];
+
+  Case Side[1] of
+    0 : Begin
+          Game.River[high(Game.River)].X := 0 - River_Width;
+          Game.River[high(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
+        End;
+    1 : Begin
+          Game.River[high(Game.River)].X := Random(Game.Panel_Right.Size.X);
+          Game.River[high(Game.River)].Y := 0 - River_Width;
+        End;
+    2 : Begin
+          Game.River[high(Game.River)].X := Game.Panel_Right.Size.X + River_Width;
+          Game.River[high(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
+        End;
+    3 : Begin
+          Game.River[high(Game.River)].X := Random(Game.Panel_Right.Size.X);
+          Game.River[high(Game.River)].Y := Game.Panel_Right.Size.Y + River_Width;
+        End;
+  End;
+
+  // Détermination des coordonnées des points.
+  For i := low(Game.River) + 1 to high(Game.River) - 1 do
+  Begin
+    // Index pair (points de contrôle)
+    If i mod 2 = 0 then
+    Begin
+      Game.River[i].X := Random(Game.Panel_Right.Size.X - River_Width) + River_Width;
+      Game.River[i].Y := Random(Game.Panel_Right.Size.Y - River_Width) + River_Width;
+    End
+  End;
+
+  // - Calcul des points intermédiaires.
+  For i := low(Game.River) + 1 to high(Game.River) - 1 Do
+  Begin
+    // Index impair (positions intermédiaires)
+    If (i mod 2) <> 0 then
+    Begin
+      // Calcul de la position intermédiaire.
+      Game.River[i] := Station_Get_Intermediate_Position(Game.River[i - 1], Game.River[i + 1]);
+    End;
+  End;
 
 End;
 
@@ -797,6 +872,12 @@ Begin
     Color_Blue_Grey : Color_Get := Color_Get(96,125,139,255);
     Color_White : Color_Get := Color_Get(255,255,255,255);
   End;
+End;
+
+Function Color_Get(Color_Name : Type_Color_Name; Alpha : Byte) : Type_Color;
+Begin
+  Color_Get := Color_Get(Color_Name);
+  Color_Get.Alpha := Alpha;
 End;
 
 // Fonction qui détecte si un rectangle et une ligne sont en colision.

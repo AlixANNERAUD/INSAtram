@@ -21,7 +21,9 @@ Function Graphics_Get_Direction(Angle : Real) : Integer;
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Coordinates; Color :
                              Type_Color; Var Panel : Type_Panel);
-
+Procedure Graphics_Draw_River(Position_1, Position_2 :
+                              Type_Coordinates; Color :
+                              Type_Color; Var Panel : Type_Panel);
 
 // - - Objets liées à l'interface graphique.
 
@@ -67,27 +69,84 @@ Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
 // - - Entités du jeux.
 
 Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
-Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Color; Var Panel : Type_Panel);
+Procedure Line_Render(Line : Type_Line; Var Panel : Type_Panel);
+
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
 Procedure Left_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
-
+Procedure Right_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 Function Image_Load(Path : String) : PSDL_Surface;
 
 Implementation
 
+// Fonction qui rend le panneau de droite dans la fenêtre principale.
+Procedure Right_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+
+Var i, j : Byte;
+Begin
+
+  // Nettoyage du panneau de droite.
+  SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+
+  // - Rendu de la rivière.
+  For i := low(Game.River) + 1 To high(Game.River) Do
+    Graphics_Draw_River(Game.River[i - 1], Game.River[i], Color_Get(Color_Cyan), Game.Panel_Right);
+
+
+  // - Affichage des lignes et des trains.
+
+  // Vérifie qu'il y a bien des lignes dans la partie.
+  If (length(Game.Lines) > 0) Then
+    Begin
+      // Itère parmis les lignes.
+      For i := low(Game.Lines) To high(Game.Lines) Do
+        Begin
+
+          Line_Render(Game.Lines[i], Game.Panel_Right);
+
+          // Si la ligne contient des trains.
+          If (length(Game.Lines[i].Trains) > 0) Then
+            Begin
+              // Itère parmis les trains d'une ligne.
+              For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+                Begin
+                  // Affichage des trains sur la ligne.
+                  Train_Render(Game.Lines[i].Trains[j], Game.Lines[i], Game.Ressources, Game.Panel_Right);
+                End;
+            End;
+        End;
+    End;
+
+  // - Rendu des stations
+
+  // Vérifie qu'il y a bien des stations dans la partie.
+  If (length(Game.Stations) > 0) Then
+    Begin
+      // - Affichage les stations.
+      For i := low(Game.Stations) To high(Game.Stations) Do
+        Begin
+          Station_Render(Game.Stations[i], Game.Panel_Right);
+        End;
+    End;
+
+
+  Panel_Render(Game.Panel_Right, Game.Window);
+
+End;
+
 Function Image_Load(Path : String) : PSDL_Surface;
+
 Var Image : PSDL_Surface;
-    Optimized_Image : PSDL_Surface;
-    Color_Key : Longword;
+  Optimized_Image : PSDL_Surface;
+  Color_Key : Longword;
 Begin
   Image := IMG_Load(String_To_Characters(Path));
 
   Optimized_Image := SDL_DisplayFormatAlpha(Image);
 
   SDL_FreeSurface(Image);
-  
+
   Color_Key := SDL_MapRGBA(Optimized_Image^.Format, 255, 0, 255, 255);
   SDL_SetColorKey(Optimized_Image, SDL_SRCCOLORKEY, Color_Key);
 
@@ -105,7 +164,7 @@ Var i : Byte;
 Begin
   SDL_FillRect(Game.Panel_Left.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
-  For i := 2 DownTo 0 Do
+  For i := 2 Downto 0 Do
     Begin
       If (i < Game.Player.Locomotive_Token) Then
         Begin
@@ -328,8 +387,9 @@ Begin
 End;
 
 Procedure Panel_Create(Var Panel : Type_Panel; X,Y, Width, Height : Integer);
+
 Var Surface : PSDL_Surface;
-    Color_Key : Longword;
+  Color_Key : Longword;
 Begin
   Panel.Position.X := X;
   Panel.Position.Y := Y;
@@ -410,7 +470,7 @@ Begin
 
   // - Panneau de droite.
 
-  SetLength(Game.River_Points, 6);
+  Create_River(Game);
 
 
   // - Panneau de haut.
@@ -435,7 +495,7 @@ Begin
   Dual_State_Button_Set(Game.Play_Pause_Button, Image_Load(Path_Image_Pause), Image_Load(Path_Image_Play), Image_Load(Path_Image_Pause), Image_Load(Path_Image_Play));
 
   Game.Play_Pause_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Play_Pause_Button.Size.Y);
-  Game.Play_Pause_Button.Position.X := 16;
+  Game.Play_Pause_Button.Position.X := Game.Panel_Top.Size.X - 16 - Game.Play_Pause_Button.Size.X;
 
   // Panneau de gauche
 
@@ -511,48 +571,6 @@ Begin
   SDL_FillRect(Game.Panel_Top.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
   SDL_FillRect(Game.Panel_Bottom.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
-  SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
-
-
-  // - Rendu dans le panneau de droite.
-
-  // Vérifie qu'il y a bien des lignes dans la partie.
-  If (length(Game.Lines) > 0) Then
-    Begin
-      // - Affichage des lignes.
-      For i := low(Game.Lines) To high(Game.Lines) Do
-        Begin
-          // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
-          If (length(Game.Lines[i].Stations) > 0) Then
-            Begin
-              For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
-                Begin
-                  Line_Render(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Stations[j + 1]^.Position_Centered, Game.Lines[i].Color, Game.Panel_Right);
-
-                End;
-            End;
-          // - Affichage des trains sur la ligne.
-          If (length(Game.Lines[i].Trains) > 0) Then
-            Begin
-              For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
-                Begin
-                  Train_Render(Game.Lines[i].Trains[j], Game.Lines[i], Game.Ressources, Game.Panel_Right);
-                End;
-            End;
-        End;
-    End;
-
-
-  // Vérifie qu'il y a bien des stations dans la partie.
-  If (length(Game.Stations) > 0) Then
-    Begin
-      // - Affichage les stations.
-      For i := low(Game.Stations) To high(Game.Stations) Do
-        Begin
-          Station_Render(Game.Stations[i], Game.Panel_Right);
-        End;
-    End;
-
   // - Rendu dans le panneau du haut.
 
   Label_Render(Game.Score_Label, Game.Panel_Top);
@@ -568,20 +586,20 @@ Begin
   // - Panneau de gauche.
 
   Left_Panel_Render(Game, Game.Window);
+  Right_Panel_Render(Game, Game.Window);
 
   // - Regroupement des surfaces dans la fenêtre.
 
   Panel_Render(Game.Panel_Top, Game.Window);
   Panel_Render(Game.Panel_Bottom, Game.Window);
-  Panel_Render(Game.Panel_Right, Game.Window);
 
 
   Cursor_Render(Game.Mouse, Game.Window, Game);
-  
+
 
   SDL_Flip(Game.Window.Surface);
   Animation_Refresh(Game);
-  
+
 End;
 
 
@@ -627,6 +645,63 @@ Begin
   // L'orientatino est de 180°
 End;
 
+// Procédure qui dessine une ligne très épaisse (rivière entre deux points).
+Procedure Graphics_Draw_River(Position_1, Position_2 :
+                             Type_Coordinates; Color :
+                             Type_Color; Var Panel : Type_Panel);
+
+Var Direction : Integer;
+  i : Integer;
+Begin
+
+  Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
+
+  // Index_Max  := Width / (sqrt(2) * 2)
+
+  Case Direction Of 
+    0, 180 :
+             Begin
+               For i := -20 To 20 Do
+                 lineRGBA(Panel.Surface, Position_1.X, Position_1.Y  + i, Position_2.X, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+             End;
+    45, -135 :
+               Begin
+                 For i := -14 To 0 Do
+                   Begin
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i - 1, Position_2.X + i, Position_2.Y + i - 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+                 For i := 0 To 14 Do
+                   Begin
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y + i, Position_2.X + i + 1, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+               End;
+    90, -90 :
+              Begin
+                For i := -20 To 20 Do
+                  lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y, Position_2.X + i, Position_2.Y, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+              End;
+    135, -45 :
+               Begin
+                 For i := -14 To 0 Do
+                   Begin
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i + 1, Position_2.X + i, Position_2.Y - i + 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+                 For i := 0 To 14 Do
+                   Begin
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y - i, Position_2.X + i + 1, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+               End;
+  End;
+
+    Graphics_Draw_Filled_Circle(Panel.Surface, Position_1, 20, Color);
+
+End;
+
+// Procédure qui desinne une lign épaisse entre deux points.
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Coordinates; Color :
                              Type_Color; Var Panel : Type_Panel);
@@ -681,15 +756,23 @@ End;
 // - - Station
 
 // - Procédure génère le rendu dans la fenêtre des traits entre les stations en utilisant que des angles de 0, 45 et 90 degrés.
-Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Color; Var Panel : Type_Panel);
+Procedure Line_Render(Line : Type_Line; Var Panel : Type_Panel);
 
 Var Intermediate_Position :   Type_Coordinates;
+  i : Byte;
 Begin
-
-  Intermediate_Position := Station_Get_Intermediate_Position(Position_1, Position_2);
-
-  Graphics_Draw_Line(Position_1, Intermediate_Position, Color, Panel);
-  Graphics_Draw_Line(Intermediate_Position, Position_2, Color, Panel);
+  // Si la ligne contient au moins une station.
+  If (length(Line.Stations) > 0) Then
+    Begin
+      // Itère parmis les stations d'une ligne.
+      For i := low(Line.Stations) + 1 To high(Line.Stations) Do
+        Begin
+          // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
+          Intermediate_Position := Station_Get_Intermediate_Position(Line.Stations[i - 1]^.Position_Centered, Line.Stations[i]^.Position_Centered);
+          Graphics_Draw_Line(Line.Stations[i - 1]^.Position_Centered, Intermediate_Position, Line.Color, Panel);
+          Graphics_Draw_Line(Intermediate_Position, Line.Stations[i]^.Position_Centered, Line.Color, Panel);
+        End;
+    End;
 End;
 
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
