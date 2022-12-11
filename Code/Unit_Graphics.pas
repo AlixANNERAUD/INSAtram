@@ -959,9 +959,6 @@ Begin
 
   // - Affichage des passagers de la station.
 
-  Destination_Rectangle.w := Passenger_Width;
-  Destination_Rectangle.h := Passenger_Height;
-
   If (length(Station.Passengers) > 0) Then
     Begin
       For i := low(Station.Passengers) To high(Station.Passengers) Do
@@ -977,7 +974,7 @@ Begin
           Else If (i < (low(Station.Passengers) + 6)) Then
                  Begin
                    Destination_Rectangle.x := (Station.Position.X + Station.Size.X +
-                                              Passenger_Width);
+                                              Station.Passengers[i]^.Size.X);
 
                    Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
                                               Station.Passengers[i]^.Size.Y + 4));
@@ -996,7 +993,7 @@ Begin
                                               Station.Passengers[i]^.Size.X + 4));
 
                    Destination_Rectangle.y := (Station.Position.Y + Station.Size.Y +
-                                              Passenger_Width);
+                                              Station.Passengers[i]^.Size.Y);
                  End;
 
 

@@ -146,15 +146,6 @@ Const Station_Overfill_Passengers_Number = 6;
 
   // - - - Station
 
-  // - - - Véhicules (locomotive et wagon).
-
-
-  // - - - Passagers
-
-Const Passenger_Width =   8;
-
-Const Passenger_Height =   8;
-
   // - - - Trains
 
   // - - - - Vehicles
