@@ -36,7 +36,8 @@ Implementation
 
 Procedure Logic_Rewards(Var Game : Type_Game);
 Begin
-  {
+
+{
   Panel_Set_Hidden(Game.Panel_Reward, True);
 
   Label_Set_Text('Week : ' + IntToStr(Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration * 7)), Game.Title_Label));
@@ -49,6 +50,7 @@ Begin
   Panel_Set_Hidden(Game.Panel_Reward, True);
 }
 End;
+
 
 {Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
 
@@ -295,6 +297,7 @@ End;}
 
 
 
+
 {Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station; Game : Type_Game) : Boolean;
 Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
 
@@ -322,6 +325,7 @@ Begin // tout ce bordel est à refaire j'arrive plus à réfléchir mais on y es
       Passenger_Get_On := False;
     end;
 End;}
+
 
 
 
@@ -379,7 +383,7 @@ Begin
   Graphics_Load(Game);
 
   Sounds_Load(Game);
-  
+
   Sounds_Set_Volume(Sounds_Maximum_Volume);
 
   Sounds_Play(Game.Ressources.Music);
@@ -388,7 +392,7 @@ Begin
 
   Game.Play_Pause_Button.State := true;
 
-    Game.Player.Locomotive_Token := 3;
+  Game.Player.Locomotive_Token := 3;
   Game.Player.Tunnel_Token := 3;
   Game.Player.Wagon_Token := 3;
   Game.Player.Score := 0;
@@ -529,7 +533,7 @@ Begin
         SDL_QUITEV :
                      HALT();
         SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP :
-                            Mouse_Event_Handler(Event.button, Game);
+                                                 Mouse_Event_Handler(Event.button, Game);
       End;
 
     End;
@@ -541,12 +545,14 @@ Procedure Logic_Refresh(Var Game : Type_Game);
 Var i, j : Integer;
 Begin
 
+  // Si il faut rafraichir les graphismes.
   If (Game.Graphics_Timer < Time_Get_Current()) Then
     Begin
       Graphics_Refresh(Game);
       Logic_Event_Handler(Game);
-      Game.Graphics_Timer := Time_Get_Current() + (1000 Div 60);
+      Game.Graphics_Timer := Time_Get_Current() + (1000 Div 60);           
     End
+  // Si il faut rafraichrir la logique.
   Else If (Game.Logic_Timer < Time_Get_Current) Then
          Begin
            // Si la partie n'est pas en pause.  
@@ -560,7 +566,7 @@ Begin
                    // Mise à jour de l'étiquette du jour.
                    Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
                    If (Game.Day = Day_Sunday) Then
-                      Logic_Rewards(Game);
+                     Logic_Rewards(Game);
                  End;
 
                // Si le timer à été dépassé.
@@ -599,10 +605,12 @@ Begin
                      End;
                  End;
              End;
-              Game.Logic_Timer := Time_Get_Current() + 200;
+           Game.Logic_Timer := Time_Get_Current() + 200;
          End
-      Else
-        SDL_Delay(2);
+  // Si tout à été rafraichit.
+  Else
+    // Mise en pause du jeu.
+    SDL_Delay(10);
 
 End;
 

@@ -412,6 +412,8 @@ End;
 
 Type Type_Game = Record
 
+  Performance : Type_Time;
+
   Animation : Type_Animation;
 
   Start_Time : Type_Time;
@@ -464,7 +466,7 @@ Type Type_Game = Record
   // Tableau dymamique contenant les stations.
   Stations : Array Of Type_Station;
   // Tableau des 
-  River_Points : Array Of Type_Coordinates;
+  River : Array Of Type_Coordinates;
   // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.  
   Graph_Table : Type_Graph_Table;
   // Carte des stations.
@@ -597,7 +599,23 @@ Procedure Game_Pause(Var Game : Type_Game);
 
 Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
 
+Procedure Create_River(Var Game : Type_Game);
+
 Implementation
+
+// Fonction qui génère aléatoire une rivière.
+Procedure Create_River(Var Game : Type_Game);
+Var Side : Byte;
+Begin
+
+  length(Game.River) := 0;
+
+  // Choix du côté de la rivière.
+  Side := Random(4);
+  
+
+
+End;
 
 Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
 Begin
@@ -883,11 +901,6 @@ Function Lines_Colliding(Line_1, Line_2, Line_3, Line_4 : Type_Coordinates) : Bo
 
 Var Coeffcient_A, Coeffcient_B : Real;
 Begin
-  writeln('Line_1.X : ', Line_1.X, ' Line_1.Y : ', Line_1.Y);
-  writeln('Line_2.X : ', Line_2.X, ' Line_2.Y : ', Line_2.Y);
-  writeln('Line_3.X : ', Line_3.X, ' Line_3.Y : ', Line_3.Y);
-  writeln('Line_4.X : ', Line_4.X, ' Line_4.Y : ', Line_4.Y);
-
 
   Coeffcient_A := ((Line_4.X-Line_3.X)*(Line_1.Y-Line_3.Y) - (Line_4.Y-Line_3.Y)*(Line_1.X-Line_3.X)) / ((Line_4.Y-Line_3.Y)*(Line_2.X-Line_1.X) - (Line_4.X-Line_3.X)*(Line_2.Y-Line_1.Y));
 

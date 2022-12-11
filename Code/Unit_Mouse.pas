@@ -43,6 +43,7 @@ Function Mouse_Pressed_On_Station(Var Game : Type_Game) : Boolean;
 
 Implementation
 
+// Fonction qui charge les images de manière optimisée pour le rendu.
 
 
 
@@ -206,7 +207,6 @@ Begin
       // Parcourt les lignes.
       For i := low(Game.Lines) To high(Game.Lines) Do
         Begin
-          writeln('i = ', i);
           If (length(Game.Lines[i].Stations) > 0) Then
             Begin
               // Parcourt les stations (et point intermédiaires) d'une ligne.
@@ -318,17 +318,17 @@ Begin
     Begin
       Game.Mouse.Mode := Type_Mouse_Mode.Normal;
       // Si la souris se trouve dans le panneau de gauche.
-      If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Left)) Then
+      If (Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Left)) Then
         Begin
           // Si la souris se trouve le boutton d'ajout d'une locomotive.
-          If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Locomotive_Button[0].Position, Game.Locomotive_Button[0].Size, Game.Panel_Left)) And (Game.Player.Locomotive_Token > 0) Then
+          If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Locomotive_Button[0].Position, Game.Locomotive_Button[0].Size, Game.Panel_Left)) And (Game.Player.Locomotive_Token > 0) Then
             Game.Mouse.Mode := Type_Mouse_Mode.Add_Locomotive
                                // Si la souris se trouve sur le boutton d'ajout d'un wagon.
-          Else If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Wagon_Button[0].Position, Game.Wagon_Button[0].Size, Game.Panel_Left)) And (Game.Player.Wagon_Token > 0) Then
+          Else If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Wagon_Button[0].Position, Game.Wagon_Button[0].Size, Game.Panel_Left)) And (Game.Player.Wagon_Token > 0) Then
                  Game.Mouse.Mode := Type_Mouse_Mode.Add_Wagon;
         End;
       // Si la souri se trouve sur le panneau de droite.
-      If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Right)) Then
+      If (Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Right)) Then
         Begin
           If (Mouse_Pressed_On_Line(Game)) Then
 

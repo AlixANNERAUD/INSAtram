@@ -72,7 +72,27 @@ Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources 
 
 Procedure Left_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
+
+Function Image_Load(Path : String) : PSDL_Surface;
+
 Implementation
+
+Function Image_Load(Path : String) : PSDL_Surface;
+Var Image : PSDL_Surface;
+    Optimized_Image : PSDL_Surface;
+    Color_Key : Longword;
+Begin
+  Image := IMG_Load(String_To_Characters(Path));
+
+  Optimized_Image := SDL_DisplayFormatAlpha(Image);
+
+  SDL_FreeSurface(Image);
+  
+  Color_Key := SDL_MapRGBA(Optimized_Image^.Format, 255, 0, 255, 255);
+  SDL_SetColorKey(Optimized_Image, SDL_SRCCOLORKEY, Color_Key);
+
+  Image_Load := Optimized_Image;
+End;
 
 Procedure Button_Set_Hidden(Hidden : Boolean; Var Button : Type_Button);
 Begin
@@ -103,7 +123,7 @@ Begin
         End;
     End;
 
-  Panel_Render(Game.Panel_Right, Destination_Panel);
+  Panel_Render(Game.Panel_Left, Destination_Panel);
 End;
 
 // Procédure qui charge les ressources graphiques.
@@ -115,18 +135,18 @@ Var Position : Type_Coordinates;
 Begin
 
   // - - Station
-  Ressources.Stations[0] := IMG_Load(Path_Image_Station_Circle);
-  Ressources.Stations[1] := IMG_Load(Path_Image_Station_Lozenge);
-  Ressources.Stations[2] := IMG_Load(Path_Image_Station_Pentagon);
-  Ressources.Stations[3] := IMG_Load(Path_Image_Station_Square);
-  Ressources.Stations[4] := IMG_Load(Path_Image_Station_Triangle);
+  Ressources.Stations[0] := Image_Load(Path_Image_Station_Circle);
+  Ressources.Stations[1] := Image_Load(Path_Image_Station_Lozenge);
+  Ressources.Stations[2] := Image_Load(Path_Image_Station_Pentagon);
+  Ressources.Stations[3] := Image_Load(Path_Image_Station_Square);
+  Ressources.Stations[4] := Image_Load(Path_Image_Station_Triangle);
 
   // - - Passenger
-  Ressources.Passengers[0] := IMG_Load(Path_Image_Passenger_Circle);
-  Ressources.Passengers[1] := IMG_Load(Path_Image_Passenger_Lozenge);
-  Ressources.Passengers[2] := IMG_Load(Path_Image_Passenger_Pentagon);
-  Ressources.Passengers[3] := IMG_Load(Path_Image_Passenger_Square);
-  Ressources.Passengers[4] := IMG_Load(Path_Image_Passenger_Triangle);
+  Ressources.Passengers[0] := Image_Load(Path_Image_Passenger_Circle);
+  Ressources.Passengers[1] := Image_Load(Path_Image_Passenger_Lozenge);
+  Ressources.Passengers[2] := Image_Load(Path_Image_Passenger_Pentagon);
+  Ressources.Passengers[3] := Image_Load(Path_Image_Passenger_Square);
+  Ressources.Passengers[4] := Image_Load(Path_Image_Passenger_Triangle);
 
 
   // - - Véhicule (Locomotive et Wagon)
@@ -308,12 +328,23 @@ Begin
 End;
 
 Procedure Panel_Create(Var Panel : Type_Panel; X,Y, Width, Height : Integer);
+Var Surface : PSDL_Surface;
+    Color_Key : Longword;
 Begin
   Panel.Position.X := X;
   Panel.Position.Y := Y;
   Panel.Size.X := Width;
   Panel.Size.Y := Height;
-  Panel.Surface := Graphics_Surface_Create(Width, Height);
+  Surface := Graphics_Surface_Create(Width, Height);
+  // Optimisation de la surface.
+  Panel.Surface := SDL_DisplayFormat(Surface);
+  Color_Key := SDL_MapRGB(Panel.Surface^.format, 255, 0, 255);
+  SDL_SetColorKey(Panel.Surface, SDL_SRCCOLORKEY, Color_Key);
+  // Libération de la surface temporaire.
+  SDL_FreeSurface(Surface);
+
+
+  Panel.Surface := SDL_DisplayFormat(Graphics_Surface_Create(Width, Height));
   Panel_Set_Hidden(True,Panel);
   Panel.Hidden := false;
 End;
@@ -384,7 +415,7 @@ Begin
 
   // - Panneau de haut.
 
-  Image_Set(Game.Score_Image, IMG_Load(Path_Image_People));
+  Image_Set(Game.Score_Image, Image_Load(Path_Image_People));
   Game.Score_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Score_Image.Size.Y);
   Game.Score_Image.Position.X := Game.Panel_Top.Size.X Div 2 + 16;
 
@@ -397,11 +428,11 @@ Begin
   Game.Clock_Label.Position.X := Game.Panel_Top.Size.X Div 2 - 16 - Game.Clock_Label.Size.X;
   Label_Set_Text(Game.Clock_Label, 'Monday');
 
-  Image_Set(Game.Clock_Image, IMG_Load(Path_Image_Clock));
+  Image_Set(Game.Clock_Image, Image_Load(Path_Image_Clock));
   Game.Clock_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Image.Size.Y);
   Game.Clock_Image.Position.X := Game.Clock_Label.Position.X - 16 - Game.Clock_Image.Size.X;
 
-  Dual_State_Button_Set(Game.Play_Pause_Button, IMG_Load(Path_Image_Pause), IMG_Load(Path_Image_Play), IMG_Load(Path_Image_Pause), IMG_Load(Path_Image_Play));
+  Dual_State_Button_Set(Game.Play_Pause_Button, Image_Load(Path_Image_Pause), Image_Load(Path_Image_Play), Image_Load(Path_Image_Pause), Image_Load(Path_Image_Play));
 
   Game.Play_Pause_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Play_Pause_Button.Size.Y);
   Game.Play_Pause_Button.Position.X := 16;
@@ -410,9 +441,9 @@ Begin
 
   For i := 0 To 2 Do
     Begin
-      Button_Set(Game.Locomotive_Button[i], IMG_Load(Path_Image_Button_Locomotive), IMG_Load(Path_Image_Button_Locomotive));
-      Button_Set(Game.Wagon_Button[i], IMG_Load(Path_Image_Button_Wagon), IMG_Load(Path_Image_Button_Wagon));
-      Button_Set(Game.Tunnel_Button[i], IMG_Load(Path_Image_Button_Tunnel), IMG_Load(Path_Image_Button_Tunnel));
+      Button_Set(Game.Locomotive_Button[i], Image_Load(Path_Image_Button_Locomotive), Image_Load(Path_Image_Button_Locomotive));
+      Button_Set(Game.Wagon_Button[i], Image_Load(Path_Image_Button_Wagon), Image_Load(Path_Image_Button_Wagon));
+      Button_Set(Game.Tunnel_Button[i], Image_Load(Path_Image_Button_Tunnel), Image_Load(Path_Image_Button_Tunnel));
     End;
 
   Game.Locomotive_Button[0].Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Locomotive_Button[0].Size.X);
@@ -429,7 +460,6 @@ Begin
 
       Game.Locomotive_Button[i].Position.X := Game.Locomotive_Button[0].Position.X + (i * 8);
       Game.Locomotive_Button[i].Position.Y := Game.Locomotive_Button[0].Position.Y;
-      writeln('Locomotive pos : ', Game.Locomotive_Button[i].Position.X, ' ', Game.Locomotive_Button[i].Position.Y, '');
 
       Game.Wagon_Button[i].Position.X := Game.Wagon_Button[0].Position.X + (i * 8);
       Game.Wagon_Button[i].Position.Y := Game.Wagon_Button[0].Position.Y;
@@ -483,6 +513,7 @@ Begin
 
   SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
+
   // - Rendu dans le panneau de droite.
 
   // Vérifie qu'il y a bien des lignes dans la partie.
@@ -510,6 +541,7 @@ Begin
             End;
         End;
     End;
+
 
   // Vérifie qu'il y a bien des stations dans la partie.
   If (length(Game.Stations) > 0) Then
@@ -541,14 +573,15 @@ Begin
 
   Panel_Render(Game.Panel_Top, Game.Window);
   Panel_Render(Game.Panel_Bottom, Game.Window);
-  Panel_Render(Game.Panel_Left, Game.Window);
+  Panel_Render(Game.Panel_Right, Game.Window);
 
 
   Cursor_Render(Game.Mouse, Game.Window, Game);
+  
 
   SDL_Flip(Game.Window.Surface);
-
   Animation_Refresh(Game);
+  
 End;
 
 
@@ -615,7 +648,7 @@ Begin
                  For i := -2 To 0 Do
                    Begin
                      lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i - 1, Position_2.X, Position_2.Y + i - 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i - 1, Position_2.X + i, Position_2.Y + i - 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
                    End;
                  For i := 0 To 2 Do
                    Begin
@@ -633,7 +666,7 @@ Begin
                  For i := -2 To 0 Do
                    Begin
                      lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i + 1, Position_2.X, Position_2.Y - i + 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i + 1, Position_2.X + i, Position_2.Y - i + 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
                    End;
                  For i := 0 To 2 Do
                    Begin
