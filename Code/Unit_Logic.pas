@@ -24,6 +24,8 @@ Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station :
 
 Procedure Logic_Event_Handler(Var Game : Type_Game);
 
+Procedure Logic_Rewards(Var Game : Type_Game);
+
 // - Définition des fonctions et des procédures.
 
 Implementation
@@ -32,9 +34,21 @@ Implementation
 
 // - - Fonctions et procédures relatives au passagers 
 
+Procedure Logic_Rewards(Var Game : Type_Game);
+Begin
+  {
+  Panel_Set_State(Game.Panel_Reward, True);
+
+  Label_Set_Text('Week : ' + IntToStr(Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration * 7)), Game.Title_Label));
+
+  Label_Set_Text('Choose your reward : ', Game.Message_Label);
 
 
 
+
+  Panel_Set_State(Game.Panel_Reward, True);
+}
+End;
 
 {Function get_Absolute_Index_From_Station_Pointer(station_Pointer : Type_Station_Pointer; stations_Table : Array Of Type_Station): integer;
 
@@ -278,6 +292,9 @@ End;}
 
 
 
+
+
+
 {Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station; Game : Type_Game) : Boolean;
 Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
 
@@ -305,6 +322,9 @@ Begin // tout ce bordel est à refaire j'arrive plus à réfléchir mais on y es
       Passenger_Get_On := False;
     end;
 End;}
+
+
+
 
 
 
@@ -389,7 +409,7 @@ Begin
   Line_Create(Game);
   Line_Create(Game);
   Line_Create(Game);
-    Line_Create(Game);
+  Line_Create(Game);
 
   For i := low(Game.Stations) To low(Game.Stations) + 3 Do
     Begin
@@ -499,11 +519,7 @@ Begin
         // Si la fenêtre est fermée.
         SDL_QUITEV :
                      HALT();
-        SDL_MOUSEBUTTONDOWN :
-                              //Mouse_Event_Handler(Event, Game);
-                              Mouse_Event_Handler(Event.button, Game);
-        SDL_MOUSEBUTTONUP :
-                            // writeln('click released');
+        SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP :
                             Mouse_Event_Handler(Event.button, Game);
       End;
 
@@ -534,44 +550,50 @@ Begin
                    Game.Day := Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7));
                    // Mise à jour de l'étiquette du jour.
                    Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
+                   If (Game.Day = Day_Sunday) Then
+                      Logic_Rewards(Game);
                  End;
 
-               // Génération aléatoire des passagers.
-               // Vérifie si il y a bien des stations dans une partie.
-               If (length(Game.Stations) > 0) Then
+               // Si le timer à été dépassé.
+               If (Game.Passengers_Timer < Time_Get_Current()) Then
                  Begin
-                   // Si le timer à été dépassé.
-                   If (Game.Passengers_Timer < Time_Get_Current()) Then
+                   // Génération aléatoire des passagers.
+                   // Vérifie si il y a bien des stations dans une partie.
+                   If (length(Game.Stations) > 0) Then
                      Begin
+
                        // Création d'un passager sur une station choisie aléatoirement.
                        Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
                        // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
                        Game.Passengers_Timer := Time_Get_Current() + round((exp(1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
                      End;
                  End;
-             End;
 
-           // Détecte les trains arrivés à quais.
-           // Vérifié qu'il existe une ligne.
-           If (length(Game.Lines) > 0) Then
-             Begin
-               // Itère parmis les lignes
-               For i := low(Game.Lines) To high(Game.Lines) Do
+
+               // Détecte les trains arrivés à quais.
+               // Vérifié qu'il existe une ligne.
+               If (length(Game.Lines) > 0) Then
                  Begin
-                   // Itère parmis les trains
-                   For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+                   // Itère parmis les lignes
+                   For i := low(Game.Lines) To high(Game.Lines) Do
                      Begin
-                       // Si le train est arrivé à quais.
-                       If (Game.Lines[i].Trains[j].Driving = false) Then
+                       // Itère parmis les trains
+                       For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
                          Begin
-                           // Effectue la correspondance du train arrivé à quais.
-                           Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j], Game);
+                           // Si le train est arrivé à quais.
+                           If (Game.Lines[i].Trains[j].Driving = false) Then
+                             Begin
+                               // Effectue la correspondance du train arrivé à quais.
+                               Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j], Game);
+                             End;
                          End;
                      End;
                  End;
              End;
-           Game.Logic_Timer := Time_Get_Current() + 200;
-         End;
+              Game.Logic_Timer := Time_Get_Current() + 200;
+         End
+      Else
+        SDL_Delay(2);
 
 End;
 

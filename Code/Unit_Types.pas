@@ -162,6 +162,7 @@ Const Lines_Maximum_Number_Trains = 4;
   // - Définition des types
 
 Const Train_Maximum_Speed = 60;
+
 Const Train_Acceleration_Time = 5;
 
 
@@ -397,7 +398,7 @@ Type Type_Mouse = Record
 End;
 
 Type Type_Animation = Record
-  Constants : array[0 .. 1] of Real;
+  Constants : array[0 .. 1] Of Real;
   Acceleration_Distance : Integer;
 End;
 
@@ -423,6 +424,12 @@ Type Type_Game = Record
   Window : Type_Panel;
   // Panneau contenant le terrain de jeu. 
   Panel_Right : Type_Panel;
+
+  // Panneau de récompense.
+  Panel_Reward : Type_Panel;
+  Title_Label : Type_Label;
+  Message_Label : Type_Label;
+  Choices_Buttons : Array[0 .. 1] Of Type_Button;
 
   // Panneau contenant l'interface du haut (score, heure ...).
   Panel_Top : Type_Panel;
@@ -595,7 +602,8 @@ Begin
 End;
 
 Procedure Game_Play(Var Game : Type_Game);
-var i, j : Byte;
+
+Var i, j : Byte;
 Begin
   Game.Pause_Time := Time_Get_Current() - Game.Pause_Time;
 
@@ -614,6 +622,7 @@ Begin
           Game.Lines[i].Trains[j].Start_Time := Game.Lines[i].Trains[j].Start_Time + Game.Pause_Time;
 
 End;
+
 
 
 
@@ -1261,18 +1270,18 @@ Begin
         If (Line.Stations[i] = Station_Pointer) Then
           Begin
             For j := low(Line.Trains) To high(Line.Trains) Do
-            Begin
-               
+              Begin
 
-                
-            End;
+
+
+              End;
 
             // Enlève la station.
             Delete(Line.Stations, i, 1);
             // Si il n'y a plus qu'une station dans la ligne, alors, on supprime la seule station restante.
             If (length(Line.Stations) = 1) Then
               SetLength(Line.Stations, 0);
-            
+
 
             Line_Compute_Intermediate_Positions(Line);
 
@@ -1314,6 +1323,8 @@ Begin
       Line.Trains[high(Line.Trains)].Direction := Direction;
       Line.Trains[high(Line.Trains)].Last_Station := Start_Station;
 
+
+      // Détermination de la prochaine station.
       If (length(Line.Stations) > 0) Then
         Begin
           // Itère parmis les stations de la ligne.
@@ -1321,8 +1332,17 @@ Begin
             Begin
               If (Line.Stations[i] = Start_Station) Then
                 Begin
+                  // Si la station est la dernière ou la première station d'une ligne.
+                  If (i = low(Line.Stations)) Then
+                    Line.Trains[high(Line.Trains)].Direction := true
+                  
+                  Else If (i = high(Line.Stations)) Then
+                    // On inverse la direction.
+                    Line.Trains[high(Line.Trains)].Direction := false;
+
                   If (Line.Trains[high(Line.Trains)].Direction = true) Then
                     Begin
+
                       Line.Trains[high(Line.Trains)].Next_Station := Line.Stations[i + 1];
                       // Calcul du point intermédiaire.
                       Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.
@@ -1373,6 +1393,7 @@ Begin
 
       Label_Set(Line.Trains[high(Line.Trains)].Passengers_Label, '', Game.Ressources.Fonts[Font_Small][Font_Bold], Color_Get(Color_White));
 
+        Line.Trains[high(Line.Trains)].Start_Time := Time_Get_Current();
 
       Vehicle_Create(Line.Trains[high(Line.Trains)]);
 

@@ -540,6 +540,254 @@ thickLineRGBA
 Résolution des itinéraires.
 \end_layout
 
+\begin_layout Subsection
+Animation réaliste des trains.
+\end_layout
+
+\begin_layout Standard
+Afin que le mouvement des trains soit réaliste, au lieu d'une vitesse constante,
+ nous avons opté pour une vitesse variable dépendant du temps.
+ Le but étant de mimer le déplacement d'un véhicule réel, nous avons utilisé
+ 
+\begin_inset Quotes fld
+\end_inset
+
+Geogebra
+\begin_inset Quotes frd
+\end_inset
+
+ et tâtonner un peu afin de trouver une fonction qui décrit au mieux la
+ vitesse d'un véhicule réel lors de son accélération : 
+\begin_inset Formula $f\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
+\end_inset
+
+ et de sa décélération : 
+\begin_inset Formula $g\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
+\end_inset
+
+.
+ Une fois que la train à accéléré, sa vitesse est constante (égale à 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Standard
+Nous avons ensuite défini 3 constantes : 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+ (la vitesse maximale), 
+\begin_inset Formula $t_{a}$
+\end_inset
+
+ (le temps que prend le train pour accélérer jusqu'à 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+ où décélérer jusqu'à 
+\begin_inset Formula $0$
+\end_inset
+
+) et 
+\begin_inset Formula $k$
+\end_inset
+
+ une constante calculé à partir de 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+ et 
+\begin_inset Formula $t_{a}$
+\end_inset
+
+.
+ On a alors : 
+\begin_inset Formula $f\left(x\right)=v_{m}\cdot\frac{\cos\left(kx\right)+1}{2}$
+\end_inset
+
+ et 
+\begin_inset Formula $g\left(x\right)=v_{m}\cdot\frac{-\cos\left(x\right)+1}{2}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+On peut alors définir la vitesse comme une fonction par morceaux dépendant
+ du temps :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+v(t)\begin{cases}
+v_{1}\left(t\right)=v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2} & \text{si }0\leqslant t\leqslant t_{a}\\
+v_{2}\left(t\right)=v_{m} & \text{si }t_{a}<t<t_{f}-t_{a}\\
+v_{3}\left(t\right)=v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+\end{cases},\forall t\in\left[0,t_{f}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Par définition, 
+\begin_inset Formula $t_{a}$
+\end_inset
+
+ est le temps mis par le train pour atteindre 
+\begin_inset Formula $v_{max}$
+\end_inset
+
+, on a donc :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+v\left(t_{a}\right)=v_{m}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow v_{m}\cdot\frac{-\cos\left(k\cdot t_{a}\right)+1}{2}=v_{m}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Cela nous permet de définir 
+\begin_inset Formula $k$
+\end_inset
+
+ en fonction du temps d'accélération :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow\cos\left(k\cdot t_{a}\right)=-1
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow k=\frac{\arccos\left(-1\right)}{t_{a}}=\frac{\pi}{t_{a}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+D'après les cours de mécanique du point, nous savons que la vitesse est
+ la dérivée de la distance parcourue : 
+\begin_inset Formula $v\left(t\right)=\frac{d}{dt}d\left(t\right)$
+\end_inset
+
+, on a donc :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+d\left(t\right)=\int v\left(t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $v\left(t\right)$
+\end_inset
+
+ étant définie par morceaux, 
+\begin_inset Formula $d$
+\end_inset
+
+
+\begin_inset Formula $\left(t\right)$
+\end_inset
+
+ est également définie par morceaux :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+d\left(t\right)=\begin{cases}
+d_{1}\left(t\right)=\int_{0}^{t}v_{1}(t) & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\left(t\right) & \text{si }t_{a}<t<t_{final}-t_{a}\\
+\int v\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t_{f}-t_{a}}v_{2}\left(t\right)+\int_{t_{f}-t_{a}}^{t_{f}}v_{3}\left(t\right) & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset Formula 
+\[
+d\left(t\right)=\begin{cases}
+d_{1}\left(t\right)=\int_{0}^{t_{a}}\left(v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}\left(v_{m}\right)dt & \text{si }t_{a}<t<t_{final}-t_{a}\\
+d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\int_{t_{f}-t_{a}}^{t_{f}}\left(v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset Formula 
+\[
+d\left(t\right)=\begin{cases}
+d_{1}\left(t\right)=\left[\frac{1}{2}\left(\frac{-\sin\left(k\cdot x\right)}{k}+x\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[v_{m}*t\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{final}-t_{a}\\
+d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot x\right)}{k}+x\right)\right]_{t_{f}-t_{a}}^{t_{f}} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Nous avons maintenant la position en fonction du temps, ce qui est suffisant
+ pour réaliser l'implémentation.
+\end_layout
+
 \begin_layout Section
 Conclusion
 \end_layout

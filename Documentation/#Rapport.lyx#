@@ -547,13 +547,34 @@ Animation réaliste des trains.
 \begin_layout Standard
 Afin que le mouvement des trains soit réaliste, au lieu d'une vitesse constante,
  nous avons opté pour une vitesse variable dépendant du temps.
- Le déplacement obtenu par cette vitesse n'est alors pas linéaire et mime
- le déplacement d'un véhicule.
- Nous avons alors défini deux constantes : 
+ Ces dernières serviront à régler les fonctions qui en découleront.
+ Le but étant de mimer le déplacement d'un véhicule réel, nous avons utilisé
+ 
+\begin_inset Quotes fld
+\end_inset
+
+Geogebra
+\begin_inset Quotes frd
+\end_inset
+
+ et tâtonner un peu afin de trouver une fonction qui décrit au mieux la
+ vitesse d'un véhicule réel lors de son accélération : 
+\begin_inset Formula $f\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
+\end_inset
+
+ et de sa décélération : 
+\begin_inset Formula $g\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Nous avons ensuite défini 3 constantes : 
 \begin_inset Formula $v_{m}$
 \end_inset
 
- (la vitesse maximale) et 
+ (la vitesse maximale), 
 \begin_inset Formula $t_{a}$
 \end_inset
 
@@ -565,35 +586,21 @@ Afin que le mouvement des trains soit réaliste, au lieu d'une vitesse constante
 \begin_inset Formula $0$
 \end_inset
 
-).
- Ces dernières serviront à régler les fonctions qui en découleront.
- A partir de la, nous avons utilisé 
-\begin_inset Quotes fld
+) et 
+\begin_inset Formula $k$
 \end_inset
 
-Geogebra
-\begin_inset Quotes frd
+ une constante ??.
+ On a alors : 
+\begin_inset Formula $f\left(x\right)=v_{m}\\cdot\frac{\cos\left(x\right)+1}{2}$
 \end_inset
 
- afin de trouver une fonction qui mimique la vitesse d'une accélération
- naturelle, au final, la fonction 
-\begin_inset Formula $f\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
-\end_inset
 
- pour l'accélération et 
-\begin_inset Formula $g\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
-\end_inset
-
- nous à sembler correspondre à nos besoins.
 \end_layout
 
 \begin_layout Standard
 Ainsi, nous avons défini la vitesse comme une fonction par morceaux dépendant
- du temps : 
-\begin_inset Formula $\forall t\in\left[0,t_{f}\right]$
-\end_inset
-
-
+ du temps :
 \end_layout
 
 \begin_layout Standard
@@ -603,7 +610,7 @@ v(t)\begin{cases}
 v_{1}\left(t\right)=v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2} & \text{si }0\leqslant t\leqslant t_{a}\\
 v_{2}\left(t\right)=v_{m}\cdot t & \text{si }t_{a}<t<t_{f}-t_{a}\\
 v_{3}\left(t\right)=v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
-\end{cases}
+\end{cases},\forall t\in\left[0,t_{f}\right]
 \]
 
 \end_inset
