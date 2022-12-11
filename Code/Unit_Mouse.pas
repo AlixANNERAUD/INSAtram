@@ -8,7 +8,7 @@ Uses Unit_Types, sdl, crt;
 
 // - Chargement
 
-Procedure Mouse_Load(Game : Type_Game);
+Procedure Mouse_Load(Var Mouse : Type_Mouse);
 
 // - Gestion des évènements.
 
@@ -123,6 +123,9 @@ Begin
                 Begin
 
 
+
+
+
 // ! Attention : La suppression de la station dans la ligne étant imédiate, il faudrait vérifier et / ou attendre que le train actuellement en transit sur l'axe passant par la station ait passé l'axe, au risque d'avoir des comportements étranges.
                   Line_Remove_Station(Line^.Stations[i], Line^);
                   Mouse_Pressed_On_Station := true;
@@ -214,15 +217,18 @@ Begin
                     Then
                     Begin
                       // Créer un train qui par de la station précédente, dans le sens indirect.
-                      Train_Create(Game.Lines[i].Stations[j], false, Game.Lines[i], Game);
+                          Train_Create(Game.Lines[i].Stations[j], false, Game.Lines[i], Game);
+                          dec(Game.Player.Locomotive_Token);
                       Break;
                       Break;
                     End;
                   // Vérifie que le pointeur est en collision avec la deuxième partie d'une ligne.
                   If (Line_Rectangle_Colliding(Game.Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position_Centered, Mouse_Position, Vehicle_Size)) Then
                     Begin
-                      // Créer un train qui part de la station suivante, dans le sens direct.
-                      Train_Create(Game.Lines[i].Stations[j + 1], true, Game.Lines[i], Game);
+                      If (Game.Player.Locomotive_Token > 0) Then
+                          // Créer un train qui part de la station suivante, dans le sens direct.
+                          Train_Create(Game.Lines[i].Stations[j + 1], true, Game.Lines[i], Game);
+                          dec(Game.Player.Locomotive_Token);
                       Break;
                       Break;
                     End;
@@ -252,6 +258,7 @@ Begin
                     Begin
                       // Ajoute un wagon au train.
                       Vehicle_Create(Game.Lines[i].Trains[j]);
+                      dec(Game.Player.Wagon_Token);
                       Break;
                       Break;
                     End;
@@ -314,10 +321,10 @@ Begin
       If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Left)) Then
         Begin
           // Si la souris se trouve le boutton d'ajout d'une locomotive.
-          If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Locomotive_Button.Position, Game.Locomotive_Button.Size, Game.Panel_Left)) Then
+          If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Locomotive_Button[0].Position, Game.Locomotive_Button[0].Size, Game.Panel_Left)) And (Game.Player.Locomotive_Token > 0) Then
             Game.Mouse.Mode := Type_Mouse_Mode.Add_Locomotive
                                // Si la souris se trouve sur le boutton d'ajout d'un wagon.
-          Else If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Wagon_Button.Position, Game.Wagon_Button.Size, Game.Panel_Left)) Then
+          Else If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Wagon_Button[0].Position, Game.Wagon_Button[0].Size, Game.Panel_Left)) And (Game.Player.Wagon_Token > 0) Then
                  Game.Mouse.Mode := Type_Mouse_Mode.Add_Wagon;
         End;
       // Si la souri se trouve sur le panneau de droite.
@@ -337,13 +344,13 @@ Begin
         Begin
           // Vérifie si le clic est sur le bouton play pause.
           If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Play_Pause_Button.Position, Game.Play_Pause_Button.Size, Game.Panel_Top)) Then
-          Begin
-            Game.Play_Pause_Button.State := Not(Game.Play_Pause_Button.State);
-            if (Game.Play_Pause_Button.State) Then
-              Game_Play(Game)
-            Else
-              Game_Pause(Game);
-          End;
+            Begin
+              Game.Play_Pause_Button.State := Not(Game.Play_Pause_Button.State);
+              If (Game.Play_Pause_Button.State) Then
+                Game_Play(Game)
+              Else
+                Game_Pause(Game);
+            End;
         End;
 
       // Si la souris se trouve sur le panneau de droite.
@@ -383,13 +390,13 @@ Begin
 End;
 
 
-Procedure Mouse_Load(Game : Type_Game);
+Procedure Mouse_Load(Var Mouse : Type_Mouse);
 Begin
-  Game.Mouse.Press_Position.X := 0;
-  Game.Mouse.Press_Position.Y := 0;
-  Game.Mouse.Release_Position.X := 0;
-  Game.Mouse.Release_Position.Y := 0;
-  Game.Mouse.State := False;
+  Mouse.Press_Position.X := 0;
+  Mouse.Press_Position.Y := 0;
+  Mouse.Release_Position.X := 0;
+  Mouse.Release_Position.Y := 0;
+  Mouse.State := False;
 End;
 
 // Fonction qui retourne la position actuelle de la souris.

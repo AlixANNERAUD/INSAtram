@@ -739,8 +739,8 @@ d\left(t\right)=\int v\left(t\right)
 \[
 d\left(t\right)=\begin{cases}
 d_{1}\left(t\right)=\int_{0}^{t}v_{1}(t) & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\left(t\right) & \text{si }t_{a}<t<t_{final}-t_{a}\\
-\int v\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t_{f}-t_{a}}v_{2}\left(t\right)+\int_{t_{f}-t_{a}}^{t_{f}}v_{3}\left(t\right) & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\left(t\right) & \text{si }t_{a}<t<t_{f}-t_{a}\\
+\int v\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t_{f}-t_{a}}v_{2}\left(t\right)+\int_{0}^{t-\left(t_{f}-t_{a}\right)}v_{3}\left(t\right) & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
 \end{cases}
 \]
 
@@ -756,8 +756,8 @@ d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\le
 \[
 d\left(t\right)=\begin{cases}
 d_{1}\left(t\right)=\int_{0}^{t_{a}}\left(v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}\left(v_{m}\right)dt & \text{si }t_{a}<t<t_{final}-t_{a}\\
-d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\int_{t_{f}-t_{a}}^{t_{f}}\left(v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}\left(v_{m}\right)dt & \text{si }t_{a}<t<t_{f}-t_{a}\\
+d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\int_{0}^{t-\left(t_{f}-t_{a}\right)}\left(v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
 \end{cases}
 \]
 
@@ -772,9 +772,26 @@ d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left
 \begin_inset Formula 
 \[
 d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=\left[\frac{1}{2}\left(\frac{-\sin\left(k\cdot x\right)}{k}+x\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[v_{m}*t\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{final}-t_{a}\\
-d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot x\right)}{k}+x\right)\right]_{t_{f}-t_{a}}^{t_{f}} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+d_{1}\left(t\right)=\left[v_{m}\cdot\left(\frac{-\sin\left(k\cdot t\right)+kt}{k*2}\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[v_{m}\cdot t\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{f}-t_{a}\\
+d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset Formula 
+\[
+d\left(t\right)=\begin{cases}
+d_{1}\left(t\right)=v_{m}\cdot\left(\frac{-\sin\left(k\cdot t\right)+kt}{k*2}\right) & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+v_{m}\times\left(t-t_{a}\right) & \text{si }t_{a}<t<t_{f}-t_{a}\\
+d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
 \end{cases}
 \]
 

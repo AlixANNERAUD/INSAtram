@@ -547,13 +547,39 @@ Animation réaliste des trains.
 \begin_layout Standard
 Afin que le mouvement des trains soit réaliste, au lieu d'une vitesse constante,
  nous avons opté pour une vitesse variable dépendant du temps.
- Le déplacement obtenu par cette vitesse n'est alors pas linéaire et mime
- le déplacement d'un véhicule.
- Nous avons alors défini deux constantes : 
+ Le but étant de mimer le déplacement d'un véhicule réel, nous avons utilisé
+ 
+\begin_inset Quotes fld
+\end_inset
+
+Geogebra
+\begin_inset Quotes frd
+\end_inset
+
+ et tâtonner un peu afin de trouver une fonction qui décrit au mieux la
+ vitesse d'un véhicule réel lors de son accélération : 
+\begin_inset Formula $f\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
+\end_inset
+
+ et de sa décélération : 
+\begin_inset Formula $g\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
+\end_inset
+
+.
+ Une fois que la train à accéléré, sa vitesse est constante (égale à 
 \begin_inset Formula $v_{m}$
 \end_inset
 
- (la vitesse maximale) et 
+).
+ 
+\end_layout
+
+\begin_layout Standard
+Nous avons ensuite défini 3 constantes : 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+ (la vitesse maximale), 
 \begin_inset Formula $t_{a}$
 \end_inset
 
@@ -565,35 +591,33 @@ Afin que le mouvement des trains soit réaliste, au lieu d'une vitesse constante
 \begin_inset Formula $0$
 \end_inset
 
-).
- Ces dernières serviront à régler les fonctions qui en découleront.
- A partir de la, nous avons utilisé 
-\begin_inset Quotes fld
+) et 
+\begin_inset Formula $k$
 \end_inset
 
-Geogebra
-\begin_inset Quotes frd
+ une constante calculé à partir de 
+\begin_inset Formula $v_{m}$
 \end_inset
 
- afin de trouver une fonction qui mimique la vitesse d'une accélération
- naturelle, au final, la fonction 
-\begin_inset Formula $f\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
+ et 
+\begin_inset Formula $t_{a}$
 \end_inset
 
- pour l'accélération et 
-\begin_inset Formula $g\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
+.
+ On a alors : 
+\begin_inset Formula $f\left(x\right)=v_{m}\cdot\frac{\cos\left(kx\right)+1}{2}$
 \end_inset
 
- nous à sembler correspondre à nos besoins.
+ et 
+\begin_inset Formula $g\left(x\right)=v_{m}\cdot\frac{-\cos\left(x\right)+1}{2}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-Ainsi, nous avons défini la vitesse comme une fonction par morceaux dépendant
- du temps : 
-\begin_inset Formula $\forall t\in\left[0,t_{f}\right]$
-\end_inset
-
-
+On peut alors définir la vitesse comme une fonction par morceaux dépendant
+ du temps :
 \end_layout
 
 \begin_layout Standard
@@ -601,9 +625,9 @@ Ainsi, nous avons défini la vitesse comme une fonction par morceaux dépendant
 \[
 v(t)\begin{cases}
 v_{1}\left(t\right)=v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2} & \text{si }0\leqslant t\leqslant t_{a}\\
-v_{2}\left(t\right)=v_{m}\cdot t & \text{si }t_{a}<t<t_{f}-t_{a}\\
+v_{2}\left(t\right)=v_{m} & \text{si }t_{a}<t<t_{f}-t_{a}\\
 v_{3}\left(t\right)=v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
-\end{cases}
+\end{cases},\forall t\in\left[0,t_{f}\right]
 \]
 
 \end_inset
@@ -715,8 +739,8 @@ d\left(t\right)=\int v\left(t\right)
 \[
 d\left(t\right)=\begin{cases}
 d_{1}\left(t\right)=\int_{0}^{t}v_{1}(t) & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\left(t\right) & \text{si }t_{a}<t<t_{final}-t_{a}\\
-\int v\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t_{f}-t_{a}}v_{2}\left(t\right)+\int_{t_{f}-t_{a}}^{t_{f}}v_{3}\left(t\right) & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\left(t\right) & \text{si }t_{a}<t<t_{f}-t_{a}\\
+\int v\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t_{f}-t_{a}}v_{2}\left(t\right)+\int_{0}^{t-\left(t_{f}-t_{a}\right)}v_{3}\left(t\right) & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
 \end{cases}
 \]
 
@@ -732,8 +756,8 @@ d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\le
 \[
 d\left(t\right)=\begin{cases}
 d_{1}\left(t\right)=\int_{0}^{t_{a}}\left(v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}\left(v_{m}*t\right)dt & \text{si }t_{a}<t<t_{final}-t_{a}\\
-d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\int_{t_{f}-t_{a}}^{t_{f}}\left(v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}\left(v_{m}\right)dt & \text{si }t_{a}<t<t_{f}-t_{a}\\
+d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\int_{0}^{t-\left(t_{f}-t_{a}\right)}\left(v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
 \end{cases}
 \]
 
@@ -748,9 +772,9 @@ d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left
 \begin_inset Formula 
 \[
 d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=\left[\frac{1}{2}\left(\frac{-\sin\left(k\cdot x\right)}{k}+x\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[\frac{v_{m}}{2}*t^{2}\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{final}-t_{a}\\
-d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot x\right)}{k}+x\right)\right]_{t_{f}-t_{a}}^{t_{f}} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+d_{1}\left(t\right)=\left[\frac{1}{2}\left(\frac{-\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[v_{m}*t\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{f}-t_{a}\\
+d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
 \end{cases}
 \]
 

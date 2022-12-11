@@ -161,9 +161,12 @@ Const Lines_Maximum_Number_Trains = 4;
 
   // - Définition des types
 
-Const Train_Maximum_Speed = 60;
+Const Train_Maximum_Speed = 80;
 
-Const Train_Acceleration_Time = 5;
+Const Train_Acceleration_Time = 3;
+
+Const Train_Speed_Constant : Real = Pi / Train_Acceleration_Time;
+ 
 
 
 
@@ -188,7 +191,7 @@ Type Type_Panel = Record
   Position, Size : Type_Coordinates;
   Surface : PSDL_Surface;
   Color : Type_Color;
-  State : Boolean;
+  Hidden : Boolean;
 End;
 
 Type Type_Image = Record
@@ -201,6 +204,7 @@ Type Type_Button = Record
   Pressed : Boolean;
   Surface_Pressed : PSDL_Surface;
   Surface_Released : PSDL_Surface;
+  Hidden : Boolean;
 End;
 
 Type Type_Dual_State_Button = Record
@@ -357,13 +361,16 @@ Type Type_Line_Colors = (Red, Purple, Indigo, Teal, Green, Yellow, Orange, Brown
 
   Type_Line_Pointer = ^Type_Line;
 
+// Structure renfermant les données du joueur.
 Type Type_Player = Record
+  // Score du joueur (nombre de passager transporté)
   Score : Integer;
+  // Locomotives du joueur.
   Locomotive_Token : Byte;
+  // Wagon du joueur.
   Wagon_Token : Byte;
+  // Tunnel du joueur.
   Tunnel_Token : Byte;
-  // Etat d'un panneau (affiché ou masqué)
-  State : Boolean;
 End;
 
 // - Itineraries
@@ -398,13 +405,14 @@ Type Type_Mouse = Record
 End;
 
 Type Type_Animation = Record
-  Constants : array[0 .. 1] Of Real;
   Acceleration_Distance : Integer;
 End;
 
 // - - Partie
 
 Type Type_Game = Record
+
+  Animation : Type_Animation;
 
   Start_Time : Type_Time;
   Day : Type_Day;
@@ -444,9 +452,9 @@ Type Type_Game = Record
 
   // Panneau contenant l'interface de gauche (train, wagon, tunnel).
   Panel_Left : Type_Panel;
-  Locomotive_Button : Type_Button;
-  Wagon_Button : Type_Button;
-  Tunnel_Button : Type_Button;
+  Locomotive_Button : Array[0 .. 2] Of Type_Button;
+  Wagon_Button : Array[0 .. 2] Of Type_Button;
+  Tunnel_Button : Array[0 .. 2] Of Type_Button;
 
   // Structure contenant les sprites du jeu.
   Ressources : Type_Ressources;
@@ -587,13 +595,13 @@ Procedure Label_Pre_Render(Var Laabel : Type_Label);
 Procedure Game_Play(Var Game : Type_Game);
 Procedure Game_Pause(Var Game : Type_Game);
 
-Procedure Panel_Set_State(State : Boolean; Var Panel : Type_Panel);
+Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
 
 Implementation
 
-Procedure Panel_Set_State(State : Boolean; Var Panel : Type_Panel);
+Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
 Begin
-  Panel.State := State;
+  Panel.Hidden := Hidden;
 End;
 
 Procedure Game_Pause(Var Game : Type_Game);
@@ -1314,7 +1322,7 @@ Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean;
 
 Var i : Byte;
 Begin
-  If (length(Line.Trains) < Lines_Maximum_Number_Trains) Then
+  If (length(Line.Trains) < Lines_Maximum_Number_Trains)Then
     Begin
       // Création d'un nouveau train dans le tableau.
       SetLength(Line.Trains, length(Line.Trains) + 1);

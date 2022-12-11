@@ -37,7 +37,7 @@ Implementation
 Procedure Logic_Rewards(Var Game : Type_Game);
 Begin
   {
-  Panel_Set_State(Game.Panel_Reward, True);
+  Panel_Set_Hidden(Game.Panel_Reward, True);
 
   Label_Set_Text('Week : ' + IntToStr(Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration * 7)), Game.Title_Label));
 
@@ -46,7 +46,7 @@ Begin
 
 
 
-  Panel_Set_State(Game.Panel_Reward, True);
+  Panel_Set_Hidden(Game.Panel_Reward, True);
 }
 End;
 
@@ -379,12 +379,19 @@ Begin
   Graphics_Load(Game);
 
   Sounds_Load(Game);
+  
   Sounds_Set_Volume(Sounds_Maximum_Volume);
+
   Sounds_Play(Game.Ressources.Music);
 
   Game.Start_Time := Time_Get_Current();
 
   Game.Play_Pause_Button.State := true;
+
+    Game.Player.Locomotive_Token := 3;
+  Game.Player.Tunnel_Token := 3;
+  Game.Player.Wagon_Token := 3;
+  Game.Player.Score := 0;
 
   Game.Day := Day_Monday;
 
@@ -440,7 +447,9 @@ Begin
   Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
   Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
 
-  Mouse_Load(Game);
+
+
+  Mouse_Load(Game.Mouse);
 
 End;
 

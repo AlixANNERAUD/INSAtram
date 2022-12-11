@@ -37,6 +37,7 @@ Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; 
 
 Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
+Procedure Button_Set_Hidden(Hidden : Boolean; Var Button : Type_Button);
 
 // - - - Bouton à deux états.
 
@@ -69,9 +70,41 @@ Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
 Procedure Line_Render(Position_1, Position_2 : Type_Coordinates; Color : Type_Color; Var Panel : Type_Panel);
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
+Procedure Left_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 Implementation
 
+Procedure Button_Set_Hidden(Hidden : Boolean; Var Button : Type_Button);
+Begin
+  Button.Hidden := Hidden;
+End;
+
+Procedure Left_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+
+Var i : Byte;
+Begin
+  SDL_FillRect(Game.Panel_Left.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+
+  For i := 2 DownTo 0 Do
+    Begin
+      If (i < Game.Player.Locomotive_Token) Then
+        Begin
+          Button_Render(Game.Locomotive_Button[i], Game.Panel_Left);
+        End;
+
+      If (i < Game.Player.Wagon_Token) Then
+        Begin
+          Button_Render(Game.Wagon_Button[i], Game.Panel_Left);
+        End;
+      If (i < Game.Player.Tunnel_Token) Then
+        Begin
+          Button_Render(Game.Tunnel_Button[i], Game.Panel_Left);
+
+        End;
+    End;
+
+  Panel_Render(Game.Panel_Right, Destination_Panel);
+End;
 
 // Procédure qui charge les ressources graphiques.
 Procedure Ressources_Load(Var Ressources : Type_Ressources);
@@ -222,6 +255,7 @@ Begin
   Button.Surface_Released := Surface_Released;
   Button.Size.X := Surface_Released^.w;
   Button.Size.Y := Surface_Released^.h;
+  Button_Set_Hidden(False, Button);
 End;
 
 Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
@@ -247,15 +281,18 @@ Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel
 
 Var Destination_Rectangle : TSDL_Rect;
 Begin
-  Destination_Rectangle.x := Button.Position.X;
-  Destination_Rectangle.y := Button.Position.Y;
-  Destination_Rectangle.w := Button.Size.X;
-  Destination_Rectangle.h := Button.Size.Y;
+  If (Not(Button.Hidden)) Then
+    Begin
+      Destination_Rectangle.x := Button.Position.X;
+      Destination_Rectangle.y := Button.Position.Y;
+      Destination_Rectangle.w := Button.Size.X;
+      Destination_Rectangle.h := Button.Size.Y;
 
-  If Button.Pressed Then
-    SDL_BlitSurface(Button.Surface_Pressed, Nil, Destination_Panel.Surface, @Destination_Rectangle)
-  Else
-    SDL_BlitSurface(Button.Surface_Released, Nil, Destination_Panel.Surface, @Destination_Rectangle);
+      If Button.Pressed Then
+        SDL_BlitSurface(Button.Surface_Pressed, Nil, Destination_Panel.Surface, @Destination_Rectangle)
+      Else
+        SDL_BlitSurface(Button.Surface_Released, Nil, Destination_Panel.Surface, @Destination_Rectangle);
+    End;
 End;
 
 Procedure Image_Render(Var Image : Type_Image; Destination_Panel : Type_Panel);
@@ -277,14 +314,15 @@ Begin
   Panel.Size.X := Width;
   Panel.Size.Y := Height;
   Panel.Surface := Graphics_Surface_Create(Width, Height);
-  Panel.State := true;
+  Panel_Set_Hidden(True,Panel);
+  Panel.Hidden := false;
 End;
 
 Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
 Begin
-  If (Panel.State) Then
+  If (Not(Panel.Hidden)) Then
     Begin
       Destination_Rectangle.x := Panel.Position.X;
       Destination_Rectangle.y := Panel.Position.Y;
@@ -294,9 +332,6 @@ Begin
       SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
     End;
 End;
-
-
-
 
 Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
 
@@ -314,6 +349,7 @@ End;
 Procedure Graphics_Load(Var Game : Type_Game);
 
 Var Video_Informations :   PSDL_VideoInfo;
+  i : Byte;
 Begin
   // - Initialisation de la SDL
   SDL_Init(SDL_INIT_EVERYTHING);
@@ -372,18 +408,39 @@ Begin
 
   // Panneau de gauche
 
-  Button_Set(Game.Locomotive_Button, IMG_Load(Path_Image_Button_Locomotive), IMG_Load(Path_Image_Button_Locomotive));
-  Button_Set(Game.Wagon_Button, IMG_Load(Path_Image_Button_Wagon), IMG_Load(Path_Image_Button_Wagon));
-  Button_Set(Game.Tunnel_Button, IMG_Load(Path_Image_Button_Tunnel), IMG_Load(Path_Image_Button_Tunnel));
+  For i := 0 To 2 Do
+    Begin
+      Button_Set(Game.Locomotive_Button[i], IMG_Load(Path_Image_Button_Locomotive), IMG_Load(Path_Image_Button_Locomotive));
+      Button_Set(Game.Wagon_Button[i], IMG_Load(Path_Image_Button_Wagon), IMG_Load(Path_Image_Button_Wagon));
+      Button_Set(Game.Tunnel_Button[i], IMG_Load(Path_Image_Button_Tunnel), IMG_Load(Path_Image_Button_Tunnel));
+    End;
 
-  Game.Locomotive_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Locomotive_Button.Size.X);
-  Game.Locomotive_Button.Position.Y := Get_Centered_Position(Game.Panel_Left.Size.Y, Game.Locomotive_Button.Size.X * 3 + 2 * 16);
+  Game.Locomotive_Button[0].Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Locomotive_Button[0].Size.X);
+  Game.Locomotive_Button[0].Position.Y := Get_Centered_Position(Game.Panel_Left.Size.Y, Game.Locomotive_Button[0].Size.X * 3 + 2 * 16);
 
-  Game.Wagon_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Wagon_Button.Size.X);
-  Game.Wagon_Button.Position.Y := Game.Locomotive_Button.Position.Y + Game.Locomotive_Button.Size.Y + 16;
+  Game.Wagon_Button[0].Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Wagon_Button[0].Size.X);
+  Game.Wagon_Button[0].Position.Y := Game.Locomotive_Button[0].Position.Y + Game.Locomotive_Button[0].Size.Y + 16;
 
-  Game.Tunnel_Button.Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Tunnel_Button.Size.X);
-  Game.Tunnel_Button.Position.Y := Game.Wagon_Button.Position.Y + Game.Wagon_Button.Size.Y + 16;
+  Game.Tunnel_Button[0].Position.X := Get_Centered_Position(Game.Panel_Left.Size.X, Game.Tunnel_Button[0].Size.X);
+  Game.Tunnel_Button[0].Position.Y := Game.Wagon_Button[0].Position.Y + Game.Wagon_Button[0].Size.Y + 16;
+
+  For i := 1 To 2 Do
+    Begin
+
+      Game.Locomotive_Button[i].Position.X := Game.Locomotive_Button[0].Position.X + (i * 8);
+      Game.Locomotive_Button[i].Position.Y := Game.Locomotive_Button[0].Position.Y;
+      writeln('Locomotive pos : ', Game.Locomotive_Button[i].Position.X, ' ', Game.Locomotive_Button[i].Position.Y, '');
+
+      Game.Wagon_Button[i].Position.X := Game.Wagon_Button[0].Position.X + (i * 8);
+      Game.Wagon_Button[i].Position.Y := Game.Wagon_Button[0].Position.Y;
+
+      Game.Tunnel_Button[i].Position.X := Game.Tunnel_Button[0].Position.X + (i * 8);
+      Game.Tunnel_Button[i].Position.Y := Game.Tunnel_Button[0].Position.Y;
+
+    End;
+
+  Animation_Load(Game.Animation);
+
 End;
 
 Procedure Graphics_Unload(Var Game : Type_Game);
@@ -423,7 +480,7 @@ Begin
   SDL_FillRect(Game.Window.Surface, Nil, SDL_MapRGBA(Game.Window.Surface^.format, 255, 255, 255, 255));
   SDL_FillRect(Game.Panel_Top.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
   SDL_FillRect(Game.Panel_Bottom.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
-  SDL_FillRect(Game.Panel_Left.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+
   SDL_FillRect(Game.Panel_Right.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
   // - Rendu dans le panneau de droite.
@@ -478,16 +535,14 @@ Begin
 
   // - Panneau de gauche.
 
-  Button_Render(Game.Locomotive_Button, Game.Panel_Left);
-  Button_Render(Game.Wagon_Button, Game.Panel_Left);
-  Button_Render(Game.Tunnel_Button, Game.Panel_Left);
+  Left_Panel_Render(Game, Game.Window);
 
   // - Regroupement des surfaces dans la fenêtre.
 
   Panel_Render(Game.Panel_Top, Game.Window);
   Panel_Render(Game.Panel_Bottom, Game.Window);
   Panel_Render(Game.Panel_Left, Game.Window);
-  Panel_Render(Game.Panel_Right, Game.Window);
+
 
   Cursor_Render(Game.Mouse, Game.Window, Game);
 
@@ -611,85 +666,90 @@ Var Destination_Rectangle : TSDL_Rect;
   Norme : Integer;
 Begin
 
-  If (Train.Distance <= Train.Intermediate_Position_Distance) Then // Si le train se trouve avant le point intermédiaire.
+  If (Train.Distance < Train.Maximum_Distance) Or (Train.Driving = false) Then
     Begin
-      // Calcul de l'angle et de la direction (arrondissement de l'angle à 45 degré près).
-      Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Train.Intermediate_Position));
-      Train.Position := Train.Last_Station^.Position_Centered;
+      If (Train.Distance <= Train.Intermediate_Position_Distance) Then // Si le train se trouve avant le point intermédiaire.
+        Begin
+          // Calcul de l'angle et de la direction (arrondissement de l'angle à 45 degré près).
+          Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Train.Intermediate_Position));
+          Train.Position := Train.Last_Station^.Position_Centered;
 
-      If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
-        Norme := Train.Distance
-      Else
-        Norme := round(sqrt(sqr(Train.Distance) * 0.5));
-    End
-  Else  // Si le train se trouve après le point intermédiaire.
-    Begin
-      // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
-      Direction := Graphics_Get_Direction(Get_Angle(Train.Intermediate_Position, Train.Next_Station^.Position_Centered));
+          If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
+            Norme := Train.Distance
+          Else
+            Norme := round(sqrt(sqr(Train.Distance) * 0.5));
+        End
+      Else // Si le train se trouve après le point intermédiaire.
+        Begin
+          // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
+          Direction := Graphics_Get_Direction(Get_Angle(Train.Intermediate_Position, Train.Next_Station^.Position_Centered));
 
-      Train.Position := Train.Intermediate_Position;
+          Train.Position := Train.Intermediate_Position;
 
-      If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
-        Norme := Train.Distance - Train.Intermediate_Position_Distance
-      Else
-        Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance)) * 0.5));
+          If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
+            Norme := Train.Distance - Train.Intermediate_Position_Distance
+          Else
+            Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance)) * 0.5));
+
+        End;
+
+      Case Direction Of 
+        0 :
+            Begin
+              Train.Position.X := Train.Position.X + Norme;
+              Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
+            End;
+        180 :
+              Begin
+                Train.Position.X := Train.Position.X - Norme;
+                Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
+              End;
+        90 :
+             Begin
+               Train.Position.Y := Train.Position.Y - Norme;
+               Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
+             End;
+        -90 :
+              Begin
+                Train.Position.Y := Train.Position.Y + Norme;
+                Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
+              End;
+        -45 :
+              Begin
+                Train.Position.X := Train.Position.X + Norme;
+                Train.Position.Y := Train.Position.Y + Norme;
+                Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
+              End;
+        -135 :
+               Begin
+                 Train.Position.X := Train.Position.X - Norme;
+                 Train.Position.Y := Train.Position.Y + Norme;
+                 Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
+               End;
+        45:
+            Begin
+              Train.Position.X := Train.Position.X + Norme;
+              Train.Position.Y := Train.Position.Y - Norme;
+              Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
+
+            End;
+        135:
+             Begin
+               Train.Position.X := Train.Position.X - Norme;
+               Train.Position.Y := Train.Position.Y - Norme;
+               Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
+             End;
+      End;
+
+
+      Train.Position.X := round(Train.Position.X - (Train.Size.X*0.5));
+      Train.Position.Y := round(Train.Position.Y - (Train.Size.X*0.5));
 
     End;
-
-  Case Direction Of 
-    0 :
-        Begin
-          Train.Position.X := Train.Position.X + Norme;
-          Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
-        End;
-    180 :
-          Begin
-            Train.Position.X := Train.Position.X - Norme;
-            Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
-          End;
-    90 :
-         Begin
-           Train.Position.Y := Train.Position.Y - Norme;
-           Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
-         End;
-    -90 :
-          Begin
-            Train.Position.Y := Train.Position.Y + Norme;
-            Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
-          End;
-    -45 :
-          Begin
-            Train.Position.X := Train.Position.X + Norme;
-            Train.Position.Y := Train.Position.Y + Norme;
-            Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
-          End;
-    -135 :
-           Begin
-             Train.Position.X := Train.Position.X - Norme;
-             Train.Position.Y := Train.Position.Y + Norme;
-             Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
-           End;
-    45:
-        Begin
-          Train.Position.X := Train.Position.X + Norme;
-          Train.Position.Y := Train.Position.Y - Norme;
-          Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
-
-        End;
-    135:
-         Begin
-           Train.Position.X := Train.Position.X - Norme;
-           Train.Position.Y := Train.Position.Y - Norme;
-           Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
-         End;
-
-  End;
 
   Train.Size.X := Train.Sprite^.w;
   Train.Size.Y := Train.Sprite^.h;
 
-  Train.Position.X := round(Train.Position.X - (Train.Size.X*0.5));
-  Train.Position.Y := round(Train.Position.Y - (Train.Size.X*0.5));
 
   Destination_Rectangle.x := Train.Position.X;
   Destination_Rectangle.y := Train.Position.Y;
