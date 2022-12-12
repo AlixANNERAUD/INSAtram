@@ -129,8 +129,6 @@ Begin
             Begin
               If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Line^.Stations[i]^.Position, Line^.Stations[i]^.Size, Game.Panel_Right)) Then
                 Begin
-                
-// ! Attention : La suppression de la station dans la ligne étant imédiate, il faudrait vérifier et / ou attendre que le train actuellement en transit sur l'axe passant par la station ait passé l'axe, au risque d'avoir des comportements étranges.
                   Line_Remove_Station(Line^.Stations[i], Line^);
                   Mouse_Pressed_On_Station := true;
                   Break;
@@ -149,22 +147,18 @@ Var Mouse_Position : Type_Coordinates;
   Line : Type_Line_Pointer;
 Begin
   Mouse_Pressed_On_Line := false;
-  // Vérifie si la souris se trouve sur une ligne.
-
-  // Vérifie qu'il y a bien des lignes dans la partie.
 
   Line := Lines_Get_Selected(Game);
 
+  // Vérifie si il y a bien une ligne selectionnée.
   If (Line <> Nil) Then
     Begin
-
-
-
+      // Calcul des coordonnées du pointeur dans le tableau.
       Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Press_Position(Game), Game.Panel_Right);
 
+      // Prise en compte de la hit box de la souris.
       Mouse_Position.X := Mouse_Position.X - (Mouse_Size.X Div 2);
       Mouse_Position.Y := Mouse_Position.Y - (Mouse_Size.Y Div 2);
-
 
       // Vérifie que la ligne contient des stations
       If (length(Line^.Stations) > 0) Then
@@ -176,7 +170,7 @@ Begin
               If (Line_Rectangle_Colliding(Line^.Stations[i]^.Position_Centered, Line^.Intermediate_Positions[i], Mouse_Position, Mouse_Size)) Or (Line_Rectangle_Colliding(Line^.Intermediate_Positions
                  [i], Line^.Stations[i + 1]^.Position_Centered, Mouse_Position, Mouse_Size)) Then
                 Begin
-                  Game.Mouse.Selected_Line := @Line^;
+                  Game.Mouse.Selected_Line := Line;
                   Game.Mouse.Selected_Last_Station := Line^.Stations[i];
                   Game.Mouse.Selected_Next_Station := Line^.Stations[i + 1];
                   Game.Mouse.Mode := Type_Mouse_Mode.Line_Insert_Station;
@@ -330,7 +324,8 @@ Begin
       // Si la souri se trouve sur le panneau de droite.
       If (Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Right)) Then
         Begin
-          Mouse_Pressed_On_Line(Game)
+           If (not(Mouse_Pressed_On_Station(Game))) Then
+            Mouse_Pressed_On_Line(Game);
         End;
 
     End

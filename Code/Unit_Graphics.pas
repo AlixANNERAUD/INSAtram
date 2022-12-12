@@ -68,7 +68,7 @@ Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
 // - - Entités du jeux.
 
 Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
-Procedure Line_Render(Line : Type_Line; Var Panel : Type_Panel);
+Procedure Line_Render(Var Line : Type_Line; Var Panel : Type_Panel; Mouse : Type_Mouse);
 
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
@@ -147,7 +147,7 @@ Begin
           For i := low(Game.Lines) To high(Game.Lines) Do
             Begin
 
-              Line_Render(Game.Lines[i], Game.Panel_Right);
+              Line_Render(Game.Lines[i], Game.Panel_Right, Game.Mouse);
 
               // Si la ligne contient des trains.
               If (length(Game.Lines[i].Trains) > 0) Then
@@ -315,27 +315,6 @@ Begin
            Destination_Rectangle.x := Mouse_Get_Position().X - Vehicle_Size.X Div 2;
            Destination_Rectangle.y := Mouse_Get_Position().Y - Vehicle_Size.Y Div 2;
            SDL_BlitSurface(Game.Ressources.Vehicles[8][0], Nil, Game.Window.Surface, @Destination_Rectangle);
-         End
-         // Si le curseur est en mode ajout de station à une ligne.
-  Else If (Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
-         Begin
-          
-          Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
-
-           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
-
-           Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Game.Panel_Right);
-
-           Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Mouse.Selected_Line^.Color, Game.Panel_Right);
-
-           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
-
-           Graphics_Draw_Line(Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Game.Panel_Right);
-
-           Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Mouse.Selected_Line^.Color, Game.Panel_Right);
-
-           Panel_Render(Game.Panel_Right, Game.Window);
-
          End
          // Si le curseur est en mode ajout de station à une ligne.
   Else If (Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Then
@@ -658,7 +637,7 @@ Begin
 
 
   Left_Panel_Render(Game, Game.Window);
-  
+
 
 
 
@@ -835,10 +814,10 @@ End;
 // - - Station
 
 // - Procédure génère le rendu dans la fenêtre des traits entre les stations en utilisant que des angles de 0, 45 et 90 degrés.
-Procedure Line_Render(Line : Type_Line; Var Panel : Type_Panel);
-
+Procedure Line_Render(Var Line : Type_Line; Var Panel : Type_Panel; Mouse : Type_Mouse);
 Var Intermediate_Position :   Type_Coordinates;
   i : Byte;
+  Mouse_Position : Type_Coordinates;
 Begin
   // Si la ligne contient au moins une station.
   If (length(Line.Stations) > 0) Then
@@ -846,10 +825,31 @@ Begin
       // Itère parmis les stations d'une ligne.
       For i := low(Line.Stations) + 1 To high(Line.Stations) Do
         Begin
-          // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
-          Intermediate_Position := Station_Get_Intermediate_Position(Line.Stations[i - 1]^.Position_Centered, Line.Stations[i]^.Position_Centered);
-          Graphics_Draw_Line(Line.Stations[i - 1]^.Position_Centered, Intermediate_Position, Line.Color, Panel);
-          Graphics_Draw_Line(Intermediate_Position, Line.Stations[i]^.Position_Centered, Line.Color, Panel);
+          If (Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) And (@Line = Mouse.Selected_Line) And (Line.Stations[i] = Mouse.Selected_Next_Station) Then
+            Begin
+
+              Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Panel);
+
+              Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
+
+              Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Panel);
+
+              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Mouse.Selected_Line^.Color, Panel);
+
+              Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
+
+              Graphics_Draw_Line(Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Panel);
+
+              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Mouse.Selected_Line^.Color, Panel);
+            End
+          Else
+            Begin
+
+              // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
+              Intermediate_Position := Station_Get_Intermediate_Position(Line.Stations[i - 1]^.Position_Centered, Line.Stations[i]^.Position_Centered);
+              Graphics_Draw_Line(Line.Stations[i - 1]^.Position_Centered, Intermediate_Position, Line.Color, Panel);
+              Graphics_Draw_Line(Intermediate_Position, Line.Stations[i]^.Position_Centered, Line.Color, Panel);
+            End;
         End;
     End;
 End;

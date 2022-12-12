@@ -656,7 +656,7 @@ Begin
 
   // On dessine le .
   filledPieRGBA(Pie.Surface, Pie.Size.X Div 2, Pie.Size.Y Div 2, (Pie.Size.X Div 2 - 1), -90, Angle, Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
-  aacircleRGBA(Pie.Surface, Pie.Size.X div 2, Pie.Size.Y Div 2, (Pie.Size.X Div 2 - 1), Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
+  aacircleRGBA(Pie.Surface, Pie.Size.X Div 2, Pie.Size.Y Div 2, (Pie.Size.X Div 2 - 1), Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
 End;
 
 // Fonction qui génère aléatoire une rivière.
@@ -788,14 +788,15 @@ Begin
   // - Mise à jour des timer de surcharge des stations.
 
   // Itère parmis les stations.
-    For i := low(Game.Stations) To high(Game.Stations) Do
-      // Si la station est surchargée.
-      If (Game.Stations[i].Overfill_Timer <> 0) Then
-        Game.Stations[i].Overfill_Timer := Game.Stations[i].Overfill_Timer + Game.Pause_Time;
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    // Si la station est surchargée.
+    If (Game.Stations[i].Overfill_Timer <> 0) Then
+      Game.Stations[i].Overfill_Timer := Game.Stations[i].Overfill_Timer + Game.Pause_Time;
 
 
   Game.Pause_Time := 0;
 End;
+
 
 
 
@@ -1448,32 +1449,41 @@ End;
 
 // Fonction qui enlève une station d'une ligne.
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
-
 Var i, j : Byte;
+    Busy : Boolean;
 Begin
   Line_Remove_Station := False;
+  // Vérifie que la ligne contient des stations.
   If (length(Line.Stations) > 0) Then
     Begin
       For i := low(Line.Stations) To high(Line.Stations) Do
         If (Line.Stations[i] = Station_Pointer) Then
           Begin
+            Busy := false;
+            // Itère parmis les trains de la ligne.
             For j := low(Line.Trains) To high(Line.Trains) Do
               Begin
-
-
-
+                // Vérifie que tous les trains concerné ne sont pas en trainsit i un train est en transit vers où au départ de la station concerné.
+                // ! : Crash : AccesViolation pour la dernière ligne (3ème).
+                If (Line.Trains[j].Last_Station = Station_Pointer) Or (Line.Trains[j].Next_Station = Station_Pointer) Then
+                  Begin
+                    Busy := true;
+                    Break;
+                  End;
               End;
 
-            // Enlève la station.
-            Delete(Line.Stations, i, 1);
-            // Si il n'y a plus qu'une station dans la ligne, alors, on supprime la seule station restante.
-            If (length(Line.Stations) = 1) Then
-              SetLength(Line.Stations, 0);
+              // Si la station n'est pas destionation où départ d'un train, on peut enlever la station de la ligne.
+              If not(Busy) Then
+              Begin
+                    // Enlève la station.
+                    Delete(Line.Stations, i, 1);
+                    // Si il n'y a plus qu'une station dans la ligne, alors, on supprime la seule station restante.
+                    If (length(Line.Stations) = 1) Then
+                      SetLength(Line.Stations, 0);
+                    Line_Compute_Intermediate_Positions(Line);
+                    Line_Remove_Station := True;
+              End;
 
-
-            Line_Compute_Intermediate_Positions(Line);
-
-            Line_Remove_Station := True;
             Break;
           End;
     End;
