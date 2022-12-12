@@ -453,7 +453,8 @@ Type Type_Game = Record
   Panel_Reward : Type_Panel;
   Title_Label : Type_Label;
   Message_Label : Type_Label;
-  Choices_Buttons : Array[0 .. 1] Of Type_Button;
+  Reward_Buttons : Array[0 .. 1] Of Type_Button;
+  Reward_Labels : Array[0 .. 1] Of Type_Label;
 
   // Panneau contenant l'interface du haut (score, heure ...).
   Panel_Top : Type_Panel;
@@ -558,6 +559,8 @@ Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean;
 
 Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 
+Procedure Train_Pre_Render_Label(Var Train : Type_Train);
+
 // - Passenger
 
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
@@ -624,7 +627,32 @@ Procedure Pie_Create(Var Pie : Type_Pie; Radius : Integer; Color : Type_Color; P
 Procedure Pie_Set_Percentage(Var Pie : Type_Pie; Percentage : Real);
 Procedure Pie_Pre_Render(Var Pie : Type_Pie);
 
+Function Vehicle_Delete(Var Train : Type_Train) : Boolean;
+
 Implementation
+
+// Fonction qui met à jour l'étiquette d'un train.
+Procedure Train_Pre_Render_Label(Var Train : Type_Train);
+Var i, j, k : Byte;
+Begin
+  // - Comptage des passagers.
+
+  k := 0;
+  // Itère sur tous les véhicules du train.
+  For i := low(Train.Vehicles) To high(Train.Vehicles) Do
+    Begin
+      // Itère sur tous les passagers du véhicule.
+      For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+        Begin
+          // Si l'entrée dans le tableau n'est pas vide, on incrémente le compteur.
+          If (Train.Vehicles[i].Passengers[j] <> Nil) Then
+            inc(k);
+        End;
+    End;
+
+  // Définition du texte de l'étiquette.
+  Label_Set_Text(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number));
+End;
 
 Procedure Pie_Create(Var Pie : Type_Pie; Radius : Integer; Color : Type_Color; Percentage : Real);
 Begin
@@ -798,10 +826,6 @@ Begin
 End;
 
 
-
-
-
-
 // Procédure pré-rendant le texte dans une surface. Cette fonction est appelé dès qu'un attribut d'une étiquette est modifié, pour que ces opérations ne soient pas à refaires lors de l'affichage.
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
@@ -909,6 +933,7 @@ Var i : Byte;
 Begin
   // Vérifie si il y a des lignes.
   Lines_Get_Selected := Nil;
+
   If (length(Game.Lines) > 0) Then
     Begin
       For i := low(Game.Lines) To high(Game.Lines) Do
@@ -1114,11 +1139,11 @@ Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
 
 Var i : Byte;
 Begin
-  // Définition de la taille du tableau.
-  SetLength(Line.Intermediate_Positions, length(Line.Stations) - 1);
   // Vérifie qu'il y a bien au moins une stations dans la ligne.
   If (length(Line.Stations) > 1) Then
     Begin
+      // Définition de la taille du tableau.
+      SetLength(Line.Intermediate_Positions, length(Line.Stations) - 1);
       // Itère parmi les stations.
       For i := low(Line.Stations) To (high(Line.Stations) - 1) Do
         Begin
@@ -1246,14 +1271,32 @@ Begin
 
       // Détermination de la position de la station.
       Repeat
+        // Détermination de la position aléatoire.
         Position.X := Random(length(Game.Stations_Map));
         Position.Y := Random(length(Game.Stations_Map[high(Game.Stations_Map)]));
+
+        Game.Stations[i].Position.X := 64 * Position.X + (Game.Panel_Right.Size.X Mod 64) Div 2;
+        Game.Stations[i].Position.Y := 64 * Position.Y + (Game.Panel_Right.Size.Y Mod 64) Div 2;
+
+        If (Game.Stations_Map[Position.X][Position.Y] = false) Then
+          Begin
+            // Itère parmis les points de la rivière.
+            For j := low(Game.River) + 1 To high(Game.River) Do
+              Begin
+                // Si il y a collision entre la rivière et la station.
+                If (Line_Rectangle_Colliding(Game.River[j - 1], Game.River[j], Game.Stations[i].Position, Game.Stations[i].Size)) Then
+                  Begin
+                    // On maruqe l'emplacement comme occupé pour les prochaines stations crées.
+                    Game.Stations_Map[Position.X][Position.Y] := true;
+                    // On sort de la boucle.
+                    break;
+                  End;
+              End;
+          End;
+
       Until Game.Stations_Map[Position.X][Position.Y] = false;
 
       Game.Stations_Map[Position.X][Position.Y] := true;
-
-      Game.Stations[i].Position.X := 64 * Position.X;
-      Game.Stations[i].Position.Y := 64 * Position.Y;
 
       // Augmentation du nombre d'entrée dans le tableau de résolutions.
       SetLength(Game.Graph_Table, length(Game.Stations));
@@ -1449,8 +1492,9 @@ End;
 
 // Fonction qui enlève une station d'une ligne.
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+
 Var i, j : Byte;
-    Busy : Boolean;
+  Busy : Boolean;
 Begin
   Line_Remove_Station := False;
   // Vérifie que la ligne contient des stations.
@@ -1460,28 +1504,33 @@ Begin
         If (Line.Stations[i] = Station_Pointer) Then
           Begin
             Busy := false;
-            // Itère parmis les trains de la ligne.
-            For j := low(Line.Trains) To high(Line.Trains) Do
+            // Vérifie que la ligne contient des trains.
+            If (length(Line.Trains) > 0) Then
               Begin
-                // Vérifie que tous les trains concerné ne sont pas en trainsit i un train est en transit vers où au départ de la station concerné.
-                // ! : Crash : AccesViolation pour la dernière ligne (3ème).
-                If (Line.Trains[j].Last_Station = Station_Pointer) Or (Line.Trains[j].Next_Station = Station_Pointer) Then
+                // Itère parmis les trains de la ligne.
+                For j := low(Line.Trains) To high(Line.Trains) Do
                   Begin
-                    Busy := true;
-                    Break;
+                    // Vérifie que tous les trains concerné ne sont pas en trainsit i un train est en transit vers où au départ de la station concerné.
+                    If (Line.Trains[j].Last_Station = Station_Pointer) Or (Line.Trains[j].Next_Station = Station_Pointer) Then
+                      Begin
+                        Busy := true;
+                        Break;
+                      End;
                   End;
-              End;
+              End
+            Else
+              Busy := false;
 
-              // Si la station n'est pas destionation où départ d'un train, on peut enlever la station de la ligne.
-              If not(Busy) Then
+            // Si la station n'est pas destionation où départ d'un train, on peut enlever la station de la ligne.
+            If Not(Busy) Then
               Begin
-                    // Enlève la station.
-                    Delete(Line.Stations, i, 1);
-                    // Si il n'y a plus qu'une station dans la ligne, alors, on supprime la seule station restante.
-                    If (length(Line.Stations) = 1) Then
-                      SetLength(Line.Stations, 0);
-                    Line_Compute_Intermediate_Positions(Line);
-                    Line_Remove_Station := True;
+                // Enlève la station.
+                Delete(Line.Stations, i, 1);
+                // Si il n'y a plus qu'une station dans la ligne, alors, on supprime la seule station restante.
+                If (length(Line.Stations) = 1) Then
+                  SetLength(Line.Stations, 0);
+                Line_Compute_Intermediate_Positions(Line);
+                Line_Remove_Station := True;
               End;
 
             Break;
@@ -1498,7 +1547,7 @@ Begin
   // Allocation de la mémoire.
   Station.Passengers[high(Station.Passengers)] := GetMem(SizeOf(Type_Passenger));
 
-  Shape := Random(Shapes_Number - 1);
+  Shape := Random(Shapes_Number);
   // Définition de la forme du passager.
   Station.Passengers[high(Station.Passengers)]^.Shape := Number_To_Shape(Shape);
   // Définition du sprite du passager.
@@ -1601,34 +1650,58 @@ Begin
     Train_Create := False;
 End;
 
+// Fonction qui supprime un train d'une ligne.
+Function Vehicle_Delete(Var Train : Type_Train) : Boolean;
+
+Var i : Byte;
+Begin
+  // Vérifie que le train possède bien des véhicules.
+  If (length(Train.Vehicles) > 1) Then
+    Begin
+      // - Déchargement des passagers dans la station précédente.
+
+      // Itère parmis les passagers du dernier véhicule.
+      For i := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+        If (Train.Vehicles[high(Train.Vehicles)].Passengers[i] <> Nil) Then
+          Begin
+            // Création d'une nouvelle entrée dans le tableau des passagers de la station précédente.
+            SetLength(Train.Last_Station^.Passengers, length(Train.Last_Station^.Passengers) + 1);
+            // Ajout du passager dans la station précédente.
+            Train.Last_Station^.Passengers[high(Train.Last_Station^.Passengers)] := Train.Vehicles[high(Train.Vehicles)].Passengers[i];
+          End;
+
+
+      // Suppression du dernier véhicule.
+      SetLength(Train.Vehicles, length(Train.Vehicles) - 1);
+
+      // Mise à jour de l'étiquette du train.
+
+      Vehicle_Delete := True;
+    End
+  Else
+    Vehicle_Delete := False;
+
+End;
+
 Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 
-Var i, j, k : Byte;
+Var i : Byte;
 Begin
+  // Vérifie que le train n'a pas atteint le nombre maximum de véhicules.
   If (length(Train.Vehicles) < Train_Maximum_Vehicles_Number) Then
     Begin
+      // Création d'un nouveau véhicule.
       SetLength(Train.Vehicles, length(Train.Vehicles) + 1);
 
-      Vehicle_Create := True;
 
+      // Itère parmis les places du véhicule crée.
       For i := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
         Train.Vehicles[high(Train.Vehicles)].Passengers[i] := Nil;
 
-      // - Mise à jour de l'étiquette
+      // Mise à jour de l'étiquette du train.
+      Train_Pre_Render_Label(Train);
 
-      // - - Comptage des passagers.
-      k := 0;
-      For i := low(Train.Vehicles) To high(Train.Vehicles) Do
-        Begin
-          For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
-            Begin
-              If (Train.Vehicles[i].Passengers[j] <> Nil) Then
-                inc(k);
-            End;
-        End;
-
-      Label_Set_Text(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number));
-
+      Vehicle_Create := True;
     End
   Else
     Vehicle_Create := False;
@@ -1687,10 +1760,10 @@ Function Number_To_Shape(Number : Byte) : Type_Shape;
 Begin
   Case Number Of 
     0 : Number_To_Shape := Circle;
-    4 : Number_To_Shape := Lozenge;
-    3 : Number_To_Shape := Pentagon;
-    1 : Number_To_Shape := Square;
-    2 : Number_To_Shape := Triangle;
+    1 : Number_To_Shape := Lozenge;
+    2 : Number_To_Shape := Pentagon;
+    3 : Number_To_Shape := Square;
+    4 : Number_To_Shape := Triangle;
   End;
 End;
 

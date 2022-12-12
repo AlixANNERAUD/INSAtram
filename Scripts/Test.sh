@@ -1,7 +1,8 @@
-sh ./Compile.sh
+sh ./Build_Debug.sh
 
-clear
 
 cd ../Binaries/Linux
 
 ./INSAtram
+
+rm ../../Binaries -rf

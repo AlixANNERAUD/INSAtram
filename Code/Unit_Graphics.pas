@@ -106,6 +106,12 @@ Begin
       Label_Render(Game.Title_Label, Game.Panel_Reward);
       Label_Render(Game.Message_Label, Game.Panel_Reward);
 
+      Button_Render(Game.Reward_Buttons[0], Game.Panel_Reward);
+      Button_Render(Game.Reward_Buttons[1], Game.Panel_Reward);
+
+      Label_Render(Game.Reward_Labels[0], Game.Panel_Reward);
+      Label_Render(Game.Reward_Labels[1], Game.Panel_Reward);
+
       Panel_Render(Game.Panel_Reward, Destination_Panel);
     End;
 End;
@@ -125,6 +131,8 @@ End;
 Procedure Panel_Right_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 Var i, j : Byte;
+  Intermediate_Position : Type_Coordinates;
+  Mouse_Position : Type_Coordinates;
 Begin
 
   If (Game.Play_Pause_Button.State = true) Then
@@ -160,6 +168,19 @@ Begin
                     End;
                 End;
             End;
+        End;
+
+
+      // Si le curseur est en mode ajout de station à une ligne.
+      If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Then
+        Begin
+          Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
+
+          Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
+
+          Graphics_Draw_Line(Game.Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+
+          Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
         End;
 
       // - Rendu des stations
@@ -315,14 +336,8 @@ Begin
            Destination_Rectangle.x := Mouse_Get_Position().X - Vehicle_Size.X Div 2;
            Destination_Rectangle.y := Mouse_Get_Position().Y - Vehicle_Size.Y Div 2;
            SDL_BlitSurface(Game.Ressources.Vehicles[8][0], Nil, Game.Window.Surface, @Destination_Rectangle);
-         End
-         // Si le curseur est en mode ajout de station à une ligne.
-  Else If (Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Then
-         Begin
-           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
-           Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
-           Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position(), Mouse.Selected_Line^.Color, Destination_Panel);
          End;
+
 
 End;
 
@@ -555,7 +570,7 @@ Begin
 
   // Panneau des récompenses.
 
-  Panel_Create(Game.Panel_Reward, 0, 0, Game.Window.Size.X Div 2, Game.Window.Size.Y Div 2);
+  Panel_Create(Game.Panel_Reward, 0, 0, 400, 240);
 
   Game.Panel_Reward.Position.X := Get_Centered_Position(Game.Window.Size.X, Game.Panel_Reward.Size.X);
   Game.Panel_Reward.Position.Y := Get_Centered_Position(Game.Window.Size.Y, Game.Panel_Reward.Size.Y);
@@ -568,6 +583,28 @@ Begin
 
 
   Label_Set(Game.Message_Label, 'Choose your reward :', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+
+  Button_Set(Game.Reward_Buttons[0], Image_Load(Path_Image_Button_Locomotive), Image_Load(Path_Image_Button_Locomotive));
+
+  Button_Set(Game.Reward_Buttons[1], Image_Load(Path_Image_Button_Wagon), Image_Load(Path_Image_Button_Wagon));
+
+  Game.Reward_Buttons[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X div 2, Game.Reward_Buttons[0].Size.X);
+  Game.Reward_Buttons[0].Position.Y := Game.Panel_Reward.Size.Y - 16 - Game.Reward_Buttons[0].Size.Y;
+
+  Game.Reward_Buttons[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X div 2, Game.Reward_Buttons[1].Size.X) + Game.Panel_Reward.Size.X div 2;
+  Game.Reward_Buttons[1].Position.Y := Game.Reward_Buttons[0].Position.Y;
+
+  Label_Set(Game.Reward_Labels[0], 'Locomotive', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+
+  Game.Reward_Labels[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X div 2, Game.Reward_Labels[0].Size.X);
+
+  Game.Reward_Labels[0].Position.Y := Game.Reward_Buttons[0].Position.Y - 16 - Game.Reward_Labels[0].Size.Y;
+
+  Label_Set(Game.Reward_Labels[1], 'Wagon', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+
+  Game.Reward_Labels[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X div 2, Game.Reward_Labels[1].Size.X) + Game.Panel_Reward.Size.X div 2;
+
+  Game.Reward_Labels[1].Position.Y := Game.Reward_Labels[0].Position.Y;
 
   // Calcul des coordonnées centré dans le panneau
   Game.Message_Label.Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X, Game.Message_Label.Size.X);
@@ -815,6 +852,7 @@ End;
 
 // - Procédure génère le rendu dans la fenêtre des traits entre les stations en utilisant que des angles de 0, 45 et 90 degrés.
 Procedure Line_Render(Var Line : Type_Line; Var Panel : Type_Panel; Mouse : Type_Mouse);
+
 Var Intermediate_Position :   Type_Coordinates;
   i : Byte;
   Mouse_Position : Type_Coordinates;
@@ -1020,7 +1058,7 @@ Begin
 
   If (Station.Overfill_Timer <> 0) Then
     Begin
-      Pie_Set_Percentage(Station.Timer, Time_Get_Elapsed(Station.Overfill_Timer) / (Station_Overfill_Timer * 10));
+      Pie_Set_Percentage(Station.Timer, (Time_Get_Elapsed(Station.Overfill_Timer) / (Station_Overfill_Timer * 10)) mod 100);
       Pie_Render(Station.Timer, Panel);
     End;
 

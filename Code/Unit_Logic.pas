@@ -422,7 +422,7 @@ Begin
     End;
 
   // Création des 5 premères stations
-  For i := 1 To 10 Do
+  For i := 1 To 5 Do
     Begin
       Station_Create(Game);
     End;
@@ -432,7 +432,14 @@ Begin
   Line_Create(Game);
   Line_Create(Game);
   Line_Create(Game);
+    Line_Create(Game);
+  Line_Create(Game);
+  Line_Create(Game);
+  Line_Create(Game);
 
+
+
+{
   For i := low(Game.Stations) To low(Game.Stations) + 3 Do
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
@@ -447,7 +454,7 @@ Begin
     Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[2]);
     End;
-
+}
 
 
   For i := low(Game.Stations) To high(Game.Stations) Do
@@ -458,9 +465,9 @@ Begin
         End;
     End;
 
-  Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
-  Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
-  Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
+//  Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
+ // Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
+ // Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
 
   Mouse_Load(Game.Mouse);
 
@@ -586,7 +593,8 @@ Begin
                    // Création d'un passager sur une station choisie aléatoirement.
                    Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
                    // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
-                   Game.Passengers_Timer := Time_Get_Current() + round((exp(1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
+                   Game.Passengers_Timer := Time_Get_Current() + round((exp(-1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
+
                  End;
              End;
 
@@ -625,7 +633,7 @@ Begin
                                                         // Si la station était encombré avant la dernière vérification et que son timer est dépassé.
                    Else If (Time_Get_Elapsed(Game.Stations[i].Overfill_Timer) > Station_Overfill_Timer * 1000) Then
                           // La partie est terminée.
-                          writeln('Perdu !');
+                          ;
                    // TODO : Faire écran de game over.
                  End
                Else
