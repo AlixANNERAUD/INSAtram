@@ -123,15 +123,15 @@ Afin de faciliter le développement, nous avons choisi des outils adéquat
 \end_layout
 
 \begin_layout Itemize
-Visual Studio Code :
+Visual Studio Code : Comme editeur de code (IDE).
 \end_layout
 
 \begin_layout Itemize
-Git et GitHub :
+Git et GitHub : Afin de 
 \end_layout
 
 \begin_layout Itemize
-Live Share : Une extension de visual studio code permettant une collaboration
+Live Share : Une extension de Visual Studio Code permettant une collaboration
  en direct.
 \end_layout
 
@@ -140,12 +140,32 @@ Inkscape : C'est un de dessiner les ressources graphiques du jeu.
 \end_layout
 
 \begin_layout Subsection
+Répartition
+\end_layout
+
+\begin_layout Standard
+Afin d'avoir une répartition du travail équitable, de manière analogue à
+ la méthode 
+\begin_inset Quotes fld
+\end_inset
+
+Agile
+\begin_inset Quotes frd
+\end_inset
+
+, nous avons divisé le cahier des charges en tâches égales.
+ Ces dernières ont été anoté sur un panneau de travail (Dashboard), et chaques
+ personne, une fois ça tâche actuelle réalisé, pouvait choisir la tâche
+ suivante sur le panneau de travail.
+\end_layout
+
+\begin_layout Subsection
 Répartition des tâches
 \end_layout
 
 \begin_layout Standard
 La répartition des tâches à été faite de la manière la plus homogène possible.
- Ainsi, chaque personne à pu .
+ Ainsi, chaque personne à pu : 
 \end_layout
 
 \begin_layout Section
@@ -540,6 +560,10 @@ thickLineRGBA
 Résolution des itinéraires.
 \end_layout
 
+\begin_layout Standard
+Bon courage :) <3
+\end_layout
+
 \begin_layout Subsection
 Animation réaliste des trains.
 \end_layout
@@ -558,11 +582,11 @@ Geogebra
 
  et tâtonner un peu afin de trouver une fonction qui décrit au mieux la
  vitesse d'un véhicule réel lors de son accélération : 
-\begin_inset Formula $f\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
+\begin_inset Formula $a\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
 \end_inset
 
  et de sa décélération : 
-\begin_inset Formula $g\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
+\begin_inset Formula $d\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
 \end_inset
 
 .
@@ -605,11 +629,11 @@ Nous avons ensuite défini 3 constantes :
 
 .
  On a alors : 
-\begin_inset Formula $f\left(x\right)=v_{m}\cdot\frac{\cos\left(kx\right)+1}{2}$
+\begin_inset Formula $a\left(x\right)=v_{m}\cdot\frac{\cos\left(kx\right)+1}{2}$
 \end_inset
 
  et 
-\begin_inset Formula $g\left(x\right)=v_{m}\cdot\frac{-\cos\left(x\right)+1}{2}$
+\begin_inset Formula $d\left(x\right)=v_{m}\cdot\frac{-\cos\left(x\right)+1}{2}$
 \end_inset
 
 .
@@ -835,8 +859,16 @@ SDL_BlitSurface
  Il
 \end_layout
 
+\begin_layout Itemize
+jj
+\end_layout
+
 \begin_layout Section
 Conclusion
+\end_layout
+
+\begin_layout Standard
+j
 \end_layout
 
 \end_body

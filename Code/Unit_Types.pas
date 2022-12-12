@@ -655,7 +655,8 @@ Begin
   SDL_FillRect(Pie.Surface, Nil, $00000000);
 
   // On dessine le .
-  filledPieRGBA(Pie.Surface, Pie.Size.X Div 2, Pie.Size.Y Div 2, Pie.Size.X Div 2, -90, Angle, Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
+  filledPieRGBA(Pie.Surface, Pie.Size.X Div 2, Pie.Size.Y Div 2, (Pie.Size.X Div 2 - 1), -90, Angle, Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
+  aacircleRGBA(Pie.Surface, Pie.Size.X div 2, Pie.Size.Y Div 2, (Pie.Size.X Div 2 - 1), Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
 End;
 
 // Fonction qui génère aléatoire une rivière.
@@ -1433,7 +1434,7 @@ Begin
                       // Ajout du pointeur de la station au tableau temporarie.
                       Temporary_Array[high(Temporary_Array)] := Station_Pointer;
                       // Insertion du pointeur de la station dans le tableau des stations de la ligne.
-                      Insert(Temporary_Array, Line.Stations, i);
+                      Insert(Temporary_Array, Line.Stations, i + 1);
                       // Recalcul des positions intermédiaires de la ligne.
                       Line_Compute_Intermediate_Positions(Line);
                       Line_Add_Station := true;

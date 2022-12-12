@@ -72,7 +72,7 @@ Begin
 
           If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
             Begin
-              writeln('Mouse release on sta');
+
               Line_Add_Station(Game.Mouse.Selected_Last_Station, @Game.Stations[i], Game.Mouse.Selected_Line^);
             End
           Else If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Then
@@ -129,16 +129,7 @@ Begin
             Begin
               If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Line^.Stations[i]^.Position, Line^.Stations[i]^.Size, Game.Panel_Right)) Then
                 Begin
-
-
-
-
-
-
-
-
-
-
+                
 // ! Attention : La suppression de la station dans la ligne étant imédiate, il faudrait vérifier et / ou attendre que le train actuellement en transit sur l'axe passant par la station ait passé l'axe, au risque d'avoir des comportements étranges.
                   Line_Remove_Station(Line^.Stations[i], Line^);
                   Mouse_Pressed_On_Station := true;
@@ -181,6 +172,7 @@ Begin
           // Itère parmis les stations de la ligne selectionnée.
           For i := low(Line^.Stations) To high(Line^.Stations) - 1 Do
             Begin
+              // Vérifie si la ligne
               If (Line_Rectangle_Colliding(Line^.Stations[i]^.Position_Centered, Line^.Intermediate_Positions[i], Mouse_Position, Mouse_Size)) Or (Line_Rectangle_Colliding(Line^.Intermediate_Positions
                  [i], Line^.Stations[i + 1]^.Position_Centered, Mouse_Position, Mouse_Size)) Then
                 Begin
@@ -190,9 +182,6 @@ Begin
                   Game.Mouse.Mode := Type_Mouse_Mode.Line_Insert_Station;
 
                   Mouse_Pressed_On_Line := true;
-
-                  writeln('Mouse pressed on line');
-
                   Break;
                   Break;
                 End;
