@@ -805,6 +805,36 @@ Nous avons maintenant la position en fonction du temps, ce qui est suffisant
  pour réaliser l'implémentation.
 \end_layout
 
+\begin_layout Subsection
+Optimisations
+\end_layout
+
+\begin_layout Standard
+Au fur et à mesure que le projet avançait et que les ressources graphiques
+ se multipliaient.
+ Nous nous somme heurté à un problème de performance qui affectait la fluidité
+ du jeux.
+ Ainsi, après quelques recherches, nous avons procédé à quelques optimisations
+ :
+\end_layout
+
+\begin_layout Itemize
+Tout d'abord, lorsque la SDL créer des surface à partir d'images importés,
+ cette dernière ont une format de pixel (profondeur de couleur, cannal alpha)
+ qui n'est pas forcément le même que celui de l'affichage.
+ Or, lors du rendu (fonction 
+\begin_inset Quotes fld
+\end_inset
+
+SDL_BlitSurface
+\begin_inset Quotes frd
+\end_inset
+
+), la SDL doit effectuer une convertion à la volée pour rendre la surface
+ sur l'écran.
+ Il
+\end_layout
+
 \begin_layout Section
 Conclusion
 \end_layout

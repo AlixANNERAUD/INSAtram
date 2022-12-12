@@ -299,6 +299,7 @@ Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; 
 
 Var Destination_Rectangle : TSDL_Rect;
   Intermediate_Position : Type_Coordinates;
+  Mouse_Position : Type_Coordinates;
 Begin
   // Si le curseur est en mode ajout de locomotive.
   If (Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Then
@@ -318,17 +319,22 @@ Begin
          // Si le curseur est en mode ajout de station à une ligne.
   Else If (Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
          Begin
-           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Get_Position());
+          
+          Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
 
-           Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
 
-           Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+           Graphics_Draw_Line(Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Game.Panel_Right);
 
-           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Next_Station^.Position_Centered, Mouse_Get_Position());
+           Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Mouse.Selected_Line^.Color, Game.Panel_Right);
 
-           Graphics_Draw_Line(Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+           Intermediate_Position := Station_Get_Intermediate_Position(Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
 
-           Graphics_Draw_Line(Intermediate_Position, Mouse_Get_Position, Mouse.Selected_Line^.Color, Destination_Panel);
+           Graphics_Draw_Line(Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Mouse.Selected_Line^.Color, Game.Panel_Right);
+
+           Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Mouse.Selected_Line^.Color, Game.Panel_Right);
+
+           Panel_Render(Game.Panel_Right, Game.Window);
 
          End
          // Si le curseur est en mode ajout de station à une ligne.
@@ -648,8 +654,19 @@ Begin
 
   // - Panneau de gauche.
 
+
+
+
   Left_Panel_Render(Game, Game.Window);
+  
+
+
+
   Panel_Right_Render(Game, Game.Window);
+
+  Cursor_Render(Game.Mouse, Game.Window, Game);
+
+
 
   // - Regroupement des surfaces dans la fenêtre.
 
@@ -657,9 +674,6 @@ Begin
   Panel_Render(Game.Panel_Bottom, Game.Window);
 
   Panel_Reward_Render(Game, Game.Window);
-
-
-  Cursor_Render(Game.Mouse, Game.Window, Game);
 
 
   SDL_Flip(Game.Window.Surface);

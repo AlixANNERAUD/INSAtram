@@ -772,8 +772,25 @@ d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left
 \begin_inset Formula 
 \[
 d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=\left[\frac{1}{2}\left(\frac{-\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[v_{m}*t\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{f}-t_{a}\\
+d_{1}\left(t\right)=\left[v_{m}\cdot\left(\frac{-\sin\left(k\cdot t\right)+kt}{k*2}\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[v_{m}\cdot t\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{f}-t_{a}\\
+d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset Formula 
+\[
+d\left(t\right)=\begin{cases}
+d_{1}\left(t\right)=v_{m}\cdot\left(\frac{-\sin\left(k\cdot t\right)+kt}{k*2}\right) & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+v_{m}\times\left(t-t_{a}\right) & \text{si }t_{a}<t<t_{f}-t_{a}\\
 d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
 \end{cases}
 \]
