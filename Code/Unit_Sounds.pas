@@ -1,9 +1,10 @@
+// Cette unité contient toutes les fonctions et procédures qui gèrent le sons.
 
 Unit Unit_Sounds;
 
 Interface
 
-Uses Unit_Types, sdl_mixer;
+Uses Unit_Types, Unit_Constants, sdl_mixer;
 
 Procedure Sounds_Load(Var Game : Type_Game);
 Procedure Sounds_Unload(Var Game : Type_Game);

@@ -3,7 +3,7 @@ Unit Unit_Animations;
 
 Interface
 
-Uses Unit_Types, sdl;
+Uses Unit_Types, Unit_Common, Unit_Constants, sdl;
 
 Procedure Animation_Refresh(Var Game : Type_Game);
 

@@ -5,7 +5,7 @@ Interface
 
 // - Dépendances
 
-Uses Unit_Types, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Math, Unit_Mouse;
+Uses Unit_Types, Unit_Common, Unit_Constants, Unit_Animations, sdl, sdl_image, sdl_ttf, sdl_gfx, sysutils, Math, Unit_Mouse;
 
 // - Défintion des fonctions.
 
@@ -120,7 +120,25 @@ End;
 Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
+  Angle : Integer;
+  i : Integer;
 Begin
+
+  If (Pie.Pre_Render) Then
+    Begin
+      // Convertino du pourcentage en angle, Angle en degrés.
+      Angle := round(360 * (Pie.Percentage / 100) - 90);
+
+      // On efface la surface.
+      SDL_FillRect(Pie.Surface, Nil, $00000000);
+
+      // On dessine le .
+      filledPieRGBA(Pie.Surface, Pie.Size.X Div 2, Pie.Size.Y Div 2, (Pie.Size.X Div 2 - 1), -90, Angle, Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
+      aacircleRGBA(Pie.Surface, Pie.Size.X Div 2, Pie.Size.Y Div 2, (Pie.Size.X Div 2 - 1), Pie.Color.Red, Pie.Color.Green, Pie.Color.Blue, Pie.Color.Alpha);
+
+      Pie.Pre_Render := false;
+    End;
+
   Destination_Rectangle.x := Pie.Position.X;
   Destination_Rectangle.y := Pie.Position.Y;
 
@@ -461,15 +479,48 @@ Begin
     End;
 End;
 
+Procedure Label_Pre_Render(Var Laabel : Type_Label);
+
+Var   Characters : pChar;
+  SDL_Color : PSDL_Color;
+Begin
+  new(SDL_Color);
+
+  SDL_Color^.r := Laabel.Color.Red;
+  SDL_Color^.g := Laabel.Color.Green;
+  SDL_Color^.b := Laabel.Color.Blue;
+
+  SDL_FreeSurface(Laabel.Surface);
+
+  // Conversion du string en pChar.
+  Characters := String_To_Characters(Laabel.Text);
+  Laabel.Surface := TTF_RENDERTEXT_BLENDED(Laabel.Font, Characters,
+                    SDL_Color^);
+
+  TTF_SizeText(Laabel.Font, Characters, Laabel.Size.X, Laabel.Size.Y);
+
+  dispose(SDL_Color);
+  strDispose(Characters);
+
+End;
+
+
+// Procédure qui pré-rend le texte dans une surface lorsqu'un attribut de l'étiquette est modifié (moins lourd pour l'affichage) puis rend dans le panneau de destination.
 Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
 
-Var Destionation_Rectangle : TSDL_Rect;
+Var Destination_Rectangle : TSDL_Rect;
 Begin
-  Destionation_Rectangle.x := Laabel.Position.X;
-  Destionation_Rectangle.y := Laabel.Position.Y;
-  //Destionation_Rectangle.w := Laabel.Size.X;
-  //Destionation_Rectangle.h := Laabel.Size.Y;
-  SDL_BlitSurface(Laabel.Surface, Nil, Panel.Surface, @Destionation_Rectangle);
+
+  If (Laabel.Pre_Render) Then
+    Begin
+      Label_Pre_Render(Laabel);
+      Laabel.Pre_Render := false;
+    End;
+
+  Destination_Rectangle.x := Laabel.Position.X;
+  Destination_Rectangle.y := Laabel.Position.Y;
+
+  SDL_BlitSurface(Laabel.Surface, Nil, Panel.Surface, @Destination_Rectangle);
 End;
 
 // - - Graphics
@@ -515,12 +566,19 @@ Begin
   Game.Score_Image.Position.X := Game.Panel_Top.Size.X Div 2 + 16;
 
   Label_Set(Game.Score_Label, '0', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+
+  Label_Pre_Render(Game.Score_Label);
+
   Game.Score_Label.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Score_Label.Size.Y);
   Game.Score_Label.Position.X := Game.Score_Image.Position.X + Game.Score_Image.Size.X + 16;
 
   Label_Set(Game.Clock_Label, 'Wednesday', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+
+  Label_Pre_Render(Game.Clock_Label);
+
   Game.Clock_Label.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Label.Size.Y);
   Game.Clock_Label.Position.X := Game.Panel_Top.Size.X Div 2 - 16 - Game.Clock_Label.Size.X;
+
   Label_Set_Text(Game.Clock_Label, 'Monday');
 
   Image_Set(Game.Clock_Image, Image_Load(Path_Image_Clock));
@@ -588,21 +646,21 @@ Begin
 
   Button_Set(Game.Reward_Buttons[1], Image_Load(Path_Image_Button_Wagon), Image_Load(Path_Image_Button_Wagon));
 
-  Game.Reward_Buttons[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X div 2, Game.Reward_Buttons[0].Size.X);
+  Game.Reward_Buttons[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Buttons[0].Size.X);
   Game.Reward_Buttons[0].Position.Y := Game.Panel_Reward.Size.Y - 16 - Game.Reward_Buttons[0].Size.Y;
 
-  Game.Reward_Buttons[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X div 2, Game.Reward_Buttons[1].Size.X) + Game.Panel_Reward.Size.X div 2;
+  Game.Reward_Buttons[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Buttons[1].Size.X) + Game.Panel_Reward.Size.X Div 2;
   Game.Reward_Buttons[1].Position.Y := Game.Reward_Buttons[0].Position.Y;
 
   Label_Set(Game.Reward_Labels[0], 'Locomotive', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
 
-  Game.Reward_Labels[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X div 2, Game.Reward_Labels[0].Size.X);
+  Game.Reward_Labels[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Labels[0].Size.X);
 
   Game.Reward_Labels[0].Position.Y := Game.Reward_Buttons[0].Position.Y - 16 - Game.Reward_Labels[0].Size.Y;
 
   Label_Set(Game.Reward_Labels[1], 'Wagon', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
 
-  Game.Reward_Labels[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X div 2, Game.Reward_Labels[1].Size.X) + Game.Panel_Reward.Size.X div 2;
+  Game.Reward_Labels[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Labels[1].Size.X) + Game.Panel_Reward.Size.X Div 2;
 
   Game.Reward_Labels[1].Position.Y := Game.Reward_Labels[0].Position.Y;
 
@@ -796,6 +854,8 @@ Begin
 
 End;
 
+
+
 // Procédure qui desinne une lign épaisse entre deux points.
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Coordinates; Color :
@@ -850,6 +910,7 @@ End;
 
 // - - Station
 
+
 // - Procédure génère le rendu dans la fenêtre des traits entre les stations en utilisant que des angles de 0, 45 et 90 degrés.
 Procedure Line_Render(Var Line : Type_Line; Var Panel : Type_Panel; Mouse : Type_Mouse);
 
@@ -882,7 +943,6 @@ Begin
             End
           Else
             Begin
-
               // - Affichage des traits représentant la ligne à partir des coordonnées centrées des stations.
               Intermediate_Position := Station_Get_Intermediate_Position(Line.Stations[i - 1]^.Position_Centered, Line.Stations[i]^.Position_Centered);
               Graphics_Draw_Line(Line.Stations[i - 1]^.Position_Centered, Intermediate_Position, Line.Color, Panel);
@@ -890,13 +950,27 @@ Begin
             End;
         End;
     End;
+
+    // - Affichage des lignes parallèles 
+
+    For i := low(Game.Graph_Table) To high(Game.Graph_Table) Do
+    Begin
+      For j := low(Game.Graph_Table[i]) To high(Game.Graph_Table[i]) Do
+        If (length(Game.Graph_Table[i]) > 1) Then
+        Begin
+
+        End;
+
+    End;
+
+
 End;
 
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
-  Direction : Integer;
-  Norme : Integer;
+  Direction, Norme : Integer;
+  i, j, k : Byte;
 Begin
 
   If (Train.Distance < Train.Maximum_Distance) Or (Train.Driving = false) Then
@@ -989,7 +1063,33 @@ Begin
 
   SDL_BlitSurface(Train.Sprite, Nil, Panel.Surface, @Destination_Rectangle);
 
-  // Affichage de l'étiquette du train.
+  // - Affichage de l'étiquette du train.
+
+  // - - Rendu anticipé de l'étiquette du train.
+  If (Train.Pre_Render) Then
+    Begin
+  // - Comptage des passagers.
+      k := 0;
+      // Itère sur tous les véhicules du train.
+      For i := low(Train.Vehicles) To high(Train.Vehicles) Do
+        Begin
+          // Itère sur tous les passagers du véhicule.
+          For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+            Begin
+              // Si l'entrée dans le tableau n'est pas vide, on incrémente le compteur.
+              If (Train.Vehicles[i].Passengers[j] <> Nil) Then
+                inc(k);
+            End;
+        End;
+
+      Label_Set_Text(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles)*Vehicle_Maximum_Passengers_Number));
+      Label_Pre_Render(Train.Passengers_Label);
+
+      Train.Pre_Render := false;
+    End;
+
+  // Définition du texte de l'étiquette.
+
   Destination_Rectangle.x := Destination_Rectangle.x + Get_Centered_Position(Train.Size.X, Train.Passengers_Label.Size.X);
   Destination_Rectangle.y := Destination_Rectangle.y + Get_Centered_Position(Train.Size.Y, Train.Passengers_Label.Size.Y);
 

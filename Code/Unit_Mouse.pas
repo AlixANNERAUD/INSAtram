@@ -3,7 +3,7 @@ Unit Unit_Mouse;
 
 Interface
 
-Uses Unit_Types, sdl, crt;
+Uses Unit_Types, Unit_Common, Unit_Constants, sdl, crt;
 
 
 // - Chargement
