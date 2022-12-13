@@ -32,10 +32,7 @@ Function Mouse_On_Object(Mouse_Position : Type_Coordinates; Object_Position, Obj
 
 Procedure Mouse_Line_Add_Train(Var Game : Type_Game);
 Procedure Mouse_Line_Add_Station(Var Game : Type_Game);
-Procedure Mouse_Line_Delete_Station(Var Game : Type_Game);
 Procedure Mouse_Train_Add_Wagon(Var Game : Type_Game);
-
-Procedure Mouse_Set_Mouse_Mode(Var Game : Type_Game);
 
 Function Mouse_Pressed_On_Line(Var Game : Type_Game) : Boolean;
 Function Mouse_Pressed_On_Station(Var Game : Type_Game) : Boolean;
@@ -80,14 +77,6 @@ Begin
     End;
 End;
 
-Procedure Mouse_Line_Delete_Station(Var Game : Type_Game);
-
-Var i : Byte;
-  Selected_Line : Type_Line_Pointer;
-Begin
-
-End;
-
 // Fonction qui vérifie que la souris est sur une station et l'ajoute à la ligne actuellement maintenue par la souris.
 Procedure Mouse_Line_Add_Station(Var Game : Type_Game);
 
@@ -116,12 +105,6 @@ Begin
           Break;
         End;
     End;
-End;
-
-// Procedure qui détermine le mode du curseur en fonction de la première interraction de l'utilisateur.
-Procedure Mouse_Set_Mouse_Mode(Var Game : Type_Game);
-Begin
-
 End;
 
 // Fonction uqui vérifie si la souris est sur une station et détermine la ligne actuellement sélectionnée.

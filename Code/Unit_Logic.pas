@@ -1,4 +1,3 @@
-
 Unit Unit_Logic;
 
 Interface
@@ -122,17 +121,6 @@ Begin
               absolute_Index_First_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[0], Game.Stations);
 
 
-
-
-
-
-
-
-
-
-
-
-
         // Je pense qu'on pourrait directement mettre la fonction en tant qu'index pour graph_Table mais pour la compréhension je trouve ca mieux comme ca, surtout si on relit le code dans longtemps.
               absolute_Index_Second_Station := get_Absolute_Index_From_Station_Pointer(couple_Stations[1], Game.Stations);
               Game.graph_Table[absolute_Index_First_Station][absolute_Index_Second_Station][iteration] := @Game.Lines[iteration];
@@ -246,7 +234,7 @@ Begin
 
   For i := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
     Begin
-      For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+      For j := low(Game.Dijkstra_Table[i]) To high(Game.Dijkstra_Table[i]) Do
         Begin
           Game.Dijkstra_Table[i][j].isAvailable := True;
           // Les cases sont a priori toutes disponibles avant d'être passé dessus.
@@ -282,9 +270,10 @@ Begin
       End;
     // - Compare et détermine l'index de la station dont le poids est le plus faible. 
     minimum_Weight := 30000; {Plus gros entier}
+
     For i := (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
       Begin
-        For column:= (low(Game.Dijkstra_Table)) To (high(Game.Dijkstra_Table)) Do
+        For column:= (low(Game.Dijkstra_Table[i])) To (high(Game.Dijkstra_Table[i])) Do
           Begin
             If (Game.Dijkstra_Table[i][column].isConnected = True) And (Game.Dijkstra_Table[iteration][column].isValidated = False) And (Game.Dijkstra_Table[iteration][column].isAvailable = True)
               Then
@@ -311,27 +300,25 @@ Begin
   Until ((iteration = high(Game.Dijkstra_Table)) Or (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=True));
 
 
-  k := 1;
-  SetLength(Itinerary_Indexes, k);
+  SetLength(Itinerary_Indexes, 1);
 
   Itinerary_Indexes[high(Itinerary_Indexes)] := Starting_Station_Index;
 
   For iteration:= low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
     Begin
-      writeln('Itération ', iteration);
-      For column := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+      For column := low(Game.Dijkstra_Table[iteration]) To high(Game.Dijkstra_Table[iteration]) Do
+            writeln('I / C : ', iteration, ' - ', column);
         // ! : Bug, ne s'arrête pas ?
-        If (Game.Dijkstra_Table[iteration][column].isValidated = True) And (Itinerary_Indexes[k-1] <> Game.Dijkstra_Table[iteration][column].comingFromStationIndex) Then
+        If (Game.Dijkstra_Table[iteration][column].isValidated) And (Itinerary_Indexes[high(Itinerary_Indexes) - 1] <> Game.Dijkstra_Table[iteration][column].comingFromStationIndex) Then
           Begin
-            writeln('Column ', column);
 
-            writeln('k : ', k);
+            writeln('Itinerary_Indexes[high] ', high(Itinerary_Indexes));
 
             // ! : Ducoup la table vide.
-            SetLength(Itinerary_Indexes, k);
+
+            SetLength(Itinerary_Indexes, length(Itinerary_Indexes)+1);
             
-            Itinerary_Indexes[k] := Game.Dijkstra_Table[iteration][column].comingFromStationIndex;
-            inc(k);
+            Itinerary_Indexes[high(Itinerary_Indexes)] := Game.Dijkstra_Table[iteration][column].comingFromStationIndex;
           End;
 
     End;
@@ -543,7 +530,7 @@ Begin
 
 
   // Calcul des itinéaires des passagers crées.
-  Passengers_Compute_Itinerary(Game);
+ Passengers_Compute_Itinerary(Game);
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
   //Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
