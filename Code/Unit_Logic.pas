@@ -68,20 +68,7 @@ Begin
 }
 End;
 
-// Fonction qui renvoie l'index absolu (dans le tableau de stations du jeu) d'une station à partir de son pointeur.
-Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var Game : Type_Game) : Byte;
 
-Var i : Byte;
-Begin
-  For i := low(Game.Stations) To high(Game.Stations) Do
-    Begin
-      If Station_Pointer = @Game.Stations[i] Then
-        Begin
-          Station_Get_Absolute_Index := i;
-          break;
-        End;
-    End;
-End;
 
 Function Station_Get_Pointer_From_Absolute_Index(Inndex : Integer; Stations : Array Of Type_Station_Pointer) : Type_Station_Pointer;
 Begin

@@ -81,8 +81,24 @@ Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
 
 Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
+Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer)
+
 Implementation
 
+// Fonction qui renvoie l'index absolu (dans le tableau de stations du jeu) d'une station à partir de son pointeur.
+Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var Game : Type_Game) : Byte;
+
+Var i : Byte;
+Begin
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
+      If Station_Pointer = @Game.Stations[i] Then
+        Begin
+          Station_Get_Absolute_Index := i;
+          break;
+        End;
+    End;
+End;
 
 Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
@@ -956,11 +972,12 @@ Begin
     For i := low(Game.Graph_Table) To high(Game.Graph_Table) Do
     Begin
       For j := low(Game.Graph_Table[i]) To high(Game.Graph_Table[i]) Do
+      Begin
         If (length(Game.Graph_Table[i]) > 1) Then
         Begin
 
         End;
-
+      End;
     End;
 
 
