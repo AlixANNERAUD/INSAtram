@@ -422,6 +422,9 @@ Type Type_Animation = Record
   Acceleration_Distance : Integer;
 End;
 
+Type Type_Index_Table = Array of Integer;
+Type Type_Dijkstra_Table = Array of Array of Type_Dijkstra_Cell;
+
 // - - Partie
 
 Type Type_Game = Record
