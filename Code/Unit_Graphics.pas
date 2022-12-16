@@ -81,7 +81,7 @@ Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
 
 Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
-Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer)
+Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer) : Byte;
 
 Implementation
 
@@ -137,7 +137,6 @@ Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
   Angle : Integer;
-  i : Integer;
 Begin
 
   If (Pie.Pre_Render) Then
