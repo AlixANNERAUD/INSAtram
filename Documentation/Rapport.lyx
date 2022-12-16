@@ -32,7 +32,7 @@
 \spacing single
 \use_hyperref false
 \papersize default
-\use_geometry false
+\use_geometry true
 \use_package amsmath 1
 \use_package amssymb 1
 \use_package cancel 1
@@ -57,6 +57,10 @@
 \shortcut idx
 \color #008000
 \end_index
+\leftmargin 1in
+\topmargin 1in
+\rightmargin 1in
+\bottommargin 1in
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
@@ -79,6 +83,37 @@
 
 \begin_layout Title
 Rapport de projet informatique
+\end_layout
+
+\begin_layout Title
+INSAtram
+\end_layout
+
+\begin_layout Author
+Alix ANNERAUD - Myriem ABID - Hugo LASCOUTS
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -127,70 +162,35 @@ L’objectif du joueur est que l’acheminement des passagers vers leurs destina
 s soit optimal.
  Plusieurs stations qu’il faudra relier entre elles apparaissent au fil
  de la partie.
- Les passagers apparaîtront
-\end_layout
-
-\begin_layout Standard
-à côté de leur station de départ et emprunteront la ou les lignes qui desservent
- leur station
-\end_layout
-
-\begin_layout Standard
-afin d’atteindre leur destination.
- Certaines cartes pourront contenir des fleuves dès le début
-\end_layout
-
-\begin_layout Standard
-de la partie.
+ Les passagers apparaîtront à côté de leur station de départ et emprunteront
+ la ou les lignes qui desservent leur station afin d’atteindre leur destination.
+ Certaines cartes pourront contenir des fleuves dès le début de la partie.
  L’identité graphique du jeu s’apparentera aux cartes de réseaux disponibles
- dans
-\end_layout
-
-\begin_layout Standard
-les transports en commun.
+ dans les transports en commun.
 \end_layout
 
 \begin_layout Standard
 Les lignes reliant les stations seront de différentes couleurs, elles sont
- semblables à celles que
-\end_layout
-
-\begin_layout Standard
-l'on voit sur les vraies cartes de transport en commun.
- Lorsqu’une ligne est créée, un véhicule
-\end_layout
-
-\begin_layout Standard
-apparaîtra sur cette dernière et y fera des allers-retours.
- Il est possible de librement supprimer
-\end_layout
-
-\begin_layout Standard
-ou réorganiser les lignes à tout moment de la partie.
+ semblables à celles que l'on voit sur les vraies cartes de transport en
+ commun.
+ Lorsqu’une ligne est créée, un véhicule apparaîtra sur cette dernière et
+ y fera des allers-retours.
+ Il est possible de librement supprimer ou réorganiser les lignes à tout
+ moment de la partie.
 \end_layout
 
 \begin_layout Standard
 Les réseaux deviennent de plus en plus complexes au fur et à mesure de la
- partie, le joueur
-\end_layout
-
-\begin_layout Standard
-pourra recevoir des objets (items cités dans les fonctionnalités) à différents
- moments de la
-\end_layout
-
-\begin_layout Standard
-partie afin de l’aider dans la gestion des réseaux.
+ partie, le joueur pourra recevoir des objets (items cités dans les fonctionnali
+tés) à différents moments de la partie afin de l’aider dans la gestion des
+ réseaux.
+ 
 \end_layout
 
 \begin_layout Standard
 Enfin, le joueur perd lorsque son réseau n’est plus efficace.
- C’est-à-dire lorsqu’une station
-\end_layout
-
-\begin_layout Standard
-accueille un nombre de passagers supérieur à sa capacité pendant un certain
- temps.
+ C’est-à-dire lorsqu’une station accueille un nombre de passagers supérieur
+ à sa capacité pendant un certain temps.
 \end_layout
 
 \begin_layout Subsection
@@ -199,50 +199,77 @@ Cahier des charges initial
 
 \begin_layout Standard
 Voici le cahier des charges initial.
- Les parties soulignées étant les fonctionnalités optionnelles et seront
- réalisées si l’avancement du projet le permet.
+ Les 
+\bar under
+parties soulignées
+\bar default
+ sont les fonctionnalités optionnelles et seront réalisées si l’avancement
+ du projet le permet.
 \end_layout
 
 \begin_layout Itemize
-Interface graphique : L’interface graphique comportera les éléments suivants
- :
+
+\series bold
+Interface graphique : 
+\series default
+L’interface graphique comportera les éléments suivants :
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-Menu de démarrage : Il permettra de commencer une partie, de sélectionner
- un niveau de difficulté, de choisir une carte, de paramétrer l'échelle
- de l'interface graphique, de charger une partie à partir d’un fichier et
- également de changer le niveau du son.
+
+\series bold
+Menu de démarrage :
+\series default
+ Il permettra de commencer une partie, de sélectionner un niveau de difficulté,
+ de choisir une carte, de paramétrer l'échelle de l'interface graphique,
+ de charger une partie à partir d’un fichier et également de changer le
+ niveau du son.
  Il comprendra également un onglet “à propos” comprenant des crédits ainsi
  que des explications sur le jeu etc.
 \end_layout
 
 \begin_layout Itemize
-Terrain de jeu : Une fois que le joueur a lancé une partie, un terrain de
- jeu occupant tout l’écran sera présenté au joueur.
+
+\series bold
+Terrain de jeu :
+\series default
+ Une fois que le joueur a lancé une partie, un terrain de jeu occupant tout
+ l’écran sera présenté au joueur.
  C’est ici que les différentes entités apparaîtront au fur et à mesure.
  Un inventaire (interactif) et des indicateurs (statistiques de partie)
  sont affichés par superposition.
 \end_layout
 
 \begin_layout Itemize
-Echelle : Les coordonnées ainsi que la taille des différents objets graphiques
- seront relatives à la taille de l’écran (la proportion de l’écran occupée
- par l’objet).
+
+\series bold
+Echelle :
+\series default
+ Les coordonnées ainsi que la taille des différents objets graphiques seront
+ relatives à la taille de l’écran (la proportion de l’écran occupée par
+ l’objet).
  Cela permettra de rendre automatique la mise à l’échelle des éléments graphique
 s pour différentes configurations d’écran.
 \end_layout
 
 \begin_layout Itemize
-Bilan : A la fin de la partie, un écran de fin s’affiche présentant le score
- du joueur (calculé sur la base du nombre de semaines où le réseau était
- efficace et de voyageurs transportés).
+
+\series bold
+Bilan :
+\series default
+ A la fin de la partie, un écran de fin s’affiche présentant le score du
+ joueur (calculé sur la base du nombre de semaines où le réseau était efficace
+ et de voyageurs transportés).
 \end_layout
 
 \begin_layout Itemize
-Couleurs : L’interface graphique sera le plus épuré possible avec des couleurs
- simples et contrastées et le minimum de couleurs possibles.
+
+\series bold
+Couleurs :
+\series default
+ L’interface graphique sera le plus épuré possible avec des couleurs simples
+ et contrastées et le minimum de couleurs possibles.
  L’interface graphique disposera d’un mode sombre où les gammes de couleurs
  claires sont remplacées par des nuances plus sombres.
 \end_layout
@@ -271,8 +298,10 @@ Bilan :
 \begin_layout Itemize
 
 \series bold
+\bar under
 Son :
 \series default
+\bar default
  Le jeu comprendra une musique de fond apaisante ainsi que des effets sonores
  pour mettre le joueur dans l’ambiance du jeu.
 \end_layout
@@ -357,10 +386,8 @@ Surdimensionnement de la gare :
 \begin_layout Itemize
 
 \series bold
-\bar under
 Entités :
 \series default
-\bar default
  Les entités sont les éléments qui seront disposés sur le terrain de jeu
  par le programme.
  Le joueur ne pourra pas interagir de manière directe avec les entités,
@@ -372,10 +399,8 @@ Entités :
 \begin_layout Itemize
 
 \series bold
-\bar under
 Stations :
 \series default
-\bar default
  Les stations sont de différentes formes géométriques et sont générées de
  manière aléatoire.
  Elles apparaîtront à des instants t déterminés par une fonction (linéaire
@@ -389,10 +414,8 @@ n d'une carte de fréquentation).
 \begin_layout Itemize
 
 \series bold
-\bar under
 Passagers :
 \series default
-\bar default
  Les passagers seront également de différentes formes géométriques (correspondan
 t à leur station d'arrivée) à côté des stations à des instants t déterminés
  par une fonction (linéaire puis éventuellement logarithmique/polynomiale).
@@ -405,10 +428,8 @@ t à leur station d'arrivée) à côté des stations à des instants t détermin
 \begin_layout Itemize
 
 \series bold
-\bar under
 Fleuves :
 \series default
-\bar default
  Les différentes cartes comprendront un ou plusieurs fleuves qui feront
  office d’obstacle naturel et devront être contournés par le joueur en utilisant
  les objets qu’il a à sa disposition.
@@ -422,10 +443,8 @@ Fleuves :
 \begin_layout Itemize
 
 \series bold
-\bar under
 Difficulté :
 \series default
-\bar default
  La difficulté du jeu se trouvera dans le fait de devoir fluidifier au maximum
  le trafic et d’adapter le réseau en fonction des nouvelles stations qui
  apparaissent, le flux de passagers ainsi que des différents aléas.
@@ -459,10 +478,8 @@ Détérioration des lignes :
 \begin_layout Itemize
 
 \series bold
-\bar under
 Fin de partie :
 \series default
-\bar default
  La partie prend fin une fois qu’une station est engorgée (quand plus de
  6 passagers s’y trouvent) pendant un temps qui dépendra de la difficulté
  choisie.
@@ -498,16 +515,12 @@ Fonctionnalités cachées :
  circonstances, une blague accessible à certains joueurs chanceux...
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Structure
 \end_layout
 
-\begin_layout Standard
-Le projet était structuré en plusieurs fichiers de la manière suivante :
-\end_layout
-
-\begin_layout Subsubsection
-Convention
+\begin_layout Subsection
+Nommage
 \end_layout
 
 \begin_layout Standard
@@ -516,11 +529,11 @@ Afin que le code soit structure et facile à comprendre, nous avons adopté
 \end_layout
 
 \begin_layout Itemize
-Langage : le nomage des identifiants en anglais étant plus homogène avec
- les langages de programation (car eux même écrits en anglais).
- Nous avons donc choisi choisi de rédiger le code en anglais.
+Langage : l'écriture du code en anglais nous semblais assez naturel, car
+ cela est plus homogène avec le langage de programation lui-meme (écrit
+ en anglais).
  Cependant, afin de faciliter le compréhension du code pour les correcteurs,
- nous avons utilisé du français à été pour les commentaires.
+ nous avons utilisé du français pour les commentaires.
  Ces dernier par ailleurs suivent une certaines structure.
  Pour un commentaire faisant office de titre, 
 \begin_inset Quotes fld
@@ -539,31 +552,75 @@ Langage : le nomage des identifiants en anglais étant plus homogène avec
 \end_inset
 
 .
- Ainsi pour un titre de niveau un 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+// - Section
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// - - Sous-section
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Commentaire standard.
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Station_Render();
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
-Constantes : Les constantes
+Constantes : Les constantes sont nommées 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Const Station_Maximum
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
-Types : Toutes definition de types, que ce soit Mot 
+Types : Tout types porte d'abord comme identifiant 
 \begin_inset Quotes fld
 \end_inset
 
-Type
+Type_
 \begin_inset Quotes frd
 \end_inset
 
- suivi d'un underscore 
-\begin_inset Quotes fld
-\end_inset
-
-_
-\begin_inset Quotes frd
-\end_inset
-
- imitant un espace et de l'identifiant du type.
+ suivit de l'identifiant du type.
  Cet identifiant doit le plus court et le plus explicite possible.
  Par exemple la structure contenant une station s'appelle 
 \begin_inset Quotes fld
@@ -621,13 +678,71 @@ Type Type_Station_Pointer = ^Type_Station;
 
 \begin_layout Itemize
 Fonctions et procédures : Les fonctions et procédures portent généralement
- le 
+ le nom de l'objet sur lequel elles agissent où de l'unité concerné, suivi
+ d'un verbe (en général : 
+\begin_inset Quotes fld
+\end_inset
+
+Get
+\begin_inset Quotes frd
+\end_inset
+
+, 
+\begin_inset Quotes fld
+\end_inset
+
+Set
+\begin_inset Quotes frd
+\end_inset
+
+, 
+\begin_inset Quotes fld
+\end_inset
+
+Refresh
+\begin_inset Quotes frd
+\end_inset
+
+, 
+\begin_inset Quotes fld
+\end_inset
+
+Render
+\begin_inset Quotes frd
+\end_inset
+
+ ...) indiquant l'action effectuée et suivi éventuellement plus de précision
+ sur l'action.
 \end_layout
 
 \begin_layout Standard
 \begin_inset listings
 inline false
 status open
+
+\begin_layout Plain Layout
+
+// Procedure rafraichissant les graphismes
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Graphics_Refresh();
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Procedure qui rend graphiquement une station
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Station_Render();
+\end_layout
 
 \begin_layout Plain Layout
 
@@ -639,11 +754,122 @@ status open
 \end_layout
 
 \begin_layout Subsection
+Structure générale
+\end_layout
+
+\begin_layout Standard
+Le projet était structuré en plusieurs fichiers de la manière suivante :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Arbre des dépendances
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename Graphiques/Dépendances.png
+	width 50page%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Unit_Types : Unité contenant tout les types
+\end_layout
+
+\begin_layout Itemize
+Unit_Constants : Unité contenant toutes les constantes du jeu.
+\end_layout
+
+\begin_layout Itemize
+Unit_Common : Unité contenant toutes les fonctions 
+\begin_inset Quotes fld
+\end_inset
+
+élémentaires
+\begin_inset Quotes frd
+\end_inset
+
+ permettants de simplifier le développement dans les autres unités.
+\end_layout
+
+\begin_layout Itemize
+Unit_Mouse : Unité regroupant toutes les fonctions responsable de la prise
+ en charge de la souris.
+\end_layout
+
+\begin_layout Itemize
+Unit_Animation : Unité regroupant toutes les fonctions responsable des animation
+s (déplacement des trains, ).
+\end_layout
+
+\begin_layout Itemize
+Unit_Graphics : Unité regroupant toutes les fonctions relatives aux graphismes.
+\end_layout
+
+\begin_layout Itemize
+Unit_Logic : Unité regroupant toute la logique du jeu.
+ C'est l'unité 
+\begin_inset Quotes fld
+\end_inset
+
+mère
+\begin_inset Quotes frd
+\end_inset
+
+ du jeu, celle qui est directement inclu dans le programme principal : 
+\begin_inset Quotes fld
+\end_inset
+
+INSAtram.pas
+\begin_inset Quotes frd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Unité
+\end_layout
+
+\begin_layout Subsection
 Conclusion
 \end_layout
 
 \begin_layout Standard
 Ainsi
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -677,6 +903,10 @@ Live Share : Une extension de Visual Studio Code permettant une collaboration
 \end_layout
 
 \begin_layout Itemize
+Ptop : Le formateur de code fourni avec le Free Pascal Compiler.
+\end_layout
+
+\begin_layout Itemize
 Inkscape : Logiciel de dessin vectoriel utilisé pour la création des ressources
  graphiques du jeu.
 \end_layout
@@ -706,13 +936,10 @@ tâches élémentaires
 \end_inset
 
  le plus équitablement possible en temps de travail.
- Puis, chaques personnes, une fois sa tâche terminée lors des sessions de
- travail, pouvait choisir parmis les tâches restantes sur un panneau de
- travail (Dashboard).
-\end_layout
-
-\begin_layout Standard
-Afin de ne pas avoir à être systématiquement en présentiel pour pouvoir
+ Ces tâches étaient disposés sur un dashboard.
+ Puis, chaques personnes vient récupérer une tâche sur un tableau dès que
+ la précédente est implémenté, testée et validée par les autres.
+ Afin de ne pas avoir à être systématiquement en présentiel pour pouvoir
  travailler ensemble sur le projet.
  Nous avons utilisé des outils tels 
 \begin_inset Quotes fld
@@ -726,13 +953,30 @@ Git
 \begin_inset Quotes fld
 \end_inset
 
+GitHub
+\begin_inset Quotes frd
+\end_inset
+
+ pour la gestion du répertoire de code et 
+\begin_inset Quotes fld
+\end_inset
+
 Live Share
 \begin_inset Quotes frd
 \end_inset
 
  afin de collaborer le plus facilement possible.
  C'est pour cela que nous avons utilisé l'éditeur de code Visual Studio
- Code
+ Code du fait de sa modularité.
+ Biensur, en cas de soucis où de problème difficile à résoudre (voir section
+ 4), nous nous concertions et élaborions une solution ensemble.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -802,7 +1046,7 @@ Type_Line
 
 .
  Les deux stations forment un angle 
-\begin_inset Formula $\alpha$
+\begin_inset Formula $\alpha=arctan\left(\frac{\Delta_{y}}{\Delta_{x}}\right)$
 \end_inset
 
  par rapport à l'axe des abscisses.
@@ -1178,7 +1422,7 @@ Cependant, dans le cas de lignes obliques, ce raisonnement n'est pas valide.
 \end_layout
 
 \begin_layout Subsection
-Résolution des itinéraires.librairie
+Résolution des itinéraires des passagers
 \end_layout
 
 \begin_layout Standard
@@ -1186,14 +1430,55 @@ Bon courage :) <3
 \end_layout
 
 \begin_layout Subsection
-Animation réaliste des trains.
+Animation réaliste des trains
 \end_layout
 
 \begin_layout Standard
 Afin que le mouvement des trains soit réaliste, au lieu d'une vitesse constante,
  nous avons opté pour une vitesse variable dépendant du temps.
- Le but étant de mimer le déplacement d'un véhicule réel, nous avons utilisé
- 
+ Le but étant de mimer le déplacement d'un véhicule réel.
+\end_layout
+
+\begin_layout Standard
+Ainsi, pour le déplacement du véhicule, on peu définir trois périodes :
+\end_layout
+
+\begin_layout Itemize
+L'accélération : le temps 
+\begin_inset Formula $t_{a}$
+\end_inset
+
+ que le train atteigne sa vitesse maximale 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Croisière : le temps où le train est à sa vitesse maximale : 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Décélération : le temps 
+\begin_inset Formula $t_{d}$
+\end_inset
+
+ que le train train met pour atteindre une vitesse nulle.
+\end_layout
+
+\begin_layout Standard
+Pour des questions de simplicité, nous considérons que le train prend autant
+ de temps à accélérer, qu'a décélérer (
+\begin_inset Formula $t_{a}=t_{d}$
+\end_inset
+
+).
+ Nous avons alors utilisé 
 \begin_inset Quotes fld
 \end_inset
 
@@ -1201,18 +1486,21 @@ Geogebra
 \begin_inset Quotes frd
 \end_inset
 
- et tâtonner un peu afin de trouver une fonction qui décrit au mieux la
- vitesse d'un véhicule réel lors de son accélération : 
+ et tâtonné un peu afin de trouver une fonction qui décrit au mieux la vitesse
+ d'un véhicule 
+\begin_inset Quotes fld
+\end_inset
+
+réel
+\begin_inset Quotes frd
+\end_inset
+
+ lors de son accélération (
 \begin_inset Formula $a\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
 \end_inset
 
- et de sa décélération : 
+) et de sa décélération (
 \begin_inset Formula $d\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
-\end_inset
-
-.
- Une fois que la train à accéléré, sa vitesse est constante (égale à 
-\begin_inset Formula $v_{m}$
 \end_inset
 
 ).
@@ -1220,49 +1508,8 @@ Geogebra
 \end_layout
 
 \begin_layout Standard
-Nous avons ensuite défini 3 constantes : 
-\begin_inset Formula $v_{m}$
-\end_inset
-
- (la vitesse maximale), 
-\begin_inset Formula $t_{a}$
-\end_inset
-
- (le temps que prend le train pour accélérer jusqu'à 
-\begin_inset Formula $v_{m}$
-\end_inset
-
- où décélérer jusqu'à 
-\begin_inset Formula $0$
-\end_inset
-
-) et 
-\begin_inset Formula $k$
-\end_inset
-
- une constante calculé à partir de 
-\begin_inset Formula $v_{m}$
-\end_inset
-
- et 
-\begin_inset Formula $t_{a}$
-\end_inset
-
-.
- On a alors : 
-\begin_inset Formula $a\left(x\right)=v_{m}\cdot\frac{\cos\left(kx\right)+1}{2}$
-\end_inset
-
- et 
-\begin_inset Formula $d\left(x\right)=v_{m}\cdot\frac{-\cos\left(x\right)+1}{2}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-On peut alors définir la vitesse comme une fonction par morceaux dépendant
- du temps :
+Avec ces 3 périodes et fonctions, on peut alors définir la vitesse comme
+ une fonction par morceaux dépendant du temps :
 \end_layout
 
 \begin_layout Standard
@@ -1272,7 +1519,7 @@ v(t)\begin{cases}
 v_{1}\left(t\right)=v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2} & \text{si }0\leqslant t\leqslant t_{a}\\
 v_{2}\left(t\right)=v_{m} & \text{si }t_{a}<t<t_{f}-t_{a}\\
 v_{3}\left(t\right)=v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
-\end{cases},\forall t\in\left[0,t_{f}\right]
+\end{cases},\forall t\in\left[0,t_{f}\right],\forall k\in
 \]
 
 \end_inset
@@ -1281,15 +1528,18 @@ v_{3}\left(t\right)=v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2} & \text{si }
 \end_layout
 
 \begin_layout Standard
-Par définition, 
+\begin_inset Formula $k$
+\end_inset
+
+ étant une constante permetant de module le cosinus en fonction de 
 \begin_inset Formula $t_{a}$
 \end_inset
 
- est le temps mis par le train pour atteindre 
+ et 
 \begin_inset Formula $v_{max}$
 \end_inset
 
-, on a donc :
+, en effet :
 \end_layout
 
 \begin_layout Standard
@@ -1315,14 +1565,6 @@ v\left(t_{a}\right)=v_{m}
 \end_layout
 
 \begin_layout Standard
-Cela nous permet de définir 
-\begin_inset Formula $k$
-\end_inset
-
- en fonction du temps d'accélération :
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula 
 \[
 \Rightarrow\cos\left(k\cdot t_{a}\right)=-1
@@ -1336,7 +1578,7 @@ Cela nous permet de définir
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\Rightarrow k=\frac{45{^{\circ}}\arccos\left(-1\right)}{t_{a}}=\frac{\pi}{t_{a}}
+\Rightarrow k=\frac{\arccos\left(-1\right)}{t_{a}}=\frac{\pi}{t_{a}}
 \]
 
 \end_inset
@@ -1345,8 +1587,10 @@ Cela nous permet de définir
 \end_layout
 
 \begin_layout Standard
-D'après les cours de mécanique du point, nous savons que la vitesse est
- la dérivée de la distance parcourue : 
+Une fois les équations horraires de la vitesse obtenus, nous pouvons en
+ déduire la distance du train parcouru depuis la dernière station.
+ En effet, d'après les cours de mécanique du point (P2), nous savons que
+ la vitesse est la dérivée de la distance parcourue : 
 \begin_inset Formula $v\left(t\right)=\frac{d}{dt}d\left(t\right)$
 \end_inset
 
@@ -1383,7 +1627,7 @@ d\left(t\right)=\int v\left(t\right)
 \begin_inset Formula 
 \[
 d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=\int_{0}^{t}v_{1}(t) & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{1}\left(t\right)=\int_{0}^{t}v_{1}\left(t\right) & \text{si }0\leqslant t\leqslant t_{a}\\
 d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\left(t\right) & \text{si }t_{a}<t<t_{f}-t_{a}\\
 \int v\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t_{f}-t_{a}}v_{2}\left(t\right)+\int_{0}^{t-\left(t_{f}-t_{a}\right)}v_{3}\left(t\right) & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
 \end{cases}
@@ -1399,7 +1643,7 @@ d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\le
 \family typewriter
 \begin_inset Formula 
 \[
-d\left(t\right)=\begin{cases}
+\Rightarrow d\left(t\right)=\begin{cases}
 d_{1}\left(t\right)=\int_{0}^{t_{a}}\left(v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }0\leqslant t\leqslant t_{a}\\
 d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}\left(v_{m}\right)dt & \text{si }t_{a}<t<t_{f}-t_{a}\\
 d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\int_{0}^{t-\left(t_{f}-t_{a}\right)}\left(v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
@@ -1416,7 +1660,7 @@ d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left
 \family typewriter
 \begin_inset Formula 
 \[
-d\left(t\right)=\begin{cases}
+\Rightarrow d\left(t\right)=\begin{cases}
 d_{1}\left(t\right)=\left[v_{m}\cdot\left(\frac{-\sin\left(k\cdot t\right)+kt}{k*2}\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
 d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[v_{m}\cdot t\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{f}-t_{a}\\
 d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
@@ -1433,7 +1677,7 @@ d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left
 \family typewriter
 \begin_inset Formula 
 \[
-d\left(t\right)=\begin{cases}
+\Rightarrow d\left(t\right)=\begin{cases}
 d_{1}\left(t\right)=v_{m}\cdot\left(\frac{-\sin\left(k\cdot t\right)+kt}{k*2}\right) & \text{si }0\leqslant t\leqslant t_{a}\\
 d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+v_{m}\times\left(t-t_{a}\right) & \text{si }t_{a}<t<t_{f}-t_{a}\\
 d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
@@ -1518,6 +1762,13 @@ Une interface graphique est nécéssaire pour que l'utilisateur puisse interragi
 
 \begin_layout Itemize
 Type : 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section

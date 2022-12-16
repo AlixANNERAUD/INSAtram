@@ -298,10 +298,8 @@ Bilan :
 \begin_layout Itemize
 
 \series bold
-\bar under
 Son :
 \series default
-\bar default
  Le jeu comprendra une musique de fond apaisante ainsi que des effets sonores
  pour mettre le joueur dans l’ambiance du jeu.
 \end_layout
@@ -386,8 +384,10 @@ Surdimensionnement de la gare :
 \begin_layout Itemize
 
 \series bold
+\bar under
 Entités :
 \series default
+\bar default
  Les entités sont les éléments qui seront disposés sur le terrain de jeu
  par le programme.
  Le joueur ne pourra pas interagir de manière directe avec les entités,
@@ -399,8 +399,10 @@ Entités :
 \begin_layout Itemize
 
 \series bold
+\bar under
 Stations :
 \series default
+\bar default
  Les stations sont de différentes formes géométriques et sont générées de
  manière aléatoire.
  Elles apparaîtront à des instants t déterminés par une fonction (linéaire
@@ -414,8 +416,10 @@ n d'une carte de fréquentation).
 \begin_layout Itemize
 
 \series bold
+\bar under
 Passagers :
 \series default
+\bar default
  Les passagers seront également de différentes formes géométriques (correspondan
 t à leur station d'arrivée) à côté des stations à des instants t déterminés
  par une fonction (linéaire puis éventuellement logarithmique/polynomiale).
@@ -428,8 +432,10 @@ t à leur station d'arrivée) à côté des stations à des instants t détermin
 \begin_layout Itemize
 
 \series bold
+\bar under
 Fleuves :
 \series default
+\bar default
  Les différentes cartes comprendront un ou plusieurs fleuves qui feront
  office d’obstacle naturel et devront être contournés par le joueur en utilisant
  les objets qu’il a à sa disposition.
@@ -443,8 +449,10 @@ Fleuves :
 \begin_layout Itemize
 
 \series bold
+\bar under
 Difficulté :
 \series default
+\bar default
  La difficulté du jeu se trouvera dans le fait de devoir fluidifier au maximum
  le trafic et d’adapter le réseau en fonction des nouvelles stations qui
  apparaissent, le flux de passagers ainsi que des différents aléas.
@@ -478,8 +486,10 @@ Détérioration des lignes :
 \begin_layout Itemize
 
 \series bold
+\bar under
 Fin de partie :
 \series default
+\bar default
  La partie prend fin une fois qu’une station est engorgée (quand plus de
  6 passagers s’y trouvent) pendant un temps qui dépendra de la difficulté
  choisie.
@@ -903,10 +913,6 @@ Live Share : Une extension de Visual Studio Code permettant une collaboration
 \end_layout
 
 \begin_layout Itemize
-Ptop : Le formateur de code fourni avec le Free Pascal Compiler.
-\end_layout
-
-\begin_layout Itemize
 Inkscape : Logiciel de dessin vectoriel utilisé pour la création des ressources
  graphiques du jeu.
 \end_layout
@@ -936,10 +942,13 @@ tâches élémentaires
 \end_inset
 
  le plus équitablement possible en temps de travail.
- Ces tâches étaient disposés sur un dashboard.
- Puis, chaques personnes vient récupérer une tâche sur un tableau dès que
- la précédente est implémenté, testée et validée par les autres.
- Afin de ne pas avoir à être systématiquement en présentiel pour pouvoir
+ Puis, chaques personnes, une fois sa tâche terminée lors des sessions de
+ travail, pouvait choisir parmis les tâches restantes sur un panneau de
+ travail (Dashboard).
+\end_layout
+
+\begin_layout Standard
+Afin de ne pas avoir à être systématiquement en présentiel pour pouvoir
  travailler ensemble sur le projet.
  Nous avons utilisé des outils tels 
 \begin_inset Quotes fld
@@ -953,21 +962,13 @@ Git
 \begin_inset Quotes fld
 \end_inset
 
-GitHub
-\begin_inset Quotes frd
-\end_inset
-
- pour la gestion du répertoire de code et 
-\begin_inset Quotes fld
-\end_inset
-
 Live Share
 \begin_inset Quotes frd
 \end_inset
 
  afin de collaborer le plus facilement possible.
  C'est pour cela que nous avons utilisé l'éditeur de code Visual Studio
- Code du fait de sa modularité.
+ Code
 \end_layout
 
 \begin_layout Standard
