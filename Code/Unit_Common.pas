@@ -110,9 +110,21 @@ Procedure Pie_Set_Percentage(Var Pie : Type_Pie; Percentage : Real);
 
 Function Vehicle_Delete(Var Train : Type_Train) : Boolean;
 
+
+
 Implementation
 
+Function Line_Get_Station_Index(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Byte;
 
+Var i : Byte;
+Begin
+  For i := 0 To Length(Line.Stations) - 1 Do
+    If Line.Stations[i] = Station_Pointer Then
+      Begin
+        Line_Get_Station_Index := 1;
+        Break;
+      End
+End;
 
 Procedure Pie_Create(Var Pie : Type_Pie; Radius : Integer; Color : Type_Color; Percentage : Real);
 Begin
@@ -579,7 +591,29 @@ End;
 Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
 
 Var Angle :   Real;
+  Temporary_Position : Type_Coordinates;
 Begin
+
+  // Convention d'affichage
+
+  If (Position_1.X > Position_2.X) Then
+    Begin
+      // Invertion des positions
+      Temporary_Position := Position_1;
+      Position_1 := Position_2;
+      Position_2 := Temporary_Position;
+    End
+  Else If (Position_1.X = Position_2.X) Then
+         Begin
+           If (Position_1.Y > Position_2.Y) Then
+             Begin
+               // Invertion des positions
+               Temporary_Position := Position_1;
+               Position_1 := Position_2;
+               Position_2 := Temporary_Position;
+             End
+         End;
+
   Angle := Get_Angle(Position_1, Position_2);
 
   If ((Angle >= (Pi/4)) And (Angle <= ((3*Pi)/4))) Then
@@ -814,7 +848,7 @@ Begin
 
       Center.X := 16;
       Center.Y := 16;
-      
+
 
       Graphics_Draw_Filled_Circle(Game.Lines[i].Button.Surface_Released[0], Center, 12, Game.Lines[i].Color);
 

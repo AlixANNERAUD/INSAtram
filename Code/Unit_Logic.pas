@@ -75,7 +75,7 @@ Begin
   Station_Get_Pointer_From_Absolute_Index := @Stations[Inndex];
 End;
 
-Procedure Build_Graph_Table(Game : Type_Game);
+Procedure Build_Graph_Table(Var Game : Type_Game);
 
 Var i, j, k : Byte;
   Indexes : Array[0 .. 1] Of Byte;
