@@ -193,8 +193,6 @@ Type Type_Station_Pointer = ^Type_Station;
     Passengers_Label : Type_Label;
     // Indexe de la couleur du train.
     Color_Index : Byte;
-
-    Pre_Render : Boolean;
   End;
 
   Type_Train_Pointer = ^Type_Train;
@@ -237,9 +235,9 @@ Type Type_Graph_Table = Array Of Array Of Array Of Type_Line_Pointer;
 Type Type_Dijkstra_Cell = Record
   isConnected : Boolean;
   isAvailable : Boolean;
-  comingFromStationIndex : Integer;
-  weight : Real;
   isValidated : Boolean;
+  comingFromStationIndex : Byte;
+  Weight : Real;
 End;
 
 Type Type_Itinerary_Indexes = Array Of Integer;

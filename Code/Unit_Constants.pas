@@ -90,7 +90,7 @@ Const Path_Font_Bold = Path_Fonts + '/TitilliumWeb-Bold.ttf';
 
 Const Path_Sounds = Path_Ressources + 'Sounds/';
 
-Const Path_Sounds_Music = Path_Sounds + 'Sounds.wav';
+Const Path_Sounds_Music = Path_Sounds + 'Sound.wav';
 
 Const Mouse_Size : Type_Coordinates = (
                                        X :  8;

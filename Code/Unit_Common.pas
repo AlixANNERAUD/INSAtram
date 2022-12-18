@@ -110,9 +110,24 @@ Procedure Pie_Set_Percentage(Var Pie : Type_Pie; Percentage : Real);
 
 Function Vehicle_Delete(Var Train : Type_Train) : Boolean;
 
+Function Graphics_Get_Direction(Angle : Real) : Integer;
 
+Procedure Train_Refresh_Label(Var Train : Type_Train);
 
 Implementation
+
+Procedure Train_Refresh_Label(Var Train : Type_Train);
+
+Var i, j, k : Byte;
+Begin
+  k := 0;
+  For i := low(Train.Vehicles) To high(Train.Vehicles) Do
+      For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+          If Train.Vehicles[i].Passengers[j] <> nil Then
+            inc(k);
+
+  Label_Set_Text(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles) * Vehicle_Maximum_Passengers_Number));
+End;
 
 Function Line_Get_Station_Index(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Byte;
 
@@ -587,43 +602,104 @@ Begin
 
 End;
 
+
+
+
+// Fonction qui calcule les coordonnées centrée d'un objet à partir de sa position dans le repère et sa taille.
+
+// Fonction déterminant l'orientation d'un angle parmis : 0, 45, 90, 135, 180, -45, -90, -135.
+Function Graphics_Get_Direction(Angle : Real) : Integer;
+
+Var Sign :   Integer;
+Begin
+
+  // Si l'angle est négatif (dans la partie inférieure du cercle),
+  //son signe est inversé, mais pris en compte pour plus tard afin de simplfier la disjonction des cas.
+  If (Angle < 0) Then
+    Begin
+      Angle := -Angle;
+      Sign := -1;
+    End
+    // Si l'angle est positif mais dans la partie inférieur du cercle trigonométrique,
+    // on lui ajoute 2Pi afin d'obtenir son analogue négatif puis comme pour le cas précédent,
+    // on annule son signe et on prend en compte son signe pour plus tard.
+  Else If (Angle > Pi) Then
+         Begin
+           Angle := -(Angle - (2*Pi));
+           Sign := -1;
+         End
+  Else
+    Sign := 1;
+
+  If ((Angle >= 0) And (Angle < (Pi/8))) Then               // Si l'angle est entre 0° et 22.5°
+    Graphics_Get_Direction := 0                             // L'orientation est de 0°;
+  Else If ((Angle >= (Pi/8)) And (Angle < (3*Pi/8))) Then   // Si l'angle est entre 22.5° et 67.5°
+         Graphics_Get_Direction := Sign * 45                // L'orientation est de 45° ou -45° (en fonction du signe).
+  Else If ((Angle >= (3*Pi/8)) And (Angle < (5*Pi/8))) Then // Si l'angle est entre 67.5° et 112.5°
+         Graphics_Get_Direction := Sign * 90                // L'orientation est de 90° ou -90° (en fonction du signe).
+  Else If ((Angle >= (5*Pi/8)) And (Angle < (7*Pi/8))) Then // Si l'angle est entre 112.5° et 157.5°
+         Graphics_Get_Direction := Sign * 135
+                                   // L'orientation est de 135° ou -135° (en fonction du signe).
+  Else If (Angle >= (7*Pi/8)) Then                          // Si l'angle est supérieur à 157.5°.
+         Graphics_Get_Direction := 180;
+  // L'orientatino est de 180°
+End;
+
 // Fonction qui calcule la position intermédiaire entre deux stations.
 Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
 
-Var Angle :   Real;
+Var Direction :   Integer;
+  Angle : Real;
   Temporary_Position : Type_Coordinates;
 Begin
 
   // Convention d'affichage
 
-  If (Position_1.X > Position_2.X) Then
+  //Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
+  Angle := Get_Angle(Position_1, Position_2);
+
+  If (Angle < 0) Then
     Begin
-      // Invertion des positions
       Temporary_Position := Position_1;
       Position_1 := Position_2;
       Position_2 := Temporary_Position;
-    End
-  Else If (Position_1.X = Position_2.X) Then
-         Begin
-           If (Position_1.Y > Position_2.Y) Then
-             Begin
-               // Invertion des positions
-               Temporary_Position := Position_1;
-               Position_1 := Position_2;
-               Position_2 := Temporary_Position;
-             End
-         End;
+      Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
+      Angle := Get_Angle(Position_1, Position_2);
+    End;
 
-  Angle := Get_Angle(Position_1, Position_2);
+  Station_Get_Intermediate_Position := Position_1;
 
+
+{
+  Case Direction Of 
+    0 :
+      Station_Get_Intermediate_Position.X := Position_2.X - abs(Position_2.Y - Position_1.Y);
+
+    45 :
+      Station_Get_Intermediate_Position.Y := Position_2.Y - abs(Position_2.X - Position_1.X);
+    
+    90, 135 :
+       Station_Get_Intermediate_Position.Y := Position_2.Y + abs(Position_2.X - Position_1.X);
+      
+
+    180 : 
+        Station_Get_Intermediate_Position.X := Position_2.X + abs(Position_2.Y - Position_1.Y);
+  End;
+}
+
+  //  45 - 90 - 135
   If ((Angle >= (Pi/4)) And (Angle <= ((3*Pi)/4))) Then
     Begin
       Station_Get_Intermediate_Position.X := Position_1.X;
       Station_Get_Intermediate_Position.Y := Position_2.Y + abs(Position_2.X - Position_1.X)
       ;
     End
+
+
+
     // - Angle between -45° and -135° (included)
   Else If ((Angle <= (-Pi/4)) And (Angle >= ((-3*Pi)/4))) Then
+         //-45 - -90 - -135
          Begin
            Station_Get_Intermediate_Position.X := Position_1.X;
            Station_Get_Intermediate_Position.Y := Position_2.Y - abs(Position_2.X -
@@ -643,6 +719,7 @@ Begin
       Station_Get_Intermediate_Position.Y := Position_1.Y;
       Station_Get_Intermediate_Position.X := Position_2.X + abs(Position_2.Y - Position_1.Y);
     End;
+
 End;
 
 // Fonction supprimant les stations d'une partie.
@@ -999,7 +1076,10 @@ Begin
   // Allocation de la mémoire.
   Station.Passengers[high(Station.Passengers)] := GetMem(SizeOf(Type_Passenger));
 
-  Shape := Random(Shapes_Number);
+  Repeat
+    Shape := Random(Shapes_Number);
+  Until (Station.Shape <> Number_To_Shape(Shape));
+
   // Définition de la forme du passager.
   Station.Passengers[high(Station.Passengers)]^.Shape := Number_To_Shape(Shape);
   // Définition du sprite du passager.
@@ -1137,7 +1217,8 @@ End;
 
 Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 
-Var i : Byte;
+Var i, j, k : Byte;
+
 Begin
   // Vérifie que le train n'a pas atteint le nombre maximum de véhicules.
   If (length(Train.Vehicles) < Train_Maximum_Vehicles_Number) Then
@@ -1150,8 +1231,7 @@ Begin
       For i := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
         Train.Vehicles[high(Train.Vehicles)].Passengers[i] := Nil;
 
-      // Mise à jour de l'étiquette du train.
-      Train.Pre_Render := true;
+      Train_Refresh_Label(Train);
 
       Vehicle_Create := True;
     End
