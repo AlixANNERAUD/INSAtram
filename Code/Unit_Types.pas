@@ -226,6 +226,8 @@ Type Type_Player = Record
   Wagon_Token : Byte;
   // Tunnel du joueur.
   Tunnel_Token : Byte;
+  // Tunnel utilisés.
+  Tunnels_Used : Byte;
 End;
 
 // - Itineraries
@@ -283,6 +285,8 @@ Type Type_Game = Record
   Graphics_Timer : Type_Time;
   // Temporisateur déterminant quand générer un nouveau passager.
   Passengers_Timer : Type_Time;
+  // Temporisateur déterminant quand générer une nouvelle station.
+  Stations_Timer : Type_Time;
   // Temporisateur déterminant quand rafraishir la logique.
   Logic_Timer : Type_Time;
 
@@ -330,6 +334,8 @@ Type Type_Game = Record
   River : Array Of Type_Coordinates;
   // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.  
   Graph_Table : Type_Graph_Table;
+
+  Refresh_Graph_Table : Boolean;
   // Carte des stations.
   Stations_Map : Array Of Array Of Boolean;
   // Tableau de dijkstra.

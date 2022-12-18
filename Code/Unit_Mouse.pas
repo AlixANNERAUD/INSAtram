@@ -95,12 +95,12 @@ Begin
           If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
             Begin
 
-              Line_Add_Station(Game.Mouse.Selected_Last_Station, @Game.Stations[i], Game.Mouse.Selected_Line^);
+              Line_Add_Station(Game.Mouse.Selected_Last_Station, @Game.Stations[i], Game.Mouse.Selected_Line^, Game);
             End
           Else If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Then
                  Begin
-                   Line_Add_Station(Game.Mouse.Selected_Last_Station, Game.Mouse.Selected_Line^);
-                   Line_Add_Station(@Game.Stations[i], Game.Mouse.Selected_Line^);
+                   Line_Add_Station(Game.Mouse.Selected_Last_Station, Game.Mouse.Selected_Line^, Game);
+                   Line_Add_Station(@Game.Stations[i], Game.Mouse.Selected_Line^, Game);
                  End;
           Break;
         End;
@@ -151,7 +151,7 @@ Begin
             Begin
               If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Line^.Stations[i]^.Position, Line^.Stations[i]^.Size, Game.Panel_Right)) Then
                 Begin
-                  Line_Remove_Station(Line^.Stations[i], Line^);
+                  Line_Remove_Station(Line^.Stations[i], Line^, Game);
                   Mouse_Pressed_On_Station := true;
                   Break;
                 End;
@@ -210,9 +210,13 @@ End;
 Procedure Mouse_Line_Add_Train(Var Game : Type_Game);
 
 Var Mouse_Position : Type_Coordinates;
-  i, j : Byte;
+  j : Byte;
+  Line : Type_Line_Pointer;
 Begin
-  If (length(Game.Lines) > 0) Then
+
+ Line := Lines_Get_Selected(Game);
+
+  If (Line <> Nil) Then
     Begin
       Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Release_Position(Game), Game.Panel_Right);
 
@@ -220,29 +224,27 @@ Begin
       Mouse_Position.Y := Mouse_Position.Y - (Vehicle_Size.Y Div 2);
 
       // Parcourt les lignes.
-      For i := low(Game.Lines) To high(Game.Lines) Do
-        Begin
-          If (length(Game.Lines[i].Stations) > 0) Then
+    
+          If (length(Line^.Stations) > 0) Then
             Begin
               // Parcourt les stations (et point intermédiaires) d'une ligne.
-              For j := low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
+              For j := low(Line^.Stations) To high(Line^.Stations) - 1 Do
                 Begin
                   // Vérifie que le pointeur est en collision avec les deux partie d'une ligne.
-                  If (Line_Rectangle_Colliding(Game.Lines[i].Stations[j]^.Position_Centered, Game.Lines[i].Intermediate_Positions[j], Mouse_Position, Vehicle_Size) Or Line_Rectangle_Colliding(Game.
-                     Lines[i].Intermediate_Positions[j], Game.Lines[i].Stations[j + 1]^.Position_Centered, Mouse_Position, Vehicle_Size))
+                  If (Line_Rectangle_Colliding(Line^.Stations[j]^.Position_Centered, Line^.Intermediate_Positions[j], Mouse_Position, Vehicle_Size) Or Line_Rectangle_Colliding(Line^.Intermediate_Positions[j], Line^.Stations[j + 1]^.Position_Centered, Mouse_Position, Vehicle_Size))
                     Then
                     Begin
                       // Si le curseur est plus proche de la première station.
-                      If (Get_Distance(Mouse_Position, Game.Lines[i].Stations[j]^.Position_Centered) <= Get_Distance(Mouse_Position, Game.Lines[i].Stations[j + 1]^.Position_Centered)) Then
+                      If (Get_Distance(Mouse_Position, Line^.Stations[j]^.Position_Centered) <= Get_Distance(Mouse_Position, Line^.Stations[j + 1]^.Position_Centered)) Then
                         Begin
                           // Créer un train qui par de la station précédente, dans le sens indirect.
-                          Train_Create(Game.Lines[i].Stations[j], false, Game.Lines[i], Game);
+                          Train_Create(Line^.Stations[j], false, Line^, Game);
                         End
                         // Si le curseur est plus proche de la seconde station.
                       Else
                         Begin
                           // Créer un train qui part de la station suivante, dans le sens direct.
-                          Train_Create(Game.Lines[i].Stations[j + 1], true, Game.Lines[i], Game);
+                          Train_Create(Line^.Stations[j + 1], true, Line^, Game);
                         End;
                       dec(Game.Player.Locomotive_Token);
                       Break;
@@ -250,7 +252,7 @@ Begin
                     End;
                 End;
             End;
-        End;
+  
     End;
 End;
 

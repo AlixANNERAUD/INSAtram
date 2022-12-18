@@ -27,10 +27,10 @@ Function Line_Create(Var Game : Type_Game) : Boolean;
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
 
-Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
-Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
+Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
-Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
 Function Line_Rectangle_Colliding(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
 Function Lines_Colliding(Line_1, Line_2, Line_3, Line_4 : Type_Coordinates) : Boolean;
@@ -854,6 +854,40 @@ Begin
     Station_Create := False;
 End;
 
+Function Lines_Count_Necessary_Tunnel(Var Game : Type_Game) : Byte;
+Var i, j, k : Byte;
+  Intermediate_Position : Type_Coordinates;
+  Count : Byte;
+Begin
+
+  Count := 0;
+
+  For i := low(Game.Graph_Table) To high(Game.Graph_Table) - 1 Do
+    For j := low(Game.Graph_Table[i]) + i + 1 To high(Game.Graph_Table[i]) Do
+      If (length(Game.Graph_Table[i][j]) > 0) Then
+        Begin
+          // Vérifie s'il y intersection.
+          
+          Intermediate_Position := Station_Get_Intermediate_Position(Game.Stations[i].Position_Centered, Game.Stations[j].Position_Centered);
+
+          For k := low(Game.River) To high(Game.River) - 1 Do
+          Begin
+            If (Lines_Intersects(Game.River[k], Game.River[k + 1], Game.Stations[i].Position_Centered, Intermediate_Position)) Then
+                Inc(Count);
+
+            If (Lines_Intersects(Game.River[k], Game.River[k + 1], Intermediate_Position, Game.Stations[j].Position_Centered)) Then
+                Inc(Count);
+          End; 
+
+        End;
+
+  writeln('Count : ', Count);
+
+  Lines_Count_Necessary_Tunnel := Count;
+
+
+End;
+
 // Procédure qui créer une ligne.
 Function Line_Create(Var Game : Type_Game) : Boolean;
 
@@ -957,7 +991,7 @@ Begin
 End;
 
 // Fonction qui ajoute une station à une ligne.
-Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Begin
   If (length(Line.Stations) < Lines_Maximum_Number_Stations) Then
     Begin
@@ -967,6 +1001,9 @@ Begin
       Line.Stations[high(Line.Stations)] := Station_Pointer;
       // Recalcul des positions intermédiaires de la ligne.
       Line_Compute_Intermediate_Positions(Line);
+
+      Game.Refresh_Graph_Table := True;
+
       Line_Add_Station := True;
     End
   Else
@@ -974,7 +1011,7 @@ Begin
 End;
 
 // Fonction qui insère une station dans une ligne.
-Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
 Var i : Byte;
   Temporary_Array : Array Of Type_Station_Pointer;
@@ -1010,6 +1047,9 @@ Begin
                       Insert(Temporary_Array, Line.Stations, i + 1);
                       // Recalcul des positions intermédiaires de la ligne.
                       Line_Compute_Intermediate_Positions(Line);
+
+                      Game.Refresh_Graph_Table := True;
+
                       Line_Add_Station := true;
                       Break;
                     End;
@@ -1020,7 +1060,7 @@ Begin
 End;
 
 // Fonction qui enlève une station d'une ligne.
-Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Boolean;
+Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
 Var i, j : Byte;
   Busy : Boolean;
@@ -1059,6 +1099,9 @@ Begin
                 If (length(Line.Stations) = 1) Then
                   SetLength(Line.Stations, 0);
                 Line_Compute_Intermediate_Positions(Line);
+
+                Game.Refresh_Graph_Table := True;
+            
                 Line_Remove_Station := True;
               End;
 

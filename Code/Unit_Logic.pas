@@ -39,6 +39,7 @@ Begin
 
 
 
+
 {
   Panel_Set_Hidden(Game.Panel_Reward, True);
 
@@ -60,7 +61,7 @@ Begin
   Station_Get_Pointer_From_Absolute_Index := @Stations[Inndex];
 End;
 
-Procedure Build_Graph_Table(Var Game : Type_Game);
+Procedure Game_Refresh_Graph_Table(Var Game : Type_Game);
 
 Var i, j, k : Byte;
   Indexes : Array[0 .. 1] Of Byte;
@@ -93,7 +94,9 @@ Begin
               Indexes[1] := Station_Get_Absolute_Index(Game.Lines[i].Stations[j + 1], Game);
 
               // Ajoute une case au tableau de pointeurs des lignes des stations concernées.
+
               SetLength(Game.Graph_Table[Indexes[0]][Indexes[1]], length(Game.Graph_Table[Indexes[0]][Indexes[1]]) + 1);
+
               SetLength(Game.Graph_Table[Indexes[1]][Indexes[0]], length(Game.Graph_Table[Indexes[1]][Indexes[0]]) + 1);
 
               // A partir des indexes, on remplit Graph_Table de manière symétrique en ajoutant les pointeur des lignes corrspondantes.
@@ -326,6 +329,7 @@ Begin
         Begin
           Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Ending_Station_Index;
 
+
 // On a correctement identifié la dernière étape, on peut alors commencer la remontée en écrivant l'index de la station d'arrivée. Le 'comingFrom' de la dernière cell nous indique l'étape précédente.   
           Previous_Index := Game.Dijkstra_Table[Last_Step][j].comingFromStationIndex;
           writeln('Le premier PreviousIndex vaut : ',Previous_Index);
@@ -334,15 +338,15 @@ Begin
     End;
 
 
-  if Previous_Index <> Ending_Station_Index then
-  begin
-    Repeat
-      // Rajoute une case a RII
-      SetLength(Reverse_Itinerary_Indexes, length(Reverse_Itinerary_Indexes)+1);
-      
-      writeln('Taille de Reverse_Itinerary_Indexes : ',length(Reverse_Itinerary_Indexes));
+  If Previous_Index <> Ending_Station_Index Then
+    Begin
+      Repeat
+        // Rajoute une case a RII
+        SetLength(Reverse_Itinerary_Indexes, length(Reverse_Itinerary_Indexes)+1);
 
-      Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Previous_Index;
+        writeln('Taille de Reverse_Itinerary_Indexes : ',length(Reverse_Itinerary_Indexes));
+
+        Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Previous_Index;
 
       writeln('Contenu de la case qu''on vient d'' ajouter : ',Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)]);
 
@@ -350,14 +354,14 @@ Begin
       
       writeln('Ancien PreviousIndex : ',Previous_Index);
 
-      Previous_Index := Game.Dijkstra_Table[Last_Step - high(Reverse_Itinerary_Indexes)][Previous_Index].comingFromStationIndex;
+        Previous_Index := Game.Dijkstra_Table[Last_Step - high(Reverse_Itinerary_Indexes)][Previous_Index].comingFromStationIndex;
 
       writeln('Nouveau PreviousIndex : ',Previous_Index);
 
     Until Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] = Starting_Station_Index;
   end;
 
-    writeln('Reverse itinerary indexes :');
+  writeln('Reverse itinerary indexes :');
 
   For j := low(Reverse_Itinerary_Indexes) To high(Reverse_Itinerary_Indexes) Do
     Begin
@@ -373,6 +377,7 @@ Begin
     Begin
       Itinerary_Indexes[high(Reverse_Itinerary_Indexes)-i] := Reverse_Itinerary_Indexes[i];
     End;
+
 
 
 
@@ -404,6 +409,7 @@ Begin
 
 
 End;
+
 
 
 
@@ -585,18 +591,14 @@ Begin
 
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      Line_Add_Station(@Game.Stations[i], Game.Lines[0]);
+      Line_Add_Station(@Game.Stations[i], Game.Lines[0], Game);
     End;
 
 
   For i := low(Game.Stations) + 1 To high(Game.Stations) - 1 Do
     Begin
-      Line_Add_Station(@Game.Stations[i], Game.Lines[1]);
+      Line_Add_Station(@Game.Stations[i], Game.Lines[1], Game);
     End;
-
-
-
-  Build_Graph_Table(Game);
 
 
 
@@ -626,7 +628,7 @@ Begin
 
 
   // Calcul des itinéaires des passagers crées.
-  Passengers_Compute_Itinerary(Game);
+  //Passengers_Compute_Itinerary(Game);
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
   //Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
@@ -731,15 +733,8 @@ Procedure Logic_Refresh(Var Game : Type_Game);
 Var i, j : Integer;
 Begin
 
-  // Si il faut rafraichir les graphismes.
-  If (Game.Graphics_Timer < Time_Get_Current()) Then
-    Begin
-      Graphics_Refresh(Game);
-      Logic_Event_Handler(Game);
-      Game.Graphics_Timer := Time_Get_Current() + (1000 Div 60);
-    End
-    // Si il faut rafraichrir la logique et que la partie n'est pas en pause.
-  Else If (Game.Logic_Timer < Time_Get_Current) And (Game.Play_Pause_Button.State = true) Then
+  // Si il faut rafraichrir la logique et que la partie n'est pas en pause.
+  If (Game.Logic_Timer < Time_Get_Current) And (Game.Play_Pause_Button.State = true) Then
          Begin
            // Vérifie si le jour affiché est différent du jour actuel.
            If (Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7)) <> Game.Day) Then
@@ -761,7 +756,7 @@ Begin
                  Begin
 
                    // Création d'un passager sur une station choisie aléatoirement.
-                   //Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
+                   Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
 
                    // Calcul des itinéaires des passagers crées.
                    //Passengers_Compute_Itinerary(Game);
@@ -773,7 +768,23 @@ Begin
                  End;
              End;
 
-           // Détecte les trains arrivés à quais.
+        // Si le timer de génération de stations à été dépassé.
+           If (Game.Stations_Timer < Time_Get_Current()) Then
+             Begin
+               // Génération aléatoire d'une station.
+               // Vérifie si il y a bien des stations dans une partie.
+
+               //Station_Create(Game);
+               
+            // ! : L'allocation dynamique des stations est problématique car cela déplace les adresses mémoires des stations déjà existantes en cas d'allocation supplémentaire. Or elles ne sont pas et ne peuvent pas être mises à jour dans les lignes, ni dans les trains ... Il faut donc revoir la gestion de la mémoire des stations. Probablement en utilisant plutot des tableaux statiques ou dynamiques (mais avec des pointeurs). Cependant, au vu du nombre d'occurences de Game.Stations, cela risque d'être très long à faire.
+
+                Game.Stations_Timer := Time_Get_Current() + 25000;
+             End;
+
+            
+
+           // - Gestion des trains arrivés à quais.
+
            // Vérifié qu'il existe une ligne.
            If (length(Game.Lines) > 0) Then
              Begin
@@ -793,7 +804,15 @@ Begin
                  End;
              End;
 
-           // - Vérification des stations encombrées.
+           // - Reconstruction de la graph table.
+
+           If (Game.Refresh_Graph_Table) Then
+             Begin
+               Game_Refresh_Graph_Table(Game);
+               Game.Refresh_Graph_Table := false;
+             End;
+
+           // - Vérification de l'encombrement des stations.
 
            // Itère parmis les stations.
            For i := low(Game.Stations) To high(Game.Stations) Do
@@ -817,6 +836,13 @@ Begin
            Game.Logic_Timer := Time_Get_Current() + 200;
          End
          // Si tout à été rafraichit.
+   // Si il faut rafraichir les graphismes.
+  Else If (Game.Graphics_Timer < Time_Get_Current()) Then
+    Begin
+      Graphics_Refresh(Game);
+      Logic_Event_Handler(Game);
+      Game.Graphics_Timer := Time_Get_Current() + (1000 Div 60);
+    End
   Else
     // Mise en pause du jeu.
     SDL_Delay(10);

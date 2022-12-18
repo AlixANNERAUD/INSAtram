@@ -141,7 +141,7 @@ Procedure Graphics_Draw_Lines(Position_1, Position_2 : Type_Coordinates; Colors 
 
 Var Direction : Integer;
   i : Integer;
-  Start_Position : Type_Coordinates;
+  End_Position : Type_Coordinates;
   Temporary_Position : Type_Coordinates;
 Begin
 
@@ -158,22 +158,20 @@ Begin
     End;
 
 
-  // Offset each line around the center line
-
   i := 0;
 
-
+  // - Disjonctions des cas.
   Case Direction Of 
     0 :
         Begin
 
+          End_Position.Y := Position_1.Y + ((7 * length(Colors)) Div 2);
           Position_1.Y := Position_1.Y - ((7 * length(Colors)) Div 2);
-          Position_2.Y := Position_2.Y + ((7 * length(Colors)) Div 2);
 
           If (length(Colors) Mod 2) = 0 Then
-            dec(Position_2.Y);
+            dec(End_Position.Y);
 
-          While (Position_1.Y <= Position_2.Y) Do
+          While (Position_1.Y <= End_Position.Y) Do
             Begin
               lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_1.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
               inc(Position_1.Y);
@@ -183,13 +181,13 @@ Begin
     90 :
          Begin
 
+           End_Position.X := Position_1.X + ((7 * length(Colors)) Div 2);
            Position_1.X := Position_1.X - ((7 * length(Colors)) Div 2);
-           Position_2.X := Position_2.X + ((7 * length(Colors)) Div 2);
 
            If (length(Colors) Mod 2) = 0 Then
-             dec(Position_2.X);
+             dec(End_Position.X);
 
-           While (Position_1.X <= Position_2.X) Do
+           While (Position_1.X <= End_Position.X) Do
              Begin
                lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_1.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
                inc(Position_1.X);
@@ -197,18 +195,97 @@ Begin
              End;
 
          End;
+    45 :
+         Begin
+
+           End_Position.X := Position_1.X;
+
+           Position_1.X := Position_1.X - ((7 * length(Colors)) Div 2);
+           //  Position_2.X := Position_2.X - (2 * length(Colors));
+           // Position_1.Y := Position_1.Y - (2 * length(Colors));
+           Position_2.Y := Position_2.Y - ((7 * length(Colors)) Div 2);
+
+           If (length(Colors) Mod 2) = 1 Then
+             dec(End_Position.X);
+
+           While (Position_1.X <= End_Position.X) Do
+             Begin
+               lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
+
+               inc(Position_1.X);
+               inc(Position_2.Y);
+               inc(i);
+               //    inc(Position_2.X);
+
+               //  lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 5].Red, Colors[i Div 5].Green, Colors[i Div 5].Blue, Colors[i Div 5].Alpha);
+               // inc(Position_1.Y);
+             End;
+
+
+           End_Position.Y := Position_1.Y + ((7 * length(Colors)) Div 2);
+
+
+           If (length(Colors) Mod 2) = 1 Then
+             dec(End_Position.Y);
+
+
+           While (Position_1.Y <= End_Position.Y) Do
+             Begin
+               lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
+               inc(Position_1.Y);
+               inc(Position_2.X);
+               inc(i);
+             End;
+         End;
+    135 :
+          Begin
+            End_Position.X := Position_1.X;
+
+            Position_1.X := Position_1.X + ((7 * length(Colors)) Div 2);
+            //  Position_2.X := Position_2.X - (2 * length(Colors));
+            // Position_1.Y := Position_1.Y - (2 * length(Colors));
+            Position_2.Y := Position_2.Y - ((7 * length(Colors)) Div 2);
+
+
+            If (length(Colors) Mod 2) = 1 Then
+              inc(End_Position.X);
+
+
+            While (Position_1.X >= End_Position.X) Do
+              Begin
+                lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
+
+                dec(Position_1.X);
+                inc(Position_2.Y);
+                inc(i);
+                //    inc(Position_2.X);
+
+                //  lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 5].Red, Colors[i Div 5].Green, Colors[i Div 5].Blue, Colors[i Div 5].Alpha);
+                // inc(Position_1.Y);
+              End;
+
+
+            End_Position.Y := Position_1.Y + ((7 * length(Colors)) Div 2);
+
+
+            If (length(Colors) Mod 2) = 1 Then
+              dec(End_Position.Y);
+
+
+            While (Position_1.Y <= End_Position.Y) Do
+              Begin
+                lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
+                inc(Position_1.Y);
+                dec(Position_2.X);
+                inc(i);
+              End;
+          End;
+
+
+
+
 
 {
-          45 :
-               Begin
-
-                 For i := Position_1.Y - (2 * length(Colors)) To Position_1.Y + (2 * length(Colors)) Do
-                   Begin
-
-
-                   End;
-
-
                  For i := (-2 * length(Colors)) To 0 Do
                    Begin
                      i := (i + (2 * length(Colors))) Div (2 * length(Colors));
@@ -221,10 +298,16 @@ Begin
                      lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
                      lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y + i, Position_2.X + i + 1, Position_2.Y + i, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
                    End;
-               End;
+ }
 
 
+
+
+
+
+{
           135 :
+
            
                 Begin
                   For i := (-2 * length(Colors)) To 0 Do
@@ -251,6 +334,8 @@ Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var 
 
 Var i : Byte;
 Begin
+  Station_Get_Absolute_Index := 255;
+
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
       If Station_Pointer = @Game.Stations[i] Then
@@ -349,34 +434,39 @@ Begin
             Begin
               If (length(Game.Graph_Table[i][j]) > 0) Then
                 Begin
-                  SetLength(Colors, length(Game.Graph_Table[i][j]));
+                  SetLength(Colors, 0);
                   For k := low(Game.Graph_Table[i][j]) To high(Game.Graph_Table[i][j]) Do
                     Begin
-                      If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) And (Game.Graph_Table[i][j][k] = Game.Mouse.Selected_Line) And ((@Game.Stations[i] = Game.Mouse.Selected_Next_Station
-                         )
-                         Or (@Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Then
+                      If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) And (Game.Graph_Table[i][j][k] = Game.Mouse.Selected_Line) And (((@Game.Stations[i] = Game.Mouse.Selected_Last_Station)
+                         And (@Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Or ((@Game.Stations[j] = Game.Mouse.Selected_Last_Station)
+                         And (@Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
                         Begin
-                          Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Destination_Panel);
+                          Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
 
                           Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
 
-                          Graphics_Draw_Line(Game.Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Destination_Panel);
-                          Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Destination_Panel);
+                          Graphics_Draw_Line(Game.Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                          Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
 
                           Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
 
-                          Graphics_Draw_Line(Game.Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Destination_Panel);
-                          Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Destination_Panel);
+                          Graphics_Draw_Line(Game.Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                          Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
                         End
                       Else
-                        Colors[low(Colors) + k ] := Game.Graph_Table[i][j][k]^.Color;
+                        Begin
+                          SetLength(Colors, length(Colors) + 1);
+                          Colors[high(Colors)] := Game.Graph_Table[i][j][k]^.Color;
+                        End;
                     End;
 
-                  Intermediate_Position := Station_Get_Intermediate_Position(Game.Stations[i].Position_Centered, Game.Stations[j].Position_Centered);
+                  If (length(Colors) > 0) Then
+                    Begin
+                      Intermediate_Position := Station_Get_Intermediate_Position(Game.Stations[i].Position_Centered, Game.Stations[j].Position_Centered);
 
-                  Graphics_Draw_Lines(Game.Stations[i].Position_Centered, Intermediate_Position, Colors, Game.Panel_Right);
-                  Graphics_Draw_Lines(Intermediate_Position, Game.Stations[j].Position_Centered, Colors, Game.Panel_Right);
-
+                      Graphics_Draw_Lines(Game.Stations[i].Position_Centered, Intermediate_Position, Colors, Game.Panel_Right);
+                      Graphics_Draw_Lines(Intermediate_Position, Game.Stations[j].Position_Centered, Colors, Game.Panel_Right);
+                    End;
                 End;
             End;
         End;
@@ -1080,13 +1170,15 @@ Var Destination_Rectangle : TSDL_Rect;
   Direction, Norme : Integer;
   i, j, k : Byte;
 Begin
-
+  // Vérifie si le train est en mouvement.
   If (Train.Distance < Train.Maximum_Distance) Or (Train.Driving = false) Then
     Begin
-      If (Train.Distance <= Train.Intermediate_Position_Distance) Then // Si le train se trouve avant le point intermédiaire.
+      // Si le train se trouve avant le point intermédiaire.
+      If (Train.Distance <= Train.Intermediate_Position_Distance) Then
         Begin
           // Calcul de l'angle et de la direction (arrondissement de l'angle à 45 degré près).
           Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Train.Intermediate_Position));
+
           Train.Position := Train.Last_Station^.Position_Centered;
 
           If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
@@ -1094,7 +1186,8 @@ Begin
           Else
             Norme := round(sqrt(sqr(Train.Distance) * 0.5));
         End
-      Else // Si le train se trouve après le point intermédiaire.
+        // Si le train se trouve après le point intermédiaire.
+      Else
         Begin
           // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
           Direction := Graphics_Get_Direction(Get_Angle(Train.Intermediate_Position, Train.Next_Station^.Position_Centered));
@@ -1107,6 +1200,8 @@ Begin
             Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance)) * 0.5));
 
         End;
+
+      // - Application de la norme en fonction de la direction du train et modification de son sprite en conséquence.
 
       Case Direction Of 
         0 :
@@ -1156,9 +1251,9 @@ Begin
              End;
       End;
 
-
+      // Transformation des coordonnées centrés en coordonnées en haut à gauche.
       Train.Position.X := round(Train.Position.X - (Train.Size.X*0.5));
-      Train.Position.Y := round(Train.Position.Y - (Train.Size.X*0.5));
+      Train.Position.Y := round(Train.Position.Y - (Train.Size.Y*0.5));
 
     End;
 
