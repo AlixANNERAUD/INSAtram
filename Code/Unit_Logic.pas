@@ -126,7 +126,7 @@ Begin
             Begin
               // Permet à Dijkstra de savoir s'il doit considérer cette station en particulier dans son calcul d'itinéraire.
               Game.Dijkstra_Table[Step][j].isConnected := True;
-              writeln('Les stations DINDEX numero ',i,' et de numero ',j,' sont connectées');
+              writeln('Les stations d''index numero ',i,' et de numero ',j,' sont connectées');
             End
           Else
             // ! : Ligne rajoutée, à vérifier par HUGO.
@@ -317,8 +317,7 @@ Begin
     Step := Step + 1;
 
   Until ((Step = high(Game.Dijkstra_Table)) Or (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=True));
-
-
+  
   SetLength(Reverse_Itinerary_Indexes, 1);
   writeln('Taille de Reverse_Itinerary_Indexes',length(Reverse_Itinerary_Indexes));
   For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
@@ -329,6 +328,8 @@ Begin
 
 // On a correctement identifié la dernière étape, on peut alors commencer la remontée en écrivant l'index de la station d'arrivée. Le 'comingFrom' de la dernière cell nous indique l'étape précédente.   
           Previous_Index := Game.Dijkstra_Table[Last_Step][j].comingFromStationIndex;
+          writeln('Le premier PreviousIndex vaut : ',Previous_Index);
+          writeln('Contenu de la premiere case de Reverse_Itinerary_Indexes : ',Reverse_Itinerary_Indexes[low(Reverse_Itinerary_Indexes)]);
         End;
     End;
 
@@ -343,9 +344,15 @@ Begin
 
       Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Previous_Index;
 
-      writeln(' index : ', Last_Step - high(Reverse_Itinerary_Indexes), ' previous index : ', Previous_Index);
+      writeln('Contenu de la case qu''on vient d'' ajouter : ',Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)]);
+
+     // writeln(' etape actuelle : ', Last_Step - high(Reverse_Itinerary_Indexes), ' previous index : ', Previous_Index);
+      
+      writeln('Ancien PreviousIndex : ',Previous_Index);
 
       Previous_Index := Game.Dijkstra_Table[Last_Step - high(Reverse_Itinerary_Indexes)][Previous_Index].comingFromStationIndex;
+
+      writeln('Nouveau PreviousIndex : ',Previous_Index);
 
     Until Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] = Starting_Station_Index;
   end;
