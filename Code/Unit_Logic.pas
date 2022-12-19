@@ -596,7 +596,7 @@ Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[1], Game);
     End;
 
-  Game_Refresh_Graph_Table(Game);
+//  Game_Refresh_Graph_Table(Game);
 
 
 
@@ -625,7 +625,7 @@ Begin
 
 
   // Calcul des itinéaires des passagers crées.
-  Passengers_Compute_Itinerary(Game);
+  //Passengers_Compute_Itinerary(Game);
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
   //Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);

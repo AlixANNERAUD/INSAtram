@@ -160,6 +160,8 @@ Const Train_Maximum_Speed = 80;
 
 Const Train_Acceleration_Time = 3;
 
+Const Train_Acceleration_Distance = (Train_Maximum_Speed * Train_Acceleration_Time) Div 2;
+
 Const Train_Speed_Constant : Real = Pi / Train_Acceleration_Time;
 
 Implementation
