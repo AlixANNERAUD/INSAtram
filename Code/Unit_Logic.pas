@@ -308,17 +308,16 @@ Begin
     // - Met à jour les stations disponibles.
 
     For i:= Step To high(Game.Dijkstra_Table) Do
-      //On peut également commencer la boucle à iteration+2.
+      //On peut également commencer la boucle à step+2.
       Begin
         Game.Dijkstra_Table[i][lightest_Station_Index].isAvailable := False;
       End;
 
     comingFromStationIndex := lightest_Station_Index;
     //    End;
-    Last_Step := Step;
-    // je le mets avant le +1 car je crois que on dépasse d'une ligne la final step à la fin quoi qu'il arrive.
+    
     Step := Step + 1;
-
+    Last_Step := Step; // Avant, cette ligne était avant step := step+1.
   Until ((Step = high(Game.Dijkstra_Table)) Or (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=True));
   
   SetLength(Reverse_Itinerary_Indexes, 1);
@@ -367,10 +366,7 @@ Begin
     Begin
       writeln(j, ' : ', Reverse_Itinerary_Indexes[j]);
     End;
-
-  SetLength(Reverse_Itinerary_Indexes, length(Reverse_Itinerary_Indexes)+1);
-  Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Starting_Station_Index;
-
+  writeln('taille de reverse_itinerary_indexes', length(reverse_itinerary_indexes));
   SetLength(Itinerary_Indexes, length(Reverse_Itinerary_Indexes));
   // On copie la taille de Reverse_Itinerary_Indexes
   For i:= high(Reverse_Itinerary_Indexes) Downto low(Reverse_Itinerary_Indexes) Do
@@ -573,7 +569,7 @@ Begin
     End;
 
   // Création des 5 premères stations
-  For i := 1 To 5 Do
+  For i := 1 To 10 Do
     Begin
       Station_Create(Game);
     End;
@@ -600,6 +596,7 @@ Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[1], Game);
     End;
 
+  Game_Refresh_Graph_Table(Game);
 
 
 
@@ -628,7 +625,7 @@ Begin
 
 
   // Calcul des itinéaires des passagers crées.
-  //Passengers_Compute_Itinerary(Game);
+  Passengers_Compute_Itinerary(Game);
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
   //Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
