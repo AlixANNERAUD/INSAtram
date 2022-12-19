@@ -40,6 +40,7 @@ Begin
 
 
 
+
 {
   Panel_Set_Hidden(Game.Panel_Reward, True);
 
@@ -315,11 +316,12 @@ Begin
 
     comingFromStationIndex := lightest_Station_Index;
     //    End;
-    
+
     Step := Step + 1;
-    Last_Step := Step; // Avant, cette ligne était avant step := step+1.
+    Last_Step := Step;
+    // Avant, cette ligne était avant step := step+1.
   Until ((Step = high(Game.Dijkstra_Table)) Or (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=True));
-  
+
   SetLength(Reverse_Itinerary_Indexes, 1);
   writeln('Taille de Reverse_Itinerary_Indexes',length(Reverse_Itinerary_Indexes));
   For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
@@ -327,6 +329,7 @@ Begin
       If Game.Dijkstra_Table[Last_Step][j].isValidated Then
         Begin
           Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Ending_Station_Index;
+
 
 
 // On a correctement identifié la dernière étape, on peut alors commencer la remontée en écrivant l'index de la station d'arrivée. Le 'comingFrom' de la dernière cell nous indique l'étape précédente.   
@@ -347,18 +350,18 @@ Begin
 
         Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Previous_Index;
 
-      writeln('Contenu de la case qu''on vient d'' ajouter : ',Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)]);
+        writeln('Contenu de la case qu''on vient d'' ajouter : ',Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)]);
 
-     // writeln(' etape actuelle : ', Last_Step - high(Reverse_Itinerary_Indexes), ' previous index : ', Previous_Index);
-      
-      writeln('Ancien PreviousIndex : ',Previous_Index);
+        // writeln(' etape actuelle : ', Last_Step - high(Reverse_Itinerary_Indexes), ' previous index : ', Previous_Index);
+
+        writeln('Ancien PreviousIndex : ',Previous_Index);
 
         Previous_Index := Game.Dijkstra_Table[Last_Step - high(Reverse_Itinerary_Indexes)][Previous_Index].comingFromStationIndex;
 
-      writeln('Nouveau PreviousIndex : ',Previous_Index);
+        writeln('Nouveau PreviousIndex : ',Previous_Index);
 
-    Until Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] = Starting_Station_Index;
-  end;
+      Until Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] = Starting_Station_Index;
+    End;
 
   writeln('Reverse itinerary indexes :');
 
@@ -373,6 +376,7 @@ Begin
     Begin
       Itinerary_Indexes[high(Reverse_Itinerary_Indexes)-i] := Reverse_Itinerary_Indexes[i];
     End;
+
 
 
 
@@ -405,6 +409,7 @@ Begin
 
 
 End;
+
 
 
 
@@ -569,7 +574,7 @@ Begin
     End;
 
   // Création des 5 premères stations
-  For i := 1 To 10 Do
+  For i := 1 To 5 Do
     Begin
       Station_Create(Game);
     End;
@@ -596,7 +601,8 @@ Begin
       Line_Add_Station(@Game.Stations[i], Game.Lines[1], Game);
     End;
 
-//  Game_Refresh_Graph_Table(Game);
+  //  Game_Refresh_Graph_Table(Game);
+
 
 
 
@@ -732,114 +738,115 @@ Begin
 
   // Si il faut rafraichrir la logique et que la partie n'est pas en pause.
   If (Game.Logic_Timer < Time_Get_Current) And (Game.Play_Pause_Button.State = true) Then
-         Begin
-           // Vérifie si le jour affiché est différent du jour actuel.
-           If (Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7)) <> Game.Day) Then
-             Begin
-               // Mise à jour de la variable du jour.
-               Game.Day := Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7));
-               // Mise à jour de l'étiquette du jour.
-               Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
-               If (Game.Day = Day_Sunday) Then
-                 Logic_Rewards(Game);
-             End;
-
-           // Si le timer de génération de passager à été dépassé.
-           If (Game.Passengers_Timer < Time_Get_Current()) Then
-             Begin
-               // Génération aléatoire des passagers.
-               // Vérifie si il y a bien des stations dans une partie.
-               If (length(Game.Stations) > 0) Then
-                 Begin
-
-                   // Création d'un passager sur une station choisie aléatoirement.
-                   Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
-
-                   // Calcul des itinéaires des passagers crées.
-                   //Passengers_Compute_Itinerary(Game);
-
-
-                   // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
-                   Game.Passengers_Timer := Time_Get_Current() + round((exp(-1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
-
-                 End;
-             End;
-
-        // Si le timer de génération de stations à été dépassé.
-           If (Game.Stations_Timer < Time_Get_Current()) Then
-             Begin
-               // Génération aléatoire d'une station.
-               // Vérifie si il y a bien des stations dans une partie.
-
-               //Station_Create(Game);
-               
-            // ! : L'allocation dynamique des stations est problématique car cela déplace les adresses mémoires des stations déjà existantes en cas d'allocation supplémentaire. Or elles ne sont pas et ne peuvent pas être mises à jour dans les lignes, ni dans les trains ... Il faut donc revoir la gestion de la mémoire des stations. Probablement en utilisant plutot des tableaux statiques ou dynamiques (mais avec des pointeurs). Cependant, au vu du nombre d'occurences de Game.Stations, cela risque d'être très long à faire.
-
-                Game.Stations_Timer := Time_Get_Current() + 25000;
-             End;
-
-            
-
-           // - Gestion des trains arrivés à quais.
-
-           // Vérifié qu'il existe une ligne.
-           If (length(Game.Lines) > 0) Then
-             Begin
-               // Itère parmis les lignes
-               For i := low(Game.Lines) To high(Game.Lines) Do
-                 Begin
-                   // Itère parmis les trains
-                   For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
-                     Begin
-                       // Si le train est arrivé à quais.
-                       If (Game.Lines[i].Trains[j].Driving = false) Then
-                         Begin
-                           // Effectue la correspondance du train arrivé à quais.
-                           Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j], Game);
-                         End;
-                     End;
-                 End;
-             End;
-
-           // - Reconstruction de la graph table.
-
-           If (Game.Refresh_Graph_Table) Then
-             Begin
-               Game_Refresh_Graph_Table(Game);
-               Game.Refresh_Graph_Table := false;
-             End;
-
-           // - Vérification de l'encombrement des stations.
-
-           // Itère parmis les stations.
-           For i := low(Game.Stations) To high(Game.Stations) Do
-             Begin
-               // Si la station est surchargée.
-               If (length(Game.Stations[i].Passengers) > Station_Overfill_Passengers_Number) Then
-                 Begin
-                   // Si la station n'est pas encombré avant la dernière vérification.
-                   If (Game.Stations[i].Overfill_Timer = 0) Then
-                     // On démare le timer de la station.
-                     Game.Stations[i].Overfill_Timer := Time_Get_Current()
-                                                        // Si la station était encombré avant la dernière vérification et que son timer est dépassé.
-                   Else If (Time_Get_Elapsed(Game.Stations[i].Overfill_Timer) > Station_Overfill_Timer * 1000) Then
-                          // La partie est terminée.
-                   ;
-                   // TODO : Faire écran de game over.
-                 End
-               Else
-                 Game.Stations[i].Overfill_Timer := 0;
-             End;
-           Game.Logic_Timer := Time_Get_Current() + 200;
-         End
-         // Si tout à été rafraichit.
-   // Si il faut rafraichir les graphismes.
-  Else If (Game.Graphics_Timer < Time_Get_Current()) Then
     Begin
-      Graphics_Refresh(Game);
-      Logic_Event_Handler(Game);
-      Game.Graphics_Timer := Time_Get_Current() + (1000 Div 60);
+      // Vérifie si le jour affiché est différent du jour actuel.
+      If (Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7)) <> Game.Day) Then
+        Begin
+          // Mise à jour de la variable du jour.
+          Game.Day := Time_Index_To_Day(byte((Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration)) Mod 7));
+          // Mise à jour de l'étiquette du jour.
+          Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
+          If (Game.Day = Day_Sunday) Then
+            Logic_Rewards(Game);
+        End;
+
+      // Si le timer de génération de passager à été dépassé.
+      If (Game.Passengers_Timer < Time_Get_Current()) Then
+        Begin
+          // Génération aléatoire des passagers.
+          // Vérifie si il y a bien des stations dans une partie.
+          If (length(Game.Stations) > 0) Then
+            Begin
+
+              // Création d'un passager sur une station choisie aléatoirement.
+              Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
+
+              // Calcul des itinéaires des passagers crées.
+              //Passengers_Compute_Itinerary(Game);
+
+
+              // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
+              Game.Passengers_Timer := Time_Get_Current() + round((exp(-1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
+
+            End;
+        End;
+
+      // Si le timer de génération de stations à été dépassé.
+      If (Game.Stations_Timer < Time_Get_Current()) Then
+        Begin
+          // Génération aléatoire d'une station.
+          // Vérifie si il y a bien des stations dans une partie.
+
+          //Station_Create(Game);
+
+
+// ! : L'allocation dynamique des stations est problématique car cela déplace les adresses mémoires des stations déjà existantes en cas d'allocation supplémentaire. Or elles ne sont pas et ne peuvent pas être mises à jour dans les lignes, ni dans les trains ... Il faut donc revoir la gestion de la mémoire des stations. Probablement en utilisant plutot des tableaux statiques ou dynamiques (mais avec des pointeurs). Cependant, au vu du nombre d'occurences de Game.Stations, cela risque d'être très long à faire.
+
+          Game.Stations_Timer := Time_Get_Current() + 25000;
+        End;
+
+
+
+      // - Gestion des trains arrivés à quais.
+
+      // Vérifié qu'il existe une ligne.
+      If (length(Game.Lines) > 0) Then
+        Begin
+          // Itère parmis les lignes
+          For i := low(Game.Lines) To high(Game.Lines) Do
+            Begin
+              // Itère parmis les trains
+              For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+                Begin
+                  // Si le train est arrivé à quais.
+                  If (Game.Lines[i].Trains[j].Driving = false) Then
+                    Begin
+                      // Effectue la correspondance du train arrivé à quais.
+                      Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j], Game);
+                    End;
+                End;
+            End;
+        End;
+
+      // - Reconstruction de la graph table.
+
+      If (Game.Refresh_Graph_Table) Then
+        Begin
+          Game_Refresh_Graph_Table(Game);
+          Game.Refresh_Graph_Table := false;
+        End;
+
+      // - Vérification de l'encombrement des stations.
+
+      // Itère parmis les stations.
+      For i := low(Game.Stations) To high(Game.Stations) Do
+        Begin
+          // Si la station est surchargée.
+          If (length(Game.Stations[i].Passengers) > Station_Overfill_Passengers_Number) Then
+            Begin
+              // Si la station n'est pas encombré avant la dernière vérification.
+              If (Game.Stations[i].Overfill_Timer = 0) Then
+                // On démare le timer de la station.
+                Game.Stations[i].Overfill_Timer := Time_Get_Current()
+                                                   // Si la station était encombré avant la dernière vérification et que son timer est dépassé.
+              Else If (Time_Get_Elapsed(Game.Stations[i].Overfill_Timer) > Station_Overfill_Timer * 1000) Then
+                     // La partie est terminée.
+              ;
+              // TODO : Faire écran de game over.
+            End
+          Else
+            Game.Stations[i].Overfill_Timer := 0;
+        End;
+      Game.Logic_Timer := Time_Get_Current() + 200;
     End
+    // Si tout à été rafraichit.
+    // Si il faut rafraichir les graphismes.
+  Else If (Game.Graphics_Timer < Time_Get_Current()) Then
+         Begin
+           Graphics_Refresh(Game);
+           Logic_Event_Handler(Game);
+           Game.Graphics_Timer := Time_Get_Current() + (1000 Div 60);
+         End
   Else
     // Mise en pause du jeu.
     SDL_Delay(10);
@@ -903,6 +910,8 @@ Begin
 
 
   Train.Maximum_Distance := Train.Maximum_Distance +  Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered);
+
+
 
   // - Déchargement des passagers du train.
 
@@ -986,6 +995,13 @@ Begin
   SetLength(Passengers_Queue, 0);
 
   Train.Start_Time := Time_Get_Current();
+
+  Train.Deceleration_Time := ((Train.Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time + (Train.Start_Time / 1000);
+
+  writeln('Train.Deceleration_Time : ', Train.Deceleration_Time);
+  writeln('Train max distance : ', Train.Maximum_Distance);
+
+
 
   // Le train peut repartir.
   Train.Driving := true;

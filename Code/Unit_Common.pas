@@ -1194,6 +1194,9 @@ Begin
                                                          +  Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
                                                          (Line.Trains)].Next_Station^.Position_Centered);
 
+    
+
+
       If (Line.Color = Color_Get(Color_Red)) Then
         Line.Trains[high(Line.Trains)].Color_Index := 0
       Else If (Line.Color = Color_Get(Color_Purple)) Then
@@ -1216,6 +1219,14 @@ Begin
       Label_Set(Line.Trains[high(Line.Trains)].Passengers_Label, '', Game.Ressources.Fonts[Font_Small][Font_Bold], Color_Get(Color_White));
 
       Line.Trains[high(Line.Trains)].Start_Time := Time_Get_Current();
+
+    Line.Trains[high(Line.Trains)].Deceleration_Time := ((Line.Trains[high(Line.Trains)].Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time + (Line.Trains[high(Line.Trains)].Start_Time / 1000);
+
+    writeln(' Max distance : ', Line.Trains[high(Line.Trains)].Maximum_Distance);
+    writeln(' Acceleration time : ', Line.Trains[high(Line.Trains)].Deceleration_Time);
+
+
+
 
       Vehicle_Create(Line.Trains[high(Line.Trains)]);
 

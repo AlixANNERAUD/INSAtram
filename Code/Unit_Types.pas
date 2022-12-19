@@ -168,7 +168,10 @@ Type Type_Station_Pointer = ^Type_Station;
     Position, Size : Type_Coordinates;
     // Sprite du train.
     Sprite : PSDL_Surface;
+    
     Start_Time : Type_Time;
+
+    Deceleration_Time : Real;
     // Détermine si le train est à l'arrêt ou non.
     Driving : Boolean;
     // Pointeur de la dernière station.

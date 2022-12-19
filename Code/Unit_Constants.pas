@@ -154,15 +154,12 @@ Const Lines_Maximum_Number_Stations = 20;
 
 Const Lines_Maximum_Number_Trains = 4;
 
-  // - Définition des types
+//
 
 Const Train_Maximum_Speed = 80;
+ Train_Acceleration_Time = 3;
 
-Const Train_Acceleration_Time = 3;
-
-Const Train_Acceleration_Distance = (Train_Maximum_Speed * Train_Acceleration_Time) Div 2;
-
-Const Train_Speed_Constant : Real = Pi / Train_Acceleration_Time;
+ Train_Speed_Constant : Real = Train_Maximum_Speed / Train_Acceleration_Time;
 
 Implementation
 
