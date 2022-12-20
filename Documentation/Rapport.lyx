@@ -1426,7 +1426,41 @@ Résolution des itinéraires des passagers
 \end_layout
 
 \begin_layout Standard
-Bon courage :) <3
+Toute la difficulté du jeu reposant sur la performance du réseau créé, il
+ était impératif pour nous que les passagers fassent preuve d'intelligence
+ dans leur choix d'itinéraire.
+ Dans le cas contraire, il n'y aurait aucune incitation à construire un
+ plan de réseau efficace.
+ La recherche du plus court chemin est un problème informatique classique,
+ et de nombreux algorithmes existent pour sa résolution.
+ Nous ne sommes pas mathématiciens ni chercheurs, alors nous avons décidé
+ d'en adopter un assez connu, l'algorithme de Dijkstra.
+ Cet algorithme est supposé être de complexité 
+\begin_inset Formula $\text{O}\left(\left(n+a\right)\text{log}\left(n\right)\right)$
+\end_inset
+
+.
+ Cependant, étant donné que nous avons fait l'implémentation de cet algorithme
+ assez théorique de nous même, en s'inspirant seulement de son fonctionnement
+ quand exécuté 
+\begin_inset Quotes fld
+\end_inset
+
+à la main
+\begin_inset Quotes frd
+\end_inset
+
+, il serait très peu surprenant d'apprendre que sa complexité s'en soit
+ trouvée agrandie.
+ L'écriture des fonctions et procédures liées à la résolution d'itinéraire
+ en elle même n'a pas présenté de difficulté majeure, l'algorithme n'étant
+ pas excessivement compliqué à appréhender.
+ En revanche, toutes les subtilités d'allocation de mémoire, les tableaux
+ sur plusieurs dimensions, la rigueur dans le choix des indexes, ou bien
+ la fragmentation des différentes tâches prérequises à l'exécution de Dijkstra
+ dans de nombreuses fonctions, eux, ont été source de bugs ayant nécessité
+ de longues heures de débogage.
+ 
 \end_layout
 
 \begin_layout Subsection

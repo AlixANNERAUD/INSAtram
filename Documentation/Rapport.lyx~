@@ -515,11 +515,11 @@ Fonctionnalités cachées :
  circonstances, une blague accessible à certains joueurs chanceux...
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Structure
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Nommage
 \end_layout
 
@@ -753,7 +753,7 @@ Procedure Station_Render();
 
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Structure générale
 \end_layout
 
@@ -853,7 +853,7 @@ INSAtram.pas
 .
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Unité
 \end_layout
 
@@ -968,6 +968,8 @@ Live Share
  afin de collaborer le plus facilement possible.
  C'est pour cela que nous avons utilisé l'éditeur de code Visual Studio
  Code du fait de sa modularité.
+ Biensur, en cas de soucis où de problème difficile à résoudre (voir section
+ 4), nous nous concertions et élaborions une solution ensemble.
 \end_layout
 
 \begin_layout Standard
