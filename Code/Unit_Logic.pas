@@ -858,6 +858,7 @@ Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train; Var Gam
 
 Var i, j, k : Byte;
   Passengers_Queue : Array Of Type_Passenger_Pointer;
+  Maximum_Distance : Integer;
 Begin
   // Pour faire disparaitre l'avertissement.
   SetLength(Passengers_Queue, 0);
@@ -903,13 +904,6 @@ Begin
 
   // Calcul de la distance du point intermédiaire.
   Train.Intermediate_Position_Distance := Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
-
-  // Calcul de la distance entre la station de départ et d'arrivée.
-
-  Train.Maximum_Distance := Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
-
-
-  Train.Maximum_Distance := Train.Maximum_Distance +  Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered);
 
 
 
@@ -996,10 +990,16 @@ Begin
 
   Train.Start_Time := Time_Get_Current();
 
-  Train.Deceleration_Time := ((Train.Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time + (Train.Start_Time / 1000);
+
+  // Calcul de la distance entre la station de départ et d'arrivée.
+
+  Maximum_Distance := Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position) + Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered);
+
+
+  Train.Deceleration_Time := ((Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time;
 
   writeln('Train.Deceleration_Time : ', Train.Deceleration_Time);
-  writeln('Train max distance : ', Train.Maximum_Distance);
+  writeln('Train max distance : ', Maximum_Distance);
 
 
 

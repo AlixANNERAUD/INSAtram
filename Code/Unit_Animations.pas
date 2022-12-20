@@ -11,10 +11,12 @@ Procedure Animation_Load(Var Animation : Type_Animation);
 
 Implementation
 
-Function Test(a : Real) : Real;
+Function Test(t : Real) : Real;
 Begin
   
-  Test := ((-sqr(a) * Train_Maximum_Speed) + (2 * a * Train_Acceleration_Time * Train_Maximum_Speed)) / (2 * Train_Acceleration_Time);
+  //Test := ((sqr(a) * Train_Maximum_Speed) - (2 * a * Train_Acceleration_Time * Train_Maximum_Speed)) / (2 * Train_Acceleration_Time);
+
+  Test := t * Train_Maximum_Speed - (((Train_Maximum_Speed * t * t)) / (2 * Train_Acceleration_Time));
 
 End;
 
@@ -51,34 +53,19 @@ Begin
                           // Fait progresser le train sur la ligne.
                           // Calcul du temps écouté depuis le départ du train en secondes.
 
+                          t := Time_Get_Elapsed(Game.Lines[i].Trains[j].Start_Time) / 1000;
+                          
                           // Si le train doit s'arrêter car il est arrivé.
-                          If (Game.Lines[i].Trains[j].Distance >= Game.Lines[i].Trains[j].Maximum_Distance) Then
-                            Begin
+                          If (t >= (Game.Lines[i].Trains[j].Deceleration_Time + Train_Acceleration_Time)) Then
                               // Arrête le train.
-                              Game.Lines[i].Trains[j].Driving := False;
-                              Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Maximum_Distance;
-                            End;
-
-                            t := Time_Get_Elapsed(Game.Lines[i].Trains[j].Start_Time) / 1000;
-
-                          If (t > Game.Lines[i].Trains[j].Deceleration_Time) Then 
+                              Game.Lines[i].Trains[j].Driving := False
+                          Else If (t > Game.Lines[i].Trains[j].Deceleration_Time) Then 
                           Begin
-
                               Game.Lines[i].Trains[j].Distance := round(Game.Animation.Acceleration_Distance + ((Game.Lines[i].Trains[j].Deceleration_Time - Train_Acceleration_Time) * Train_Maximum_Speed));
 
-                              writeln('Distance 2 : ', Game.Lines[i].Trains[j].Distance);
+                  
+                              Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Distance + round(Test(t - Game.Lines[i].Trains[j].Deceleration_Time));
 
-                              writeln(' t : ', t);
-
-
-                              Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Distance + round(Test(t) - Test(Game.Lines[i].Trains[j].Deceleration_Time));
-
-
-                               //Game.Lines[i].Trains[j].Distance := round((((2 * Game.Lines[i].Trains[j].Deceleration_Time * Train_Maximum_Speed * t) - (Train_Maximum_Speed * t * t)) / (2 * Train_Acceleration_Time)) + (Train_Maximum_Speed * t));
-
-                               writeln('added : ', round((((2 * Game.Lines[i].Trains[j].Deceleration_Time * Train_Maximum_Speed * t) - (Train_Maximum_Speed * t * t)) / (2 * Train_Acceleration_Time)) + (Train_Maximum_Speed * t)));
-
-                                writeln('Distance 3 : ', Game.Lines[i].Trains[j].Distance);
       
                           End
 
@@ -86,11 +73,8 @@ Begin
                             Begin
                               t := t - Train_Acceleration_Time;
 
-                              //writeln('Deceleration distance : ', Game.Animation.Acceleration_Distance + (Game.Lines[i].Trains[j].Deceleration_Time - * Train_Maximum_Speed));
-
                               Game.Lines[i].Trains[j].Distance := round(Game.Animation.Acceleration_Distance + (t * Train_Maximum_Speed));
 
-                              writeln(' Disntace : ', Game.Lines[i].Trains[j].Distance);
                             End
                           Else
                             Begin

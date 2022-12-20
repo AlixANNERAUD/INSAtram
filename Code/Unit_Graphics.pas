@@ -1176,8 +1176,8 @@ Var Destination_Rectangle : TSDL_Rect;
   Direction, Norme : Integer;
   i, j, k : Byte;
 Begin
-  // Vérifie si le train est en mouvement.
-  If (Train.Distance < Train.Maximum_Distance) Or (Train.Driving = false) Then
+  // Si le train est en mouvement (évite de refaire les calculs inutillement).
+  If (Train.Driving) Then
     Begin
       // Si le train se trouve avant le point intermédiaire.
       If (Train.Distance <= Train.Intermediate_Position_Distance) Then

@@ -122,9 +122,9 @@ Var i, j, k : Byte;
 Begin
   k := 0;
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do
-      For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
-          If Train.Vehicles[i].Passengers[j] <> nil Then
-            inc(k);
+    For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+      If Train.Vehicles[i].Passengers[j] <> Nil Then
+        inc(k);
 
   Label_Set_Text(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles) * Vehicle_Maximum_Passengers_Number));
 End;
@@ -670,6 +670,7 @@ Begin
   Station_Get_Intermediate_Position := Position_1;
 
 
+
 {
   Case Direction Of 
     0 :
@@ -855,6 +856,7 @@ Begin
 End;
 
 Function Lines_Count_Necessary_Tunnel(Var Game : Type_Game) : Byte;
+
 Var i, j, k : Byte;
   Intermediate_Position : Type_Coordinates;
   Count : Byte;
@@ -867,17 +869,17 @@ Begin
       If (length(Game.Graph_Table[i][j]) > 0) Then
         Begin
           // Vérifie s'il y intersection.
-          
+
           Intermediate_Position := Station_Get_Intermediate_Position(Game.Stations[i].Position_Centered, Game.Stations[j].Position_Centered);
 
           For k := low(Game.River) To high(Game.River) - 1 Do
-          Begin
-            If (Lines_Intersects(Game.River[k], Game.River[k + 1], Game.Stations[i].Position_Centered, Intermediate_Position)) Then
+            Begin
+              If (Lines_Intersects(Game.River[k], Game.River[k + 1], Game.Stations[i].Position_Centered, Intermediate_Position)) Then
                 Inc(Count);
 
-            If (Lines_Intersects(Game.River[k], Game.River[k + 1], Intermediate_Position, Game.Stations[j].Position_Centered)) Then
+              If (Lines_Intersects(Game.River[k], Game.River[k + 1], Intermediate_Position, Game.Stations[j].Position_Centered)) Then
                 Inc(Count);
-          End; 
+            End;
 
         End;
 
@@ -1101,7 +1103,7 @@ Begin
                 Line_Compute_Intermediate_Positions(Line);
 
                 Game.Refresh_Graph_Table := True;
-            
+
                 Line_Remove_Station := True;
               End;
 
@@ -1135,6 +1137,7 @@ End;
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
 Var i : Byte;
+  Maximum_Distance : Integer;
 Begin
   If (length(Line.Trains) < Lines_Maximum_Number_Trains)Then
     Begin
@@ -1187,16 +1190,6 @@ Begin
       Line.Trains[high(Line.Trains)].Intermediate_Position_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].
                                                                        Intermediate_Position);
 
-      // Calcul de la distance maximale du train.
-
-      Line.Trains[high(Line.Trains)].Maximum_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position);
-      Line.Trains[high(Line.Trains)].Maximum_Distance := Line.Trains[high(Line.Trains)].Maximum_Distance
-                                                         +  Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
-                                                         (Line.Trains)].Next_Station^.Position_Centered);
-
-    
-
-
       If (Line.Color = Color_Get(Color_Red)) Then
         Line.Trains[high(Line.Trains)].Color_Index := 0
       Else If (Line.Color = Color_Get(Color_Purple)) Then
@@ -1220,13 +1213,13 @@ Begin
 
       Line.Trains[high(Line.Trains)].Start_Time := Time_Get_Current();
 
-    Line.Trains[high(Line.Trains)].Deceleration_Time := ((Line.Trains[high(Line.Trains)].Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time + (Line.Trains[high(Line.Trains)].Start_Time / 1000);
+      // Calcul de la distance maximale du train.
 
-    writeln(' Max distance : ', Line.Trains[high(Line.Trains)].Maximum_Distance);
-    writeln(' Acceleration time : ', Line.Trains[high(Line.Trains)].Deceleration_Time);
+      Maximum_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position)
+                          +  Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
+                          (Line.Trains)].Next_Station^.Position_Centered);
 
-
-
+      Line.Trains[high(Line.Trains)].Deceleration_Time := ((Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time;
 
       Vehicle_Create(Line.Trains[high(Line.Trains)]);
 

@@ -184,8 +184,6 @@ Type Type_Station_Pointer = ^Type_Station;
     Intermediate_Position : Type_Coordinates;
     // Distance de la prochaine position intermédiaire.
     Intermediate_Position_Distance : Integer;
-    // - Distance maximum;
-    Maximum_Distance : Integer;
     // Direction directe ou indirecte du train (indexe des stations de la ligne croissant ou décroissant).
     Direction : Boolean;
     // - Vitesse du train.
