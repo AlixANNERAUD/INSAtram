@@ -105,8 +105,8 @@ class Type_Color_Name {
 
 class Type_Ressources {
   Fonts : Array [Font_Small..Font_Big Font_Normal..Font_Bold] Of pTTF_Font
-  Stations : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface
-  Passengers : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface
+  Stations : Array [0 .. (Game_Shapes_Number - 1)] Of PSDL_Surface
+  Passengers : Array [0 .. (Game_Shapes_Number - 1)] Of PSDL_Surface
   Vehicles : Array [0 .. 8 0 .. 3] Of PSDL_Surface
   Music : pMIX_MUSIC
 }

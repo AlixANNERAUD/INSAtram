@@ -81,9 +81,6 @@ Begin
                               Game.Lines[i].Trains[j].Distance := round(0.5 * Train_Speed_Constant * t * t);
                             End;
 
-                         // writeln('Distance : ', Game.Lines[i].Trains[j].Distance);
-
-
                         End;
 
                     End;

@@ -17,6 +17,7 @@ Procedure Graphics_Refresh(Var Game : Type_Game);
 
 // - - - Outils
 
+Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Coordinates; Color :
@@ -143,192 +144,119 @@ Var Direction : Integer;
   i : Integer;
   End_Position : Type_Coordinates;
   Temporary_Position : Type_Coordinates;
+
+  Intermediate_Position : Type_Coordinates;
+  Intermediate_Position_2 : Type_Coordinates;
+
+  Angle : Real;
+
+  Depart : Type_Coordinates;
+
+  P : Type_Coordinates;
+
 Begin
 
 
-  Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
-
-  If (Direction < 0) Or (Direction > 135) Then
+  If (Get_Angle(Position_1, Position_2) < 0) Then
     Begin
       Temporary_Position := Position_1;
       Position_1 := Position_2;
       Position_2 := Temporary_Position;
       Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
-
+      Angle := Get_Angle(Position_1, Position_2);
     End;
 
+  // - Traçage du segment entre la postion de la première station et la position intermédiaire.
+
+  Intermediate_Position := Station_Get_Intermediate_Position(Position_1, Position_2);
+  Intermediate_Position_2 := Station_Get_Intermediate_Position(Position_2, Position_1);
+
+  Direction := Graphics_Get_Direction(Get_Angle(Position_1, Intermediate_Position));
+
+  If (Position_1.Y < Position_2.Y) Then
+    P.X := 1
+  Else
+    P.X := -1;
+
+  If (Position_1.X < Position_2.X) Then
+    P.Y := -1
+  Else
+    P.Y := 1;
+
+  Case Direction Of 
+    0 : P.Y := -1;
+    180 : P.Y := 1;
+    90 : P.X := -1;
+    -90 : P.X := 1;
+  End;
 
   i := 0;
 
-  // - Disjonctions des cas.
-  Case Direction Of 
-    0 :
-        Begin
+  Position_1.X := Position_1.X - P.X * (7 * length(Colors) Div 2);
+  Position_1.Y := Position_1.Y - P.Y * (7 * length(Colors) Div 2);
 
-          End_Position.Y := Position_1.Y + ((7 * length(Colors)) Div 2);
-          Position_1.Y := Position_1.Y - ((7 * length(Colors)) Div 2);
+  writeln('Position 1 : ', Position_1.X, ' ', Position_1.Y);
 
-          If (length(Colors) Mod 2) = 0 Then
-            dec(End_Position.Y);
+  Intermediate_Position.X := Intermediate_Position.X - P.X * (7 * length(Colors) Div 2);
+  Intermediate_Position.Y := Intermediate_Position.Y - P.Y * (7 * length(Colors) Div 2);
 
-          While (Position_1.Y <= End_Position.Y) Do
-            Begin
-              lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_1.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
-              inc(Position_1.Y);
-              inc(i);
-            End;
-        End;
-    90 :
-         Begin
+  Repeat
+    lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Intermediate_Position.X, Intermediate_Position.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
 
-           End_Position.X := Position_1.X + ((7 * length(Colors)) Div 2);
-           Position_1.X := Position_1.X - ((7 * length(Colors)) Div 2);
+    Position_1.X := Position_1.X + P.X;
+    Position_1.Y := Position_1.Y + P.Y;
+    Intermediate_Position.X := Intermediate_Position.X + P.X;
+    Intermediate_Position.Y := Intermediate_Position.Y + P.Y;
 
-           If (length(Colors) Mod 2) = 0 Then
-             dec(End_Position.X);
-
-           While (Position_1.X <= End_Position.X) Do
-             Begin
-               lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_1.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
-               inc(Position_1.X);
-               inc(i);
-             End;
-
-         End;
-    45 :
-         Begin
-
-           End_Position.X := Position_1.X;
-
-           Position_1.X := Position_1.X - ((7 * length(Colors)) Div 2);
-           //  Position_2.X := Position_2.X - (2 * length(Colors));
-           // Position_1.Y := Position_1.Y - (2 * length(Colors));
-           Position_2.Y := Position_2.Y - ((7 * length(Colors)) Div 2);
-
-           If (length(Colors) Mod 2) = 1 Then
-             dec(End_Position.X);
-
-           While (Position_1.X <= End_Position.X) Do
-             Begin
-               lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
-
-               inc(Position_1.X);
-               inc(Position_2.Y);
-               inc(i);
-               //    inc(Position_2.X);
-
-               //  lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 5].Red, Colors[i Div 5].Green, Colors[i Div 5].Blue, Colors[i Div 5].Alpha);
-               // inc(Position_1.Y);
-             End;
+    inc(i);
+  Until i >= 7 * length(Colors);
 
 
-           End_Position.Y := Position_1.Y + ((7 * length(Colors)) Div 2);
+  Position_1.X := Position_1.X - P.X * (7 * length(Colors) Div 2);
+  Position_1.Y := Position_1.Y - P.Y * (7 * length(Colors) Div 2);
+
+  writeln('Position 1 : ', Position_1.X, ' ', Position_1.Y);
+
+  Intermediate_Position := Intermediate_Position_2;
 
 
-           If (length(Colors) Mod 2) = 1 Then
-             dec(End_Position.Y);
+  // Traçage du segment entre le point intermédiaire et la seconde station.
 
+  Direction := Graphics_Get_Direction(Get_Angle(Intermediate_Position, Position_2));
 
-           While (Position_1.Y <= End_Position.Y) Do
-             Begin
-               lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
-               inc(Position_1.Y);
-               inc(Position_2.X);
-               inc(i);
-             End;
-         End;
-    135 :
-          Begin
-            End_Position.X := Position_1.X;
+  If (Direction > 0) Then
+    P.X := -1
+  Else
+    P.X := 1;
 
-            Position_1.X := Position_1.X + ((7 * length(Colors)) Div 2);
-            //  Position_2.X := Position_2.X - (2 * length(Colors));
-            // Position_1.Y := Position_1.Y - (2 * length(Colors));
-            Position_2.Y := Position_2.Y - ((7 * length(Colors)) Div 2);
+  If (Direction = 45) Or (Direction = -45) Then
+    P.Y := -1
+  Else
+    P.Y := 1;
 
+  i := 0;
 
-            If (length(Colors) Mod 2) = 1 Then
-              inc(End_Position.X);
+  Intermediate_Position.X := Intermediate_Position.X - P.X * (5 * length(Colors) Div 2);
+  Intermediate_Position.Y := Intermediate_Position.Y - P.Y * (5 * length(Colors) Div 2);
+  Position_2.X := Position_2.X - P.X * (5 * length(Colors) Div 2);
+  Position_2.Y := Position_2.Y - P.Y * (5 * length(Colors) Div 2);
 
+  Repeat
+    lineRGBA(Panel.Surface, Intermediate_Position.X, Intermediate_Position.Y, Position_2.X, Position_2.Y, Colors[i Div 5].Red, Colors[i Div 5].Green, Colors[i Div 5].Blue, Colors[i Div 5].Alpha);
 
-            While (Position_1.X >= End_Position.X) Do
-              Begin
-                lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
+    Intermediate_Position.X := Intermediate_Position.X + P.X;
+    Position_2.X := Position_2.X + P.X;
 
-                dec(Position_1.X);
-                inc(Position_2.Y);
-                inc(i);
-                //    inc(Position_2.X);
+    lineRGBA(Panel.Surface, Intermediate_Position.X, Intermediate_Position.Y, Position_2.X, Position_2.Y, Colors[i Div 5].Red, Colors[i Div 5].Green, Colors[i Div 5].Blue, Colors[i Div 5].Alpha);
 
-                //  lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 5].Red, Colors[i Div 5].Green, Colors[i Div 5].Blue, Colors[i Div 5].Alpha);
-                // inc(Position_1.Y);
-              End;
+    Intermediate_Position.Y := Intermediate_Position.Y + P.Y;
+    Position_2.Y := Position_2.Y + P.Y;
 
+    lineRGBA(Panel.Surface, Intermediate_Position.X, Intermediate_Position.Y, Position_2.X, Position_2.Y, Colors[i Div 5].Red, Colors[i Div 5].Green, Colors[i Div 5].Blue, Colors[i Div 5].Alpha);
 
-            End_Position.Y := Position_1.Y + ((7 * length(Colors)) Div 2);
+    inc(i);
+  Until i >= 5 * length(Colors);
 
-
-            If (length(Colors) Mod 2) = 1 Then
-              dec(End_Position.Y);
-
-
-            While (Position_1.Y <= End_Position.Y) Do
-              Begin
-                lineRGBA(Panel.Surface, Position_1.X, Position_1.Y, Position_2.X, Position_2.Y, Colors[i Div 7].Red, Colors[i Div 7].Green, Colors[i Div 7].Blue, Colors[i Div 7].Alpha);
-                inc(Position_1.Y);
-                dec(Position_2.X);
-                inc(i);
-              End;
-          End;
-
-
-
-
-
-
-{
-                 For i := (-2 * length(Colors)) To 0 Do
-                   Begin
-                     i := (i + (2 * length(Colors))) Div (2 * length(Colors));
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i - 1, Position_2.X + i, Position_2.Y + i - 1, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
-                   End;
-                 For i := 0 To (2 * length(Colors)) Do
-                   Begin
-                     i := (i + (2 * length(Colors))) Div (2 * length(Colors));
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
-                     lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y + i, Position_2.X + i + 1, Position_2.Y + i, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
-                   End;
- }
-
-
-
-
-
-
-
-{
-          135 :
-
-           
-                Begin
-                  For i := (-2 * length(Colors)) To 0 Do
-                    Begin
-                      i := (i + (2 * length(Colors))) Div (2 * length(Colors));
-                      lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
-                      lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i + 1, Position_2.X + i, Position_2.Y - i + 1, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
-                    End;
-                  For i := 0 To (2 * length(Colors)) Do
-                    Begin
-                      i := (i + (2 * length(Colors))) Div (2 * length(Colors));
-                      lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
-                      lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y - i, Position_2.X + i + 1, Position_2.Y - i, Colors[i].Red, Colors[i].Green, Colors[i].Blue, Colors[i].Alpha);
-                    End;
-                End;
-}
-
-
-  End;
 End;
 
 // Fonction qui renvoie l'index absolu (dans le tableau de stations du jeu) d'une station à partir de son pointeur.
@@ -340,7 +268,7 @@ Begin
 
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      If Station_Pointer = @Game.Stations[i] Then
+      If Station_Pointer = Game.Stations[i] Then
         Begin
           Station_Get_Absolute_Index := i;
           break;
@@ -360,10 +288,12 @@ Begin
       // - Rendu des bordures.
       For i := 0 To 5 Do
         Begin
+
           hlineRGBA(Game.Panel_Reward.Surface, 0, Game.Panel_Reward.Size.X, i, 0, 0, 0, 255);
           hlineRGBA(Game.Panel_Reward.Surface, 0, Game.Panel_Reward.Size.X, Game.Panel_Reward.Size.Y - i, 0, 0, 0, 255);
           vlineRGBA(Game.Panel_Reward.Surface, i, 0, Game.Panel_Reward.Size.Y, 0, 0, 0, 255);
           vlineRGBA(Game.Panel_Reward.Surface, Game.Panel_Reward.Size.X - i, 0, Game.Panel_Reward.Size.Y, 0, 0, 0, 255);
+
         End;
 
 
@@ -432,19 +362,20 @@ Begin
 
       If (length(Game.Graph_Table) > 0) Then
         Begin
+
           For i := low(Game.Graph_Table) To high(Game.Graph_Table) - 1 Do
             Begin
               For j := low(Game.Graph_Table[i]) + i + 1 To high(Game.Graph_Table[i]) Do
                 Begin
-                  If (length(Game.Graph_Table[i][j]) > 0) Then
+                  If (length(Game.Graph_Table[i][j]) = 1) Then
                     Begin
                       SetLength(Colors, 0);
                       For k := low(Game.Graph_Table[i][j]) To high(Game.Graph_Table[i][j]) Do
                         Begin
-                          If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) And (Game.Graph_Table[i][j][k] = Game.Mouse.Selected_Line) And (((@Game.Stations[i] = Game.Mouse.
+                          If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) And (Game.Graph_Table[i][j][k] = Game.Mouse.Selected_Line) And (((Game.Stations[i] = Game.Mouse.
                              Selected_Last_Station)
-                             And (@Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Or ((@Game.Stations[j] = Game.Mouse.Selected_Last_Station)
-                             And (@Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
+                             And (Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Or ((Game.Stations[j] = Game.Mouse.Selected_Last_Station)
+                             And (Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
                             Begin
                               Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
 
@@ -467,14 +398,95 @@ Begin
 
                       If (length(Colors) > 0) Then
                         Begin
-                          Intermediate_Position := Station_Get_Intermediate_Position(Game.Stations[i].Position_Centered, Game.Stations[j].Position_Centered);
-
-                          Graphics_Draw_Lines(Game.Stations[i].Position_Centered, Intermediate_Position, Colors, Game.Panel_Right);
-                          Graphics_Draw_Lines(Intermediate_Position, Game.Stations[j].Position_Centered, Colors, Game.Panel_Right);
+                          Graphics_Draw_Lines(Game.Stations[i]^.Position_Centered, Game.Stations[j]^.Position_Centered, Colors, Game.Panel_Right);
                         End;
                     End;
                 End;
             End;
+
+          For i := low(Game.Graph_Table) To high(Game.Graph_Table) - 1 Do
+            Begin
+              For j := low(Game.Graph_Table[i]) + i + 1 To high(Game.Graph_Table[i]) Do
+                Begin
+                  If (length(Game.Graph_Table[i][j]) = 2) Then
+                    Begin
+                      SetLength(Colors, 0);
+                      For k := low(Game.Graph_Table[i][j]) To high(Game.Graph_Table[i][j]) Do
+                        Begin
+                          If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) And (Game.Graph_Table[i][j][k] = Game.Mouse.Selected_Line) And (((Game.Stations[i] = Game.Mouse.
+                             Selected_Last_Station)
+                             And (Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Or ((Game.Stations[j] = Game.Mouse.Selected_Last_Station)
+                             And (Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
+                            Begin
+                              Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
+
+                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
+
+                              Graphics_Draw_Line(Game.Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+
+                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
+
+                              Graphics_Draw_Line(Game.Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                            End
+                          Else
+                            Begin
+                              SetLength(Colors, length(Colors) + 1);
+                              Colors[high(Colors)] := Game.Graph_Table[i][j][k]^.Color;
+                            End;
+                        End;
+
+                      If (length(Colors) > 0) Then
+                        Begin
+                          Graphics_Draw_Lines(Game.Stations[i]^.Position_Centered, Game.Stations[j]^.Position_Centered, Colors, Game.Panel_Right);
+                        End;
+                    End;
+                End;
+            End;
+
+          For i := low(Game.Graph_Table) To high(Game.Graph_Table) - 1 Do
+            Begin
+              For j := low(Game.Graph_Table[i]) + i + 1 To high(Game.Graph_Table[i]) Do
+                Begin
+                  If (length(Game.Graph_Table[i][j]) = 3) Then
+                    Begin
+                      SetLength(Colors, 0);
+                      For k := low(Game.Graph_Table[i][j]) To high(Game.Graph_Table[i][j]) Do
+                        Begin
+                          If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) And (Game.Graph_Table[i][j][k] = Game.Mouse.Selected_Line) And (((Game.Stations[i] = Game.Mouse.
+                             Selected_Last_Station)
+                             And (Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Or ((Game.Stations[j] = Game.Mouse.Selected_Last_Station)
+                             And (Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
+                            Begin
+                              Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
+
+                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
+
+                              Graphics_Draw_Line(Game.Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+
+                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
+
+                              Graphics_Draw_Line(Game.Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                            End
+                          Else
+                            Begin
+                              SetLength(Colors, length(Colors) + 1);
+                              Colors[high(Colors)] := Game.Graph_Table[i][j][k]^.Color;
+                            End;
+                        End;
+
+                      If (length(Colors) > 0) Then
+                        Begin
+                          Graphics_Draw_Lines(Game.Stations[i]^.Position_Centered, Game.Stations[j]^.Position_Centered, Colors, Game.Panel_Right);
+                        End;
+                    End;
+                End;
+            End;
+
+
         End;
 
       // - Affichage des trains.
@@ -519,7 +531,7 @@ Begin
           // - Affichage les stations.
           For i := low(Game.Stations) To high(Game.Stations) Do
             Begin
-              Station_Render(Game.Stations[i], Game.Panel_Right);
+              Station_Render(Game.Stations[i]^, Game.Panel_Right);
             End;
         End;
     End;
@@ -602,7 +614,7 @@ Begin
   Position.Y := 0;
 
   // Itère parmis les couleurs de véhicule.
-  For i := 0 To 7 Do
+  For i := 0 To 8 Do
     Begin
 
       Case i Of 
@@ -614,27 +626,21 @@ Begin
         5 : Color := Color_Yellow;
         6 : Color := Color_Orange;
         7 : Color := Color_Brown;
+        8 : Color := Color_Black;
       End;
 
       // Crée la surface de base (orientation 0 degrée).
       Ressources.Vehicles[i][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
+      // Dessine un rectangle plein de la couleur du véhicule.
       Graphics_Draw_Filled_Rectangle(Ressources.Vehicles[i][0], Position, Vehicle_Size, Color_Get(Color));
 
-      // Génère la deuxième surface (orientation 45 degrée).
+      // Génère les 3 autres surfaces qui sont l'image par rotation de la première surface (45, 90 et 135°).
       Ressources.Vehicles[i][1] := rotozoomSurface(Ressources.Vehicles[i][0], 45, 1, 1);
       Ressources.Vehicles[i][2] := rotozoomSurface(Ressources.Vehicles[i][0], 90, 1, 1);
       Ressources.Vehicles[i][3] := rotozoomSurface(Ressources.Vehicles[i][0], 135, 1, 1);
     End;
 
-  Ressources.Vehicles[8][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
-  Graphics_Draw_Filled_Rectangle(Ressources.Vehicles[8][0], Position, Vehicle_Size, Color_Get(Color_Black));
-
-  // Génère la deuxième surface (orientation 45 degrée).
-  Ressources.Vehicles[8][1] := rotozoomSurface(Ressources.Vehicles[8][0], 45, 1, 1);
-  Ressources.Vehicles[8][2] := rotozoomSurface(Ressources.Vehicles[8][0], 90, 1, 1);
-  Ressources.Vehicles[8][3] := rotozoomSurface(Ressources.Vehicles[8][0], 135, 1, 1);
-
-  // - Fonts loading
+  // - Chargement des polices.
   Ressources.Fonts[Font_Small][Font_Normal] := TTF_OpenFont(Path_Font, 12);
   Ressources.Fonts[Font_Medium][Font_Normal] := TTF_OpenFont(Path_Font, 24);
   Ressources.Fonts[Font_Big][Font_Normal] := TTF_OpenFont(Path_Font, 32);
@@ -642,6 +648,21 @@ Begin
   Ressources.Fonts[Font_Small][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 12);
   Ressources.Fonts[Font_Medium][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 24);
   Ressources.Fonts[Font_Big][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 32);
+
+  // - Chargement des images des bouttons de l'interface.
+
+  Ressources.Train_Add := Image_Load(Path_Image_Button_Locomotive);
+  Ressources.Wagon_Add := Image_Load(Path_Image_Button_Wagon);
+  Ressources.Tunnel_Add := Image_Load(Path_Image_Button_Tunnel);
+
+  Position.X := 16;
+  Position.Y := 16;
+
+  Ressources.Line_Add := Graphics_Surface_Create(32, 32);
+  Graphics_Draw_Filled_Circle(Ressources.Line_Add, Position, 16, Color_Get(Color_Black));
+
+
+
 End;
 
 Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
@@ -769,7 +790,6 @@ Begin
   // Libération de la surface temporaire.
   SDL_FreeSurface(Surface);
 
-
   Panel.Surface := SDL_DisplayFormat(Graphics_Surface_Create(Width, Height));
   Panel_Set_Hidden(false, Panel);
 End;
@@ -795,7 +815,6 @@ Var   Characters : pChar;
   SDL_Color : PSDL_Color;
 Begin
   new(SDL_Color);
-
 
 
   SDL_Color^.r := Laabel.Color.Red;
@@ -939,47 +958,22 @@ Begin
 
     End;
 
-  // Panneau des récompenses.
+  // - Panneau des récompenses.
 
+  // - - Définition du panneau.
   Panel_Create(Game.Panel_Reward, 0, 0, 400, 240);
 
   Game.Panel_Reward.Position.X := Get_Centered_Position(Game.Window.Size.X, Game.Panel_Reward.Size.X);
   Game.Panel_Reward.Position.Y := Get_Centered_Position(Game.Window.Size.Y, Game.Panel_Reward.Size.Y);
 
-  Label_Set(Game.Title_Label, 'Week : 00', Game.Ressources.Fonts[Font_Big][Font_Bold], Color_Get(Color_Black));
+  // - - Définition des polices et couleur des titres.
 
-  // Calcul des coordonnées centré dans le panneau
-  Game.Title_Label.Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X, Game.Title_Label.Size.X);
-  Game.Title_Label.Position.Y := 16;
+  Label_Set(Game.Title_Label, '', Game.Ressources.Fonts[Font_Big][Font_Bold], Color_Get(Color_Black));
+  Label_Set(Game.Message_Label, '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+  Label_Set(Game.Reward_Labels[0], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+  Label_Set(Game.Reward_Labels[1], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
 
 
-  Label_Set(Game.Message_Label, 'Choose your reward :', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
-
-  Button_Set(Game.Reward_Buttons[0], Image_Load(Path_Image_Button_Locomotive), Image_Load(Path_Image_Button_Locomotive));
-
-  Button_Set(Game.Reward_Buttons[1], Image_Load(Path_Image_Button_Wagon), Image_Load(Path_Image_Button_Wagon));
-
-  Game.Reward_Buttons[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Buttons[0].Size.X);
-  Game.Reward_Buttons[0].Position.Y := Game.Panel_Reward.Size.Y - 16 - Game.Reward_Buttons[0].Size.Y;
-
-  Game.Reward_Buttons[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Buttons[1].Size.X) + Game.Panel_Reward.Size.X Div 2;
-  Game.Reward_Buttons[1].Position.Y := Game.Reward_Buttons[0].Position.Y;
-
-  Label_Set(Game.Reward_Labels[0], 'Locomotive', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
-
-  Game.Reward_Labels[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Labels[0].Size.X);
-
-  Game.Reward_Labels[0].Position.Y := Game.Reward_Buttons[0].Position.Y - 16 - Game.Reward_Labels[0].Size.Y;
-
-  Label_Set(Game.Reward_Labels[1], 'Wagon', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
-
-  Game.Reward_Labels[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Labels[1].Size.X) + Game.Panel_Reward.Size.X Div 2;
-
-  Game.Reward_Labels[1].Position.Y := Game.Reward_Labels[0].Position.Y;
-
-  // Calcul des coordonnées centré dans le panneau
-  Game.Message_Label.Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X, Game.Message_Label.Size.X);
-  Game.Message_Label.Position.Y := Game.Title_Label.Position.Y + Game.Title_Label.Size.Y + 16;
 
 
   Panel_Set_Hidden(True, Game.Panel_Reward);
@@ -998,7 +992,7 @@ Begin
     For j := 0 To 3 Do
       SDL_FreeSurface(Game.Ressources.Vehicles[i][j]);
 
-  For i := 0 To Shapes_Number - 1 Do
+  For i := 0 To Game_Shapes_Number - 1 Do
     Begin
       SDL_FreeSurface(Game.Ressources.Stations[i]);
       SDL_FreeSurface(Game.Ressources.Passengers[i]);
@@ -1041,13 +1035,7 @@ Begin
 
   // - Panneau de gauche.
 
-
-
-
   Left_Panel_Render(Game, Game.Window);
-
-
-
 
   Panel_Right_Render(Game, Game.Window);
 
@@ -1306,6 +1294,7 @@ Begin
             Begin
               Destination_Rectangle.x := (Station.Position.X - (2 *
                                          Station.Passengers[i]^.Size.X));
+
               Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
                                          Station.Passengers[i]^.Size.Y + 4));
             End

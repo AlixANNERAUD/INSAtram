@@ -30,29 +30,114 @@ Procedure Logic_Rewards(Var Game : Type_Game);
 
 Implementation
 
-
-
 // - - Fonctions et procédures relatives au passagers 
 
 Procedure Logic_Rewards(Var Game : Type_Game);
+
+Var Rewards : Array[0 .. 1] Of Byte;
+  i : Byte;
+  Random_Draw : Boolean;
 Begin
 
+  Panel_Set_Hidden(False, Game.Panel_Reward);
+
+  Game_Pause(Game);
+
+  // - Tirage au sort des récompenses.
+
+  Repeat
+    Random_Draw := true;
+
+    // Tire au sort les deux récompenses.
+    Rewards[0] := Random(4);
+    Rewards[1] := Random(4);
+
+    // Vérifie que deux récompense différentes ont été tirées.
+    If (Rewards[0] = Rewards[1]) Then
+      Begin
+        // Si non, on refait le tirage.
+        Random_Draw := false;
+      End;
+
+    // Si un des choix le joueur peut choisir une ligne,
+    If (Rewards[0] = 0) Or (Rewards[1] = 0) Then
+      Begin
+        // On vérifie que le nombre de ligne n'a pas été dépassé.
+        If (length(Game.Lines) >= Game_Maximum_Lines_Number) Then
+          Begin
+            // On refait le tirage le cas échéant.
+            Random_Draw := false;
+          End;
+      End;
+  Until Random_Draw = true;
+
+  // - Définition de l'affichage des récompenses.
+
+  // - - Affichage de la semaine.
+
+  Label_Set_Text(Game.Title_Label, 'Week : ' + IntToStr(Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration * 7) + 1));
+  Label_Pre_Render(Game.Title_Label);
+  Game.Title_Label.Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X, Game.Title_Label.Size.X);
+  Game.Title_Label.Position.Y := 16;
+
+  // - - Affichage du message.
+
+  Label_Set_Text(Game.Message_Label, 'Choose your reward : ');
+  Label_Pre_Render(Game.Message_Label);
+  Game.Message_Label.Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X, Game.Message_Label.Size.X);
+  Game.Message_Label.Position.Y := Game.Title_Label.Position.Y + Game.Title_Label.Size.Y + 16;
+
+  // - - Affichage des récompenses.
+
+  For i := 0 To 1 Do
+    Begin
+
+      Case Rewards[i] Of 
+        // - Ligne
+        0 :
+            Begin
+              Label_Set_Text(Game.Reward_Labels[i], 'Line');
+              Button_Set(Game.Reward_Buttons[i], Game.Ressources.Line_Add, Game.Ressources.Line_Add);
+            End;
+        // - Train
+        1 :
+            Begin
+              Label_Set_Text(Game.Reward_Labels[i], 'Train');
+              Button_Set(Game.Reward_Buttons[i], Game.Ressources.Train_Add, Game.Ressources.Train_Add)
+            End;
+        // - Wagon
+        2 :
+            Begin
+              Label_Set_Text(Game.Reward_Labels[i], 'Wagon');
+              Button_Set(Game.Reward_Buttons[i], Game.Ressources.Wagon_Add, Game.Ressources.Wagon_Add);
+            End;
+        // - Tunnel
+        3 :
+            Begin
+              Label_Set_Text(Game.Reward_Labels[i], 'Tunnel');
+              Button_Set(Game.Reward_Buttons[i], Game.Ressources.Tunnel_Add, Game.Ressources.Tunnel_Add);
+            End;
+
+      End;
+
+      Label_Pre_Render(Game.Reward_Labels[i]);
+
+    End;
+
+  Game.Reward_Buttons[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Buttons[0].Size.X);
+  Game.Reward_Buttons[0].Position.Y := Game.Panel_Reward.Size.Y - 16 - Game.Reward_Buttons[0].Size.Y;
+
+  Game.Reward_Buttons[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Buttons[1].Size.X) + Game.Panel_Reward.Size.X Div 2;
+  Game.Reward_Buttons[1].Position.Y := Game.Reward_Buttons[0].Position.Y;
+
+  Game.Reward_Labels[0].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Labels[0].Size.X);
+  Game.Reward_Labels[0].Position.Y := Game.Reward_Buttons[0].Position.Y - 16 - Game.Reward_Labels[0].Size.Y;
+
+  Game.Reward_Labels[1].Position.X := Get_Centered_Position(Game.Panel_Reward.Size.X Div 2, Game.Reward_Labels[1].Size.X) + Game.Panel_Reward.Size.X Div 2;
+  Game.Reward_Labels[1].Position.Y := Game.Reward_Labels[0].Position.Y;
 
 
 
-
-{
-  Panel_Set_Hidden(Game.Panel_Reward, True);
-
-  Label_Set_Text('Week : ' + IntToStr(Time_Get_Elapsed(Game.Start_Time) Div (1000 * Game_Day_Duration * 7)), Game.Title_Label));
-
-  Label_Set_Text('Choose your reward : ', Game.Message_Label);
-
-
-
-
-  Panel_Set_Hidden(Game.Panel_Reward, True);
-}
 End;
 
 
@@ -151,7 +236,7 @@ Begin
   For i:= low(Game.Stations) To high(Game.Stations) Do
     Begin
 
-      If Game.Stations[i].Shape = Passenger^.Shape Then
+      If Game.Stations[i]^.Shape = Passenger^.Shape Then
         Begin
 
           SetLength(Index_Table, length(Index_Table) + 1);
@@ -200,7 +285,7 @@ Begin
   Weight := 0;
   For i := low(Itinerary_Indexes) + 1 To high(Itinerary_Indexes) Do
     Begin
-      Weight := Weight + Get_Weight(Game.Stations[Itinerary_Indexes[i - 1]], Game.Stations[Itinerary_Indexes[i]]);
+      Weight := Weight + Get_Weight(Game.Stations[Itinerary_Indexes[i - 1]]^, Game.Stations[Itinerary_Indexes[i]]^);
     End;
 
   Itinerary_Get_Weight := Weight;
@@ -272,7 +357,7 @@ Begin
               // on écrit d'où on vient dans la cell, comme on peut le voir sur la video d'Yvan
 
               // On effectue le calcul de poids.
-              Game.Dijkstra_Table[Step][i].Weight := Validated_Itinerary_Weight + Get_Weight(Game.Stations[Game.Dijkstra_Table[Step][i].comingFromStationIndex], Game.Stations[i]);//!\\ Attention : Manipule directement la station, pas le pointeur.
+              Game.Dijkstra_Table[Step][i].Weight := Validated_Itinerary_Weight + Get_Weight(Game.Stations[Game.Dijkstra_Table[Step][i].comingFromStationIndex]^, Game.Stations[i]^);//!\\ Attention : Manipule directement la station, pas le pointeur.
             End;
         End;
 
@@ -357,7 +442,7 @@ if Last_Step = high(Game.Dijkstra_Table) then
             Game.Dijkstra_Table[Last_Step][Ending_Station_Index].comingFromStationIndex := j;
             Game.Dijkstra_Table[Last_Step][Ending_Station_Index].IsValidated := True;
             Game.Dijkstra_Table[Last_Step][Ending_Station_Index].isAvailable := False;
-            Game.Dijkstra_Table[Last_Step][Ending_Station_Index].weight := Validated_Itinerary_Weight + Get_Weight(Game.Stations[Game.Dijkstra_Table[Last_Step][Ending_Station_Index].comingFromStationIndex], Game.Stations[Ending_Station_Index]); //!\\ Attention : Manipule directement la station, pas le pointeur.
+            Game.Dijkstra_Table[Last_Step][Ending_Station_Index].weight := Validated_Itinerary_Weight + Get_Weight(Game.Stations[Game.Dijkstra_Table[Last_Step][Ending_Station_Index].comingFromStationIndex]^, Game.Stations[Ending_Station_Index]^); //!\\ Attention : Manipule directement la station, pas le pointeur.
           end;
       end;  
      
@@ -469,10 +554,10 @@ Begin
   For i:= low(Game.Stations) To high(Game.Stations) Do
     // Parcourt toutes les stations pour ensuite parcourir les passagers contenus dans ces stations
     Begin
-      If (length(Game.Stations[i].Passengers) > 0) Then
+      If (length(Game.Stations[i]^.Passengers) > 0) Then
         Begin
           // Itère parmi les passagers d'une station.
-          For j:= low(Game.Stations[i].passengers) To high(Game.Stations[i].passengers) Do
+          For j:= low(Game.Stations[i]^.passengers) To high(Game.Stations[i]^.passengers) Do
             // Parcourt les passagers de la station
             Begin
 
@@ -483,7 +568,7 @@ Begin
               writeln('!!!!!!!!!!!!!!!!!!!!!!!!! Passagers sucées : ', Suce);
 
               // Détermine les stations de destination possible pour un passager.
-              Get_Ending_Stations_From_Shape(Game, Game.Stations[i].Passengers[j], Index_Table_Of_Same_Shape);
+              Get_Ending_Stations_From_Shape(Game, Game.Stations[i]^.Passengers[j], Index_Table_Of_Same_Shape);
 
               // 
               For k := low(Index_Table_Of_Same_Shape) To high(Index_Table_Of_Same_Shape) Do
@@ -532,17 +617,17 @@ Begin
               // - Conversion de l'itinéraire en pointeurs de stations.
 
               writeln('Length Shortest_Itinerary_Indexes : ', length(Shortest_Itinerary_Indexes));
-              writeln('Passenger shape : ', Game.Stations[i].Passengers[j]^.Shape);
+              writeln('Passenger shape : ', Game.Stations[i]^.Passengers[j]^.Shape);
 
-              SetLength(Game.Stations[i].Passengers[j]^.Itinerary, 1);
+              SetLength(Game.Stations[i]^.Passengers[j]^.Itinerary, 1);
               
           
               For l := low(Shortest_Itinerary_Indexes) To high(Shortest_Itinerary_Indexes) Do
                 Begin
-                  Game.Stations[i].Passengers[j]^.Itinerary[l] := @Game.Stations[Shortest_Itinerary_Indexes[l]];
-                  SetLength(Game.Stations[i].Passengers[j]^.Itinerary, length(Game.Stations[i].Passengers[j]^.Itinerary)+1);
+                  Game.Stations[i]^.Passengers[j]^.Itinerary[l] := Game.Stations[Shortest_Itinerary_Indexes[l]];
+                  SetLength(Game.Stations[i]^.Passengers[j]^.Itinerary, length(Game.Stations[i]^.Passengers[j]^.Itinerary)+1);
                 End;
-              SetLength(Game.Stations[i].Passengers[j]^.Itinerary, length(Game.Stations[i].Passengers[j]^.Itinerary)-1);
+              SetLength(Game.Stations[i]^.Passengers[j]^.Itinerary, length(Game.Stations[i]^.Passengers[j]^.Itinerary)-1);
 
             End;
         End;
@@ -585,15 +670,16 @@ Begin
 
   Game.Start_Time := Time_Get_Current();
 
-  Game.Play_Pause_Button.State := true;
+  Game.Play_Pause_Button.State := True;
 
-  Game.Player.Locomotive_Token := 3;
-  Game.Player.Tunnel_Token := 3;
-  Game.Player.Wagon_Token := 3;
+  Game.Player.Locomotive_Token := 1;
+  Game.Player.Tunnel_Token := 1;
+  Game.Player.Wagon_Token := 1;
   Game.Player.Score := 0;
 
   Game.Day := Day_Monday;
 
+  Game.Stations_Timer := Time_Get_Current() + 25000;
 
   River_Create(Game);
 
@@ -626,12 +712,12 @@ Begin
 
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      Line_Add_Station(@Game.Stations[i], Game.Lines[0], Game);
+      Line_Add_Station(Game.Stations[i], Game.Lines[0], Game);
     End;
 
   For i := low(Game.Stations) + 1 To high(Game.Stations) - 1 Do
     Begin
-      Line_Add_Station(@Game.Stations[i], Game.Lines[1], Game);
+      Line_Add_Station(Game.Stations[i], Game.Lines[1], Game);
     End;
 
 
@@ -653,12 +739,12 @@ Begin
     Begin
       For j := 0 To 2 Do
         Begin
-          Passenger_Create(Game.Stations[i], Game);
+          Passenger_Create(Game.Stations[i]^, Game);
         End;
     End;
 
 
-  Passenger_Create(Game.Stations[0], Game);
+  Passenger_Create(Game.Stations[0]^, Game);
 
 
   // Calcul des itinéaires des passagers crées.
@@ -687,12 +773,14 @@ Begin
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
       // Itère parmis les passagers de la station.
-      For j := low(Game.Stations[i].Passengers) To high(Game.Stations[i].Passengers) Do
+      For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
         Begin
-          FreeMem(Game.Stations[i].Passengers[j]);
+          Dispose(Game.Stations[i]^.Passengers[j]);
         End;
       // Vidage du tableau.
-      SetLength(Game.Stations[i].Passengers, 0);
+      SetLength(Game.Stations[i]^.Passengers, 0);
+
+      // TODO : Suppresion des stations.
     End;
 
   SetLength(Game.Stations, 0);
@@ -717,7 +805,7 @@ Begin
                       Begin
                         If (Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] <> Nil) Then
                           Begin
-                            FreeMem(Game.Lines[i].Trains[j].Vehicles[k].Passengers[l]);
+                            Dispose(Game.Lines[i].Trains[j].Vehicles[k].Passengers[l]);
                             Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] := Nil;
                           End;
                       End;
@@ -808,10 +896,7 @@ Begin
           // Génération aléatoire d'une station.
           // Vérifie si il y a bien des stations dans une partie.
 
-          //Station_Create(Game);
-
-
-// ! : L'allocation dynamique des stations est problématique car cela déplace les adresses mémoires des stations déjà existantes en cas d'allocation supplémentaire. Or elles ne sont pas et ne peuvent pas être mises à jour dans les lignes, ni dans les trains ... Il faut donc revoir la gestion de la mémoire des stations. Probablement en utilisant plutot des tableaux statiques ou dynamiques (mais avec des pointeurs). Cependant, au vu du nombre d'occurences de Game.Stations, cela risque d'être très long à faire.
+          Station_Create(Game);
 
           Game.Stations_Timer := Time_Get_Current() + 25000;
         End;
@@ -853,20 +938,20 @@ Begin
       For i := low(Game.Stations) To high(Game.Stations) Do
         Begin
           // Si la station est surchargée.
-          If (length(Game.Stations[i].Passengers) > Station_Overfill_Passengers_Number) Then
+          If (length(Game.Stations[i]^.Passengers) > Station_Overfill_Passengers_Number) Then
             Begin
               // Si la station n'est pas encombré avant la dernière vérification.
-              If (Game.Stations[i].Overfill_Timer = 0) Then
+              If (Game.Stations[i]^.Overfill_Timer = 0) Then
                 // On démare le timer de la station.
-                Game.Stations[i].Overfill_Timer := Time_Get_Current()
-                                                   // Si la station était encombré avant la dernière vérification et que son timer est dépassé.
-              Else If (Time_Get_Elapsed(Game.Stations[i].Overfill_Timer) > Station_Overfill_Timer * 1000) Then
+                Game.Stations[i]^.Overfill_Timer := Time_Get_Current()
+                                                    // Si la station était encombré avant la dernière vérification et que son timer est dépassé.
+              Else If (Time_Get_Elapsed(Game.Stations[i]^.Overfill_Timer) > Station_Overfill_Timer * 1000) Then
                      // La partie est terminée.
               ;
               // TODO : Faire écran de game over.
             End
           Else
-            Game.Stations[i].Overfill_Timer := 0;
+            Game.Stations[i]^.Overfill_Timer := 0;
         End;
       Game.Logic_Timer := Time_Get_Current() + 200;
     End

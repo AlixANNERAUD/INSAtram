@@ -1,13 +1,10 @@
+// Unité contenant les types de données du jeu.
 
 Unit Unit_Types;
 
-// Cette unité contient :
-// - les types de données principaux (alias, structures).
-// - les fonctions et procédures pour l'allocation et désallocation de ses types.
-
 Interface
 
-// - Dépendances
+// - Dépéndances
 
 Uses sdl, sdl_mixer, sdl_gfx, sdl_image, sdl_ttf, sysutils, Math, Unit_Constants;
 
@@ -17,8 +14,7 @@ Type Type_Color = Record
   Red, Green, Blue, Alpha : Byte;
 End;
 
-
-// - - - Interface graphique
+// - - - Interface
 
 Type Type_Label = Record
   Position, Size : Type_Coordinates;
@@ -107,19 +103,7 @@ Type Type_Color_Name = (Color_Black,
                        );
 
 
-Type Type_Ressources = Record
-  // Polices de caractères.
-  Fonts : Array [Font_Small..Font_Big, Font_Normal..Font_Bold] Of pTTF_Font;
-  // Stations (5 formes différentes).
-  Stations : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface;
-  // Passagers (5 formes différentes).
-  Passengers : Array [0 .. (Shapes_Number - 1)] Of PSDL_Surface;
-  // Vehicles (locomotive et wagon), la première dimension est pour les couleurs et la deuxième pour l'orientation (0, 45, 90 et 135 degrees).
-  Vehicles : Array [0 .. 8, 0 .. 3] Of PSDL_Surface;
-  // Sons
-  Music : pMIX_MUSIC;
-End;
-
+// - - Jeu
 
 
 // - - Entités du jeux.
@@ -269,6 +253,23 @@ End;
 Type Type_Index_Table = Array of Integer;
 Type Type_Dijkstra_Table = Array of Array of Type_Dijkstra_Cell;
 
+
+Type Type_Ressources = Record
+  // Polices de caractères.
+  Fonts : Array [Font_Small..Font_Big, Font_Normal..Font_Bold] Of pTTF_Font;
+  // Stations (5 formes différentes).
+  Stations : Array [0 .. (Game_Shapes_Number - 1)] Of PSDL_Surface;
+  // Passagers (5 formes différentes).
+  Passengers : Array [0 .. (Game_Shapes_Number - 1)] Of PSDL_Surface;
+  // Vehicles (locomotive et wagon), la première dimension est pour les couleurs et la deuxième pour l'orientation (0, 45, 90 et 135 degrees).
+  Vehicles : Array [0 .. 8, 0 .. 3] Of PSDL_Surface;
+  // Boutons
+  Train_Add, Wagon_Add, Tunnel_Add, Line_Add : PSDL_Surface;
+  // Sons
+  Music : pMIX_MUSIC;
+End;
+
+
 // - - Partie
 
 Type Type_Game = Record
@@ -330,7 +331,7 @@ Type Type_Game = Record
   Player : Type_Player;
   // Stations
   // Tableau dymamique contenant les stations.
-  Stations : Array Of Type_Station;
+  Stations : Array Of Type_Station_Pointer;
   // Tableau des 
   River : Array Of Type_Coordinates;
   // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.  

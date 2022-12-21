@@ -16,7 +16,7 @@ Function Get_Center_Position(Position, Size : Type_Coordinates) : Type_Coordinat
 Function Get_Centered_Position(Container_Size, Size : Integer) : Integer;
 
 
-// - - Station.
+// - - Station
 
 Function Station_Create(Var Game: Type_Game) : Boolean;
 Procedure Stations_Delete(Var Game : Type_Game);
@@ -98,7 +98,7 @@ Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
 Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
 Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
 
-Procedure Game_Play(Var Game : Type_Game);
+Procedure Game_Resume(Var Game : Type_Game);
 Procedure Game_Pause(Var Game : Type_Game);
 
 Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
@@ -260,13 +260,18 @@ End;
 
 Procedure Game_Pause(Var Game : Type_Game);
 Begin
+  Game.Play_Pause_Button.State := False;
+
   Game.Pause_Time := Time_Get_Current();
 End;
 
-Procedure Game_Play(Var Game : Type_Game);
+Procedure Game_Resume(Var Game : Type_Game);
 
 Var i, j : Byte;
 Begin
+
+  Game.Play_Pause_Button.State := True;
+
   Game.Pause_Time := Time_Get_Current() - Game.Pause_Time;
 
   // - Mise à jour du temps de début du jeu.
@@ -289,8 +294,8 @@ Begin
   // Itère parmis les stations.
   For i := low(Game.Stations) To high(Game.Stations) Do
     // Si la station est surchargée.
-    If (Game.Stations[i].Overfill_Timer <> 0) Then
-      Game.Stations[i].Overfill_Timer := Game.Stations[i].Overfill_Timer + Game.Pause_Time;
+    If (Game.Stations[i]^.Overfill_Timer <> 0) Then
+      Game.Stations[i]^.Overfill_Timer := Game.Stations[i]^.Overfill_Timer + Game.Pause_Time;
 
 
   Game.Pause_Time := 0;
@@ -733,12 +738,12 @@ Begin
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
       // Itère parmis les passagers d'une station.
-      For j := low(Game.Stations[i].Passengers) To high(Game.Stations[i].Passengers) Do
+      For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
         Begin
           // Suppression du passager.
-          Passenger_Delete(Game.Stations[i].Passengers[j]);
+          Passenger_Delete(Game.Stations[i]^.Passengers[j]);
           // Suppression de l'emplacement du passager dans la station.
-          delete(Game.Stations[i].Passengers, j, 1);
+          delete(Game.Stations[i]^.Passengers, j, 1);
         End;
       // Suppression de la station.
       delete(Game.Stations, i, 1);
@@ -777,12 +782,15 @@ Var Shape : Byte;
   Position : Type_Coordinates;
   i, j : Byte;
 Begin
-  If (length(Game.Stations) < Maximum_Number_Stations) Then
+  If (length(Game.Stations) < Game_Maximum_Number_Stations) Then
     Begin
       // Allocation de la station dans le tableau.
       SetLength(Game.Stations, length(Game.Stations) + 1);
       // Définition de l'index de la station créee.
       i := high(Game.Stations);
+
+      // Allocation de la mémoire au pointeur.
+      New(Game.Stations[i]);
 
       // Initialisation des attributs par défaut.
       // Détermination de la forme de la station.
@@ -793,13 +801,11 @@ Begin
         // Les stations suivantes peuvent avoir une forme aléatoire.
         Shape := Random(5);
 
-      Game.Stations[i].Shape := Number_To_Shape(Shape);
-      Game.Stations[i].Sprite := Game.Ressources.Stations[Shape];
+      Game.Stations[i]^.Shape := Number_To_Shape(Shape);
+      Game.Stations[i]^.Sprite := Game.Ressources.Stations[Shape];
 
-
-      Game.Stations[i].Size.X := Game.Stations[i].Sprite^.w;
-
-      Game.Stations[i].Size.Y := Game.Stations[i].Sprite^.h;
+      Game.Stations[i]^.Size.X := Game.Stations[i]^.Sprite^.w;
+      Game.Stations[i]^.Size.Y := Game.Stations[i]^.Sprite^.h;
 
       // Détermination de la position de la station.
       Repeat
@@ -807,8 +813,8 @@ Begin
         Position.X := Random(length(Game.Stations_Map));
         Position.Y := Random(length(Game.Stations_Map[high(Game.Stations_Map)]));
 
-        Game.Stations[i].Position.X := 64 * Position.X + (Game.Panel_Right.Size.X Mod 64) Div 2;
-        Game.Stations[i].Position.Y := 64 * Position.Y + (Game.Panel_Right.Size.Y Mod 64) Div 2;
+        Game.Stations[i]^.Position.X := 64 * Position.X + (Game.Panel_Right.Size.X Mod 64) Div 2;
+        Game.Stations[i]^.Position.Y := 64 * Position.Y + (Game.Panel_Right.Size.Y Mod 64) Div 2;
 
         If (Game.Stations_Map[Position.X][Position.Y] = false) Then
           Begin
@@ -816,7 +822,7 @@ Begin
             For j := low(Game.River) + 1 To high(Game.River) Do
               Begin
                 // Si il y a collision entre la rivière et la station.
-                If (Line_Rectangle_Colliding(Game.River[j - 1], Game.River[j], Game.Stations[i].Position, Game.Stations[i].Size)) Then
+                If (Line_Rectangle_Colliding(Game.River[j - 1], Game.River[j], Game.Stations[i]^.Position, Game.Stations[i]^.Size)) Then
                   Begin
                     // On maruqe l'emplacement comme occupé pour les prochaines stations crées.
                     Game.Stations_Map[Position.X][Position.Y] := true;
@@ -837,17 +843,17 @@ Begin
         SetLength(Game.Dijkstra_Table[j], length(Game.Stations));
 
       // Calcul les coordoonées centré de la station.
-      Game.Stations[i].Position_Centered := Get_Center_Position(Game.Stations[i].Position, Game.Stations[i].Size);
+      Game.Stations[i]^.Position_Centered := Get_Center_Position(Game.Stations[i]^.Position, Game.Stations[i]^.Size);
 
       // Création du timer de la station.
-      Pie_Create(Game.Stations[i].Timer, 10, Color_Get(Color_Blue_Grey), 80);
+      Pie_Create(Game.Stations[i]^.Timer, 10, Color_Get(Color_Blue_Grey), 80);
 
-      Game.Stations[i].Timer.Position.X := Game.Stations[i].Position_Centered.X + Game.Stations[i].Size.Y Div 2;
-      Game.Stations[i].Timer.Position.Y := Game.Stations[i].Position.Y - Game.Stations[i].Size.Y Div 2 - 10;
+      Game.Stations[i]^.Timer.Position.X := Game.Stations[i]^.Position_Centered.X + Game.Stations[i]^.Size.Y Div 2;
+      Game.Stations[i]^.Timer.Position.Y := Game.Stations[i]^.Position.Y - Game.Stations[i]^.Size.Y Div 2 - 10;
 
 
 
-      Game.Stations[i].Overfill_Timer := 0;
+      Game.Stations[i]^.Overfill_Timer := 0;
 
       Station_Create := True;
     End
@@ -870,14 +876,14 @@ Begin
         Begin
           // Vérifie s'il y intersection.
 
-          Intermediate_Position := Station_Get_Intermediate_Position(Game.Stations[i].Position_Centered, Game.Stations[j].Position_Centered);
+          Intermediate_Position := Station_Get_Intermediate_Position(Game.Stations[i]^.Position_Centered, Game.Stations[j]^.Position_Centered);
 
           For k := low(Game.River) To high(Game.River) - 1 Do
             Begin
-              If (Lines_Intersects(Game.River[k], Game.River[k + 1], Game.Stations[i].Position_Centered, Intermediate_Position)) Then
+              If (Lines_Intersects(Game.River[k], Game.River[k + 1], Game.Stations[i]^.Position_Centered, Intermediate_Position)) Then
                 Inc(Count);
 
-              If (Lines_Intersects(Game.River[k], Game.River[k + 1], Intermediate_Position, Game.Stations[j].Position_Centered)) Then
+              If (Lines_Intersects(Game.River[k], Game.River[k + 1], Intermediate_Position, Game.Stations[j]^.Position_Centered)) Then
                 Inc(Count);
             End;
 
@@ -985,6 +991,9 @@ Begin
               Game.Lines[j].Button.Position.X := Game.Lines[j - 1].Button.Position.X + Game.Lines[j - 1].Button.Size.X + 16;
             End;
         End;
+
+
+      Game.Refresh_Graph_Table := True;
 
       Line_Create := True;
     End
@@ -1122,7 +1131,7 @@ Begin
   New(Station.Passengers[high(Station.Passengers)]);
 
   Repeat
-    Shape := Random(Shapes_Number);
+    Shape := Random(Game_Shapes_Number);
   Until (Station.Shape <> Number_To_Shape(Shape));
 
   // Définition de la forme du passager.
