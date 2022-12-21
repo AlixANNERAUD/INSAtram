@@ -1119,7 +1119,7 @@ Var Shape : Byte;
 Begin
   SetLength(Station.Passengers, length(Station.Passengers) + 1);
   // Allocation de la mémoire.
-  Station.Passengers[high(Station.Passengers)] := GetMem(SizeOf(Type_Passenger));
+  New(Station.Passengers[high(Station.Passengers)]);
 
   Repeat
     Shape := Random(Shapes_Number);
@@ -1313,7 +1313,7 @@ Function Passenger_Delete(Var Passenger : Type_Passenger_Pointer) : Boolean;
 Begin
   If (Passenger <> Nil) Then
     Begin
-      FreeMem(Passenger);
+      Dispose(Passenger);
       Passenger := Nil;
       Passenger_Delete := True;
     End
