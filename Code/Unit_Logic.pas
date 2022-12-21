@@ -18,7 +18,7 @@ Procedure Logic_Refresh(Var Game : Type_Game);
 
 Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train; Var Game : Type_Game);
 
-Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
+Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
 
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
 
@@ -537,17 +537,19 @@ Begin
 
 
 
-{// Inverse le tableau pour obtenir l'itinéaire.
+ //Inverse le tableau pour obtenir l'itinéaire.
   For i:= high(Reverse_Itinerary_Indexes) Downto low(Reverse_Itinerary_Indexes) Do
     Begin
       Itinerary_Indexes[high(Reverse_Itinerary_Indexes)-i] := Reverse_Itinerary_Indexes[i];
-    End;}
+      writeln('indice d''itinerary indexes : ', high(Reverse_Itinerary_Indexes)-i);
+      writeln('indice de reverse itinerary indexes : ', i);
+    End;
 
-  For i := low(Reverse_Itinerary_Indexes) To high(Reverse_Itinerary_Indexes) Do
+  {For i := low(Reverse_Itinerary_Indexes) To high(Reverse_Itinerary_Indexes) Do
     // On se rend compte plus tard de l'utilité de garder sous forme reverse
     Begin
       Itinerary_Indexes[i] := Reverse_Itinerary_Indexes[i];
-    End;
+    End;}
 
 
 
@@ -624,21 +626,21 @@ Begin
               For k := low(Index_Table_Of_Same_Shape) To high(Index_Table_Of_Same_Shape) Do
                 Begin
                   writeln(' Dest station shape : ', Game.Stations[Index_Table_Of_Same_Shape[k]]^.Shape);
-                  If Index_Table_Of_Same_Shape[k] < i Then
+                  {If Index_Table_Of_Same_Shape[k] < i Then
                     Begin
                       Dijkstra(Index_Table_Of_Same_Shape[k], i, Itinerary_Indexes, Reverse_Itinerary_Indexes, Game, Station_Is_Isolated);
                       writeln('J''ai été inversé !!!');
                       writeln('suis je isoléee ? ',Station_Is_Isolated);
                     End
-                  Else If Index_Table_Of_Same_Shape[k] = i Then
+                  Else if Index_Table_Of_Same_Shape[k] = i Then
                          Begin
                            writeln('!!!!!!!!!!!!!!!!!!! Je suis pareil !!!!!!!!!!!!!!!!!!!!!!!!!!!');
 
                          End
-                  Else
-                    Begin
+                  Else}
+                    //Begin
                       Dijkstra(i, Index_Table_Of_Same_Shape[k], Itinerary_Indexes, Reverse_Itinerary_Indexes, Game, Station_Is_Isolated);
-                    End;
+                   // End;
 
                   writeln('length Dij :  ', length(Itinerary_Indexes));
 
@@ -693,18 +695,50 @@ Begin
     End;
 End;
 
-Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
+Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
 
 Var i : Byte;
-Begin
 
-  If (Passenger^.Itinerary[high(Passenger^.Itinerary)] = @Current_Station) Then
+Begin
+Passenger_Get_Off := True;
+for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
+  begin
+    if @Next_Station = Passenger^.Itinerary[i] then
+      begin
+        Passenger_Get_Off := False;
+        writeln('Descendre ? ', Passenger_Get_Off);
+      end;
+    {else
+      Begin
+        Passenger_Get_Off := True;    
+        writeln('Descendre ? ', Passenger_Get_Off);  
+      End;}
+  end;
+end;
+
+    {if Passenger^.Itinerary[low(Passenger^.itinerary)+1] = @Next_Station then
+    begin
+      Passenger_Get_Off := False;
+      writeln('Descendre ? ', Passenger_Get_Off);
+    end
+    else if Passenger^.Itinerary[low(Passenger^.itinerary)] = @Next_Station then
+    begin
+      Passenger_Get_Off := False;
+      writeln('Descendre ? ', Passenger_Get_Off);
+    end
+    else
+    begin
+      Passenger_Get_Off := True;
+      writeln('Descendre ? ', Passenger_Get_Off);
+    end;}
+
+  {If (Passenger^.Itinerary[high(Passenger^.Itinerary)] = @Current_Station) Then
     Passenger_Get_Off := True
   Else
-    Passenger_Get_Off := False;
+    Passenger_Get_Off := False;}
 
-  If (length(Passenger^.Itinerary) > 1) Then
-    SetLength(Passenger^.Itinerary, length(Passenger^.Itinerary)-1);
+  {If (length(Passenger^.Itinerary) > 0) Then
+    SetLength(Passenger^.Itinerary, length(Passenger^.Itinerary)-1);}
 
 
 {
@@ -713,23 +747,50 @@ Begin
   Else
     Passenger_Get_Off := False;
 }
-End;
 
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
 Var i : Byte;
 Begin
 
-  writeln('====================================');
+  {for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
+    Begin
+    begin
+      if Passenger^.Itinerary[i+1] = @Next_Station then
+        begin
+          writeln('Passenger^.Itinerary[i+1] Shape : ', Passenger^.Itinerary[i+1]^.Shape);
+          writeln('Next_Station Shape : ', Next_Station.Shape);
+          Passenger_Get_On := True;
+        end
+      else
+        begin
+          Passenger_Get_On := False;
+        end;
+    end;}
 
-  writeln(' Passenger shape : ', Passenger^.Shape);
+      writeln('====================================');
 
-  For i := low(Passenger^.Itinerary) To high(Passenger^.Itinerary) Do
+      writeln(' Passenger shape : ', Passenger^.Shape);
+      writeln('Next station shape = ', Next_Station.Shape);
+      if Passenger^.Itinerary[low(Passenger^.itinerary)+1] = @Next_Station then
+      begin
+        Passenger_Get_On := True;
+      end
+      else if Passenger^.Itinerary[low(Passenger^.itinerary)] = @Next_Station then
+      begin
+        Passenger_Get_On := True;
+      end
+      else
+      begin
+        Passenger_Get_On := False;
+      end;
+  
+  {For i := low(Passenger^.Itinerary) To high(Passenger^.Itinerary) Do
     Begin
       If (Passenger^.Itinerary[i] = @Next_Station) Then
         Passenger_Get_On := True
       Else
         Passenger_Get_On := False;
-    End;
+    End;}
 
   For i := low(Passenger^.itinerary) To high(Passenger^.Itinerary) Do
   Begin
@@ -829,7 +890,7 @@ Begin
 
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      For j := 0 To 5 Do
+      For j := 0 To 2 Do
         Begin
           inc(Total);
           Passenger_Create(Game.Stations[i]^, Game);
@@ -1133,9 +1194,10 @@ Begin
                   Label_Set_Text(Game.Score_Label, IntToStr(Game.Player.Score));
                 End
                 // Si le passager doit descendre du train, son pointeur est déplacé dans le tampon.
-              Else If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j], Train.Last_Station^)) Then
+              Else If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j], Train.Next_Station^)) Then
                      Begin
                        // Copie du pointeur du passager dans le tampon.
+                       writeln('Le passager ',Train.Vehicles[i].Passengers[j]^.Shape,' vient de descendre');
                        SetLength(Passengers_Queue, length(Passengers_Queue) + 1);
                        Passengers_Queue[high(Passengers_Queue)] := Train.Vehicles[i].Passengers[j];
                        // Réinitialisation du pointeur du passager dans le train.
@@ -1166,6 +1228,7 @@ Begin
                         Begin
                           // Copie du pointeur du passager dans le train.
                           Train.Vehicles[i].Passengers[j] := Train.Last_Station^.Passengers[k];
+                          writeln('Le passager ', Train.Last_Station^.Passengers[k]^.Shape, ' est monté dans le train');
                           // Suppresion du pointeur du passager de la station.
                           delete(Train.Last_Station^.Passengers, k, 1);
                           // On quitte la boucle.
