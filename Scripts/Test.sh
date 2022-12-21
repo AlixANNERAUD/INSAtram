@@ -1,3 +1,5 @@
+clear
+
 sh ./Build_Debug.sh
 
 

@@ -195,8 +195,6 @@ Begin
   Position_1.X := Position_1.X - P.X * (7 * length(Colors) Div 2);
   Position_1.Y := Position_1.Y - P.Y * (7 * length(Colors) Div 2);
 
-  writeln('Position 1 : ', Position_1.X, ' ', Position_1.Y);
-
   Intermediate_Position.X := Intermediate_Position.X - P.X * (7 * length(Colors) Div 2);
   Intermediate_Position.Y := Intermediate_Position.Y - P.Y * (7 * length(Colors) Div 2);
 
@@ -214,8 +212,6 @@ Begin
 
   Position_1.X := Position_1.X - P.X * (7 * length(Colors) Div 2);
   Position_1.Y := Position_1.Y - P.Y * (7 * length(Colors) Div 2);
-
-  writeln('Position 1 : ', Position_1.X, ' ', Position_1.Y);
 
   Intermediate_Position := Intermediate_Position_2;
 
@@ -345,6 +341,7 @@ Var i, j, k : Byte;
   Intermediate_Position, Mouse_Position: Type_Coordinates;
   Indexes : Array [0..1] Of Byte;
   Colors : Array Of Type_Color;
+  Mouse_Colors : Array Of Type_Color;
 Begin
 
   If (Game.Play_Pause_Button.State = true) Then
@@ -377,6 +374,8 @@ Begin
                              And (Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Or ((Game.Stations[j] = Game.Mouse.Selected_Last_Station)
                              And (Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
                             Begin
+
+
                               Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
 
                               Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);

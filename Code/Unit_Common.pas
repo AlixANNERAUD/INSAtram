@@ -746,6 +746,7 @@ Begin
           delete(Game.Stations[i]^.Passengers, j, 1);
         End;
       // Suppression de la station.
+      Dispose(Game.Stations[i]);
       delete(Game.Stations, i, 1);
     End;
 End;

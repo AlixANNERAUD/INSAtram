@@ -292,7 +292,8 @@ Begin
 
 End;
 
-Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Var Reverse_Itinerary_Indexes : Type_Itinerary_Indexes ;Game : Type_Game; Var Station_Is_Isolated : Boolean);
+Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Var Reverse_Itinerary_Indexes : Type_Itinerary_Indexes; Game :
+                   Type_Game; Var Station_Is_Isolated : Boolean);
 
 Var a, k, row, column, Step, indexStationToConnect, comingFromStationIndex, lightest_Station_Index, i, Previous_Index, j, Last_Step, lightest_Station_Step : Integer;
   minimum_Weight, Validated_Itinerary_Weight : Real;
@@ -300,6 +301,8 @@ Var a, k, row, column, Step, indexStationToConnect, comingFromStationIndex, ligh
 
 Begin
 
+  SetLength(Reverse_Itinerary_Indexes, 0);
+  SetLength(Itinerary_Indexes, 0);
 
   // - Initialisation de la table de Dijkstra.
   Validated_Itinerary_Weight := 0;
@@ -333,6 +336,8 @@ Begin
 
   // Définit la station de départ de l'étape 0 comme étant la station de départ (initénaire complet).
   Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].comingFromStationIndex := comingFromStationIndex;
+  writeln('Ecriture manuelle de comingFromStationIndex = ', comingFromStationIndex,' aux coordonnées : ',low(Game.Dijkstra_Table),', ',Starting_Station_Index);
+
 
   // Met la station de départ comme étant validée (dans l'itinéraire final).
   Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isValidated := True;
@@ -342,7 +347,7 @@ Begin
 
   // - Résolution de l'itinéraire.
 
-  while ((Step <= (high(Game.Dijkstra_Table))) and (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=False)) Do
+  While ((Step <= (high(Game.Dijkstra_Table))) And (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=False)) Do
     Begin
 
       Connect_Stations(Step, comingFromStationIndex, Game);
@@ -354,10 +359,13 @@ Begin
             Begin
               // TODO : Je ne suis pas fan de cette méthode, mais je ne vois pas comment faire autrement.
               Game.Dijkstra_Table[Step][i].comingFromStationIndex := comingFromStationIndex;
+              writeln('Ecriture de comingFromStationIndex = ', comingFromStationIndex,' aux coordonnées : ',Step,', ',i);
+
               // on écrit d'où on vient dans la cell, comme on peut le voir sur la video d'Yvan
 
               // On effectue le calcul de poids.
-              Game.Dijkstra_Table[Step][i].Weight := Validated_Itinerary_Weight + Get_Weight(Game.Stations[Game.Dijkstra_Table[Step][i].comingFromStationIndex]^, Game.Stations[i]^);//!\\ Attention : Manipule directement la station, pas le pointeur.
+              Game.Dijkstra_Table[Step][i].Weight := Validated_Itinerary_Weight + Get_Weight(Game.Stations[Game.Dijkstra_Table[Step][i].comingFromStationIndex]^, Game.Stations[i]^);
+              //!\\ Attention : Manipule directement la station, pas le pointeur.
             End;
         End;
 
@@ -379,35 +387,36 @@ Begin
                       lightest_Station_Index := column;
                       lightest_Station_Step := i;
                     End
+
                   Else If (Game.Dijkstra_Table[i][column].weight < minimum_Weight) Then
-                        Begin
-                          minimum_Weight := Game.Dijkstra_Table[i][column].weight;
-                          lightest_Station_Index := column;
-                          lightest_Station_Step := i;
-                        End;
+                         Begin
+                           minimum_Weight := Game.Dijkstra_Table[i][column].weight;
+                           lightest_Station_Index := column;
+                           lightest_Station_Step := i;
+                         End;
 
                 End;
             End;
         End;
 
-      if (Step = high(Game.Dijkstra_Table)) and (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=False) then
-        begin
-          Station_Is_Isolated := True;    
-        end
-      else
-        begin
-            Station_Is_Isolated := False;
-            Game.Dijkstra_Table[Step+1][lightest_Station_Index] := Game.Dijkstra_Table[lightest_Station_Step][lightest_Station_Index];
-            Game.Dijkstra_Table[Step+1][lightest_Station_Index].isValidated := True;
-            {writeln('validation à ', Step+1,', ',lightest_Station_Index);}
-            Validated_Itinerary_Weight := Game.Dijkstra_Table[lightest_Station_Step][lightest_Station_Index].weight;  
-        end; 
-      
+      If (Step = high(Game.Dijkstra_Table)) And Not(Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)) Then
+        Begin
+          Station_Is_Isolated := True;
+        End
+      Else
+        Begin
+          Station_Is_Isolated := False;
+          Game.Dijkstra_Table[Step+1][lightest_Station_Index] := Game.Dijkstra_Table[lightest_Station_Step][lightest_Station_Index];
+          Game.Dijkstra_Table[Step+1][lightest_Station_Index].isValidated := True;
+          writeln('validation à ', Step+1,', ',lightest_Station_Index);
+          Validated_Itinerary_Weight := Game.Dijkstra_Table[lightest_Station_Step][lightest_Station_Index].weight;
+        End;
+
 
 
       // - Met à jour les stations disponibles.
 
-      For i:= Step To high(Game.Dijkstra_Table) Do
+      For i:= low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
         //On peut également commencer la boucle à step+2.
         Begin
           Game.Dijkstra_Table[i][lightest_Station_Index].isAvailable := False;
@@ -415,18 +424,21 @@ Begin
 
       comingFromStationIndex := lightest_Station_Index;
       //    End;
-      
+
       Step := Step + 1;
-      if Step-1 = high(Game.Dijkstra_Table) then
+      If Step-1 = high(Game.Dijkstra_Table) Then
         Last_Step := Step-1
-      else
+      Else
         Last_Step := Step;
-    // Avant, cette ligne était avant step := step+1.
-  end;
-  
-if Last_Step = high(Game.Dijkstra_Table) then
+      // Avant, cette ligne était avant step := step+1.
+    End;
+
+
+
+
+{if Last_Step = high(Game.Dijkstra_Table) then
   begin
-    {writeln('je viens de rentrer dans la phase de correction du cas particulier, le lastStep vaut : ', Last_Step);}
+    //writeln('je viens de rentrer dans la phase de correction du cas particulier, le lastStep vaut : ', Last_Step);
     For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
       Begin
         If Game.Dijkstra_Table[Last_Step][j].isValidated Then
@@ -438,7 +450,7 @@ if Last_Step = high(Game.Dijkstra_Table) then
       Begin
         If Game.Dijkstra_Table[Last_Step-1][j].isValidated Then
           Begin
-            {writeln('Je suis à la ligne ', Last_Step-1, ' et la colonne ', j);}
+            //writeln('Je suis à la ligne ', Last_Step-1, ' et la colonne ', j);
             Game.Dijkstra_Table[Last_Step][Ending_Station_Index].comingFromStationIndex := j;
             Game.Dijkstra_Table[Last_Step][Ending_Station_Index].IsValidated := True;
             Game.Dijkstra_Table[Last_Step][Ending_Station_Index].isAvailable := False;
@@ -446,24 +458,28 @@ if Last_Step = high(Game.Dijkstra_Table) then
           end;
       end;  
      
-  end;
+  end;}
 
   SetLength(Reverse_Itinerary_Indexes, 1);
   {writeln('Taille de Reverse_Itinerary_Indexes',length(Reverse_Itinerary_Indexes));}
   Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Ending_Station_Index;
-  for j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
-  begin
+  For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
+    Begin
     {writeln('IsValidated à la case ',Last_Step,', ',j,' vaut : ',Game.Dijkstra_Table[Last_Step][j].isValidated);}
-  end;
+    End;
 
   For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
     Begin
       If Game.Dijkstra_Table[Last_Step][j].isValidated Then
         Begin
           {Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Ending_Station_Index;}
+
+
 // On a correctement identifié la dernière étape, on peut alors commencer la remontée en écrivant l'index de la station d'arrivée. Le 'comingFrom' de la dernière cell nous indique l'étape précédente.   
           Previous_Index := Game.Dijkstra_Table[Last_Step][j{+1}].comingFromStationIndex;
-          {writeln('Le premier PreviousIndex vaut : ',Previous_Index,' Il s''agit du comingFromStationIndex de la case Step = ',Last_Step,' colonne : ',j);
+
+
+{writeln('Le premier PreviousIndex vaut : ',Previous_Index,' Il s''agit du comingFromStationIndex de la case Step = ',Last_Step,' colonne : ',j);
           writeln('Contenu de la premiere case de Reverse_Itinerary_Indexes : ',Reverse_Itinerary_Indexes[low(Reverse_Itinerary_Indexes)]);}
         End;
     End;
@@ -484,7 +500,23 @@ if Last_Step = high(Game.Dijkstra_Table) then
         writeln(' etape actuelle : ', Last_Step - high(Reverse_Itinerary_Indexes), ' previous index : ', Previous_Index);
 
         {writeln('Ancien PreviousIndex : ',Previous_Index);}
-        
+
+      {
+        If (Last_Step - high(Game.Dijkstra_Table)) < 0 Then
+        begin
+          writeln('!!!!!!!!!!!!!! EXTERMINATION !!!!!!!!!!!!!!!!!');
+          Break;
+        end;
+}
+        If Previous_Index = 255 Then
+          Begin
+            writeln('!!!!!!!!!!!!!! DOUBLE EXTERMINATION !!!!!!!!!!!!!!!!!');
+            Previous_Index := Starting_Station_Index;
+            Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Starting_Station_Index;
+            Step := 0;
+            Break;
+          End;
+
         Previous_Index := Game.Dijkstra_Table[Last_Step - high(Reverse_Itinerary_Indexes)][Previous_Index].comingFromStationIndex;
 
         {writeln('Nouveau PreviousIndex : ',Previous_Index);}
@@ -492,21 +524,36 @@ if Last_Step = high(Game.Dijkstra_Table) then
       Until Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] = Starting_Station_Index;
     End;
 
-  {writeln('Reverse itinerary indexes :');}
+  writeln('Reverse itinerary indexes :');
 
   For j := low(Reverse_Itinerary_Indexes) To high(Reverse_Itinerary_Indexes) Do
     Begin
-      {writeln(j, ' : ', Reverse_Itinerary_Indexes[j]);}
+      writeln(j, ' : ', Reverse_Itinerary_Indexes[j]);
     End;
   {writeln('taille de reverse_itinerary_indexes', length(reverse_itinerary_indexes));}
+
+
   SetLength(Itinerary_Indexes, length(Reverse_Itinerary_Indexes));
-  // On copie la taille de Reverse_Itinerary_Indexes
+
+
+
+{// Inverse le tableau pour obtenir l'itinéaire.
   For i:= high(Reverse_Itinerary_Indexes) Downto low(Reverse_Itinerary_Indexes) Do
     Begin
       Itinerary_Indexes[high(Reverse_Itinerary_Indexes)-i] := Reverse_Itinerary_Indexes[i];
+    End;}
+
+  For i := low(Reverse_Itinerary_Indexes) To high(Reverse_Itinerary_Indexes) Do
+    // On se rend compte plus tard de l'utilité de garder sous forme reverse
+    Begin
+      Itinerary_Indexes[i] := Reverse_Itinerary_Indexes[i];
     End;
 
+
+
 End;
+
+
 
 {Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station; Game : Type_Game) : Boolean;
 Var Current_Station_Index, Passenger_Shape_Station_Index : Integer;
@@ -565,27 +612,39 @@ Begin
 
               inc(Suce);
 
-              writeln('!!!!!!!!!!!!!!!!!!!!!!!!! Passagers sucées : ', Suce);
+              writeln('!!!!!!!!!!!!!!!!!!!!!!!!! Passagers en train d etre sucee : ', Suce);
 
               // Détermine les stations de destination possible pour un passager.
               Get_Ending_Stations_From_Shape(Game, Game.Stations[i]^.Passengers[j], Index_Table_Of_Same_Shape);
 
+
+              writeln(' Passenger shape : ', Game.Stations[i]^.Passengers[j]^.Shape);
+
               // 
               For k := low(Index_Table_Of_Same_Shape) To high(Index_Table_Of_Same_Shape) Do
                 Begin
-                  if Index_Table_Of_Same_Shape[k] < i then
-                    begin
+                  writeln(' Dest station shape : ', Game.Stations[Index_Table_Of_Same_Shape[k]]^.Shape);
+                  If Index_Table_Of_Same_Shape[k] < i Then
+                    Begin
                       Dijkstra(Index_Table_Of_Same_Shape[k], i, Itinerary_Indexes, Reverse_Itinerary_Indexes, Game, Station_Is_Isolated);
                       writeln('J''ai été inversé !!!');
                       writeln('suis je isoléee ? ',Station_Is_Isolated);
-                    end
-                  else
-                    begin
+                    End
+                  Else If Index_Table_Of_Same_Shape[k] = i Then
+                         Begin
+                           writeln('!!!!!!!!!!!!!!!!!!! Je suis pareil !!!!!!!!!!!!!!!!!!!!!!!!!!!');
+
+                         End
+                  Else
+                    Begin
                       Dijkstra(i, Index_Table_Of_Same_Shape[k], Itinerary_Indexes, Reverse_Itinerary_Indexes, Game, Station_Is_Isolated);
-                    end;                  
+                    End;
+
                   writeln('length Dij :  ', length(Itinerary_Indexes));
 
-                  {writeln(' Solution ', k, ' de Dijkstra  : ');
+
+
+{writeln(' Solution ', k, ' de Dijkstra  : ');
                   For l := low(Itinerary_Indexes) To high(Itinerary_Indexes) Do
                     Begin
                       writeln('S : ', Itinerary_Indexes[l]);
@@ -594,10 +653,10 @@ Begin
                   writeln('Weight : ', Itinerary_Get_Weight(Game, Itinerary_Indexes));}
 
                   If k = low(Index_Table_Of_Same_Shape) Then
-                    begin
-                    Lowest_Weight := Itinerary_Get_Weight(Game, Itinerary_Indexes);
-                    Shortest_Itinerary_Indexes := copy(Itinerary_Indexes, low(Itinerary_Indexes), length(Itinerary_Indexes));
-                    end
+                    Begin
+                      Lowest_Weight := Itinerary_Get_Weight(Game, Itinerary_Indexes);
+                      Shortest_Itinerary_Indexes := copy(Itinerary_Indexes, low(Itinerary_Indexes), length(Itinerary_Indexes));
+                    End
                   Else If (Itinerary_Get_Weight(Game, Itinerary_Indexes) < Lowest_Weight) Then
                          Begin
                            Lowest_Weight := Itinerary_Get_Weight(Game, Itinerary_Indexes);
@@ -605,10 +664,10 @@ Begin
                           {writeln('length(Itinerary_Indexes) : ',length(Itinerary_Indexes));}
                            SetLength(Shortest_Itinerary_Indexes, length(Itinerary_Indexes));
                            Shortest_Itinerary_Indexes := copy(Itinerary_Indexes, low(Itinerary_Indexes), length(Itinerary_Indexes));
-                           for m := low(Itinerary_Indexes) to high(Itinerary_Indexes) do
-                            begin
-                              Shortest_Itinerary_Indexes[m]:=Itinerary_Indexes[m];
-                            end;
+                           For m := low(Itinerary_Indexes) To high(Itinerary_Indexes) Do
+                             Begin
+                               Shortest_Itinerary_Indexes[m] := Itinerary_Indexes[m];
+                             End;
 
                          End;
 
@@ -620,8 +679,8 @@ Begin
               writeln('Passenger shape : ', Game.Stations[i]^.Passengers[j]^.Shape);
 
               SetLength(Game.Stations[i]^.Passengers[j]^.Itinerary, 1);
-              
-          
+
+
               For l := low(Shortest_Itinerary_Indexes) To high(Shortest_Itinerary_Indexes) Do
                 Begin
                   Game.Stations[i]^.Passengers[j]^.Itinerary[l] := Game.Stations[Shortest_Itinerary_Indexes[l]];
@@ -635,19 +694,55 @@ Begin
 End;
 
 Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Current_Station : Type_Station) : Boolean;
+
+Var i : Byte;
 Begin
+
+  If (Passenger^.Itinerary[high(Passenger^.Itinerary)] = @Current_Station) Then
+    Passenger_Get_Off := True
+  Else
+    Passenger_Get_Off := False;
+
+  If (length(Passenger^.Itinerary) > 1) Then
+    SetLength(Passenger^.Itinerary, length(Passenger^.Itinerary)-1);
+
+
+{
   If random(2) = 0 Then
     Passenger_Get_Off := True
   Else
     Passenger_Get_Off := False;
+}
 End;
 
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
+Var i : Byte;
 Begin
+
+  writeln('====================================');
+
+  writeln(' Passenger shape : ', Passenger^.Shape);
+
+  For i := low(Passenger^.Itinerary) To high(Passenger^.Itinerary) Do
+    Begin
+      If (Passenger^.Itinerary[i] = @Next_Station) Then
+        Passenger_Get_On := True
+      Else
+        Passenger_Get_On := False;
+    End;
+
+  For i := low(Passenger^.itinerary) To high(Passenger^.Itinerary) Do
+  Begin
+    writeln(' Itinerary : ', Passenger^.Itinerary[i]^.Shape);
+  End;
+
+
+{
   If random(2) = 0 Then
     Passenger_Get_On := True
   Else
     Passenger_Get_On := False;
+}
 End;
 
 // - - Fonctions et procédures relatives à la logique générale.
@@ -656,7 +751,9 @@ End;
 Procedure Logic_Load(Var Game : Type_Game);
 
 Var i,j : Byte;
+  Total : Integer;
 Begin
+
 
   Randomize();
 
@@ -695,7 +792,7 @@ Begin
     End;
 
   // Création des 5 premères stations
-  For i := 1 To 20 Do
+  For i := 1 To 5 Do
     Begin
       Station_Create(Game);
     End;
@@ -703,25 +800,17 @@ Begin
   // Création de la première ligne
   Line_Create(Game);
   Line_Create(Game);
-  Line_Create(Game);
-  Line_Create(Game);
-  Line_Create(Game);
-  Line_Create(Game);
-  Line_Create(Game);
-  Line_Create(Game);
+
 
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
       Line_Add_Station(Game.Stations[i], Game.Lines[0], Game);
     End;
 
-  For i := low(Game.Stations) + 1 To high(Game.Stations) - 1 Do
-    Begin
-      Line_Add_Station(Game.Stations[i], Game.Lines[1], Game);
-    End;
+
+  Game_Refresh_Graph_Table(Game);
 
 
-    Game_Refresh_Graph_Table(Game);
 
 {
   For i := high(Game.Stations) - 2 To high(Game.Stations) Do
@@ -735,20 +824,25 @@ Begin
     End;
 }
 
+
+  Total := 0;
+
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      For j := 0 To 2 Do
+      For j := 0 To 5 Do
         Begin
+          inc(Total);
           Passenger_Create(Game.Stations[i]^, Game);
         End;
     End;
 
+  writeln('!!!!!!!!!!!!!! NB DE PASSAGER A SUCER : ', Total);
 
   Passenger_Create(Game.Stations[0]^, Game);
 
 
   // Calcul des itinéaires des passagers crées.
-   Passengers_Compute_Itinerary(Game);
+  Passengers_Compute_Itinerary(Game);
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
   //Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
@@ -772,16 +866,12 @@ Begin
   // Itère parmis les stations
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      // Itère parmis les passagers de la station.
-      For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
-        Begin
-          Dispose(Game.Stations[i]^.Passengers[j]);
-        End;
-      // Vidage du tableau.
-      SetLength(Game.Stations[i]^.Passengers, 0);
+
+      Stations_Delete(Game);
 
       // TODO : Suppresion des stations.
     End;
+
 
   SetLength(Game.Stations, 0);
 
@@ -805,7 +895,7 @@ Begin
                       Begin
                         If (Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] <> Nil) Then
                           Begin
-                            Dispose(Game.Lines[i].Trains[j].Vehicles[k].Passengers[l]);
+                            Passenger_Delete(Game.Lines[i].Trains[j].Vehicles[k].Passengers[l]);
                             Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] := Nil;
                           End;
                       End;
@@ -839,8 +929,8 @@ Begin
         // Si la fenêtre est fermée.
         SDL_QUITEV :
                      Begin
-                       HALT();
                        Logic_Unload(Game);
+                       HALT();
                      End;
         SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP :
                                                  Mouse_Event_Handler(Event.button, Game);

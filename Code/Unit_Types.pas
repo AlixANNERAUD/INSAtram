@@ -8,14 +8,16 @@ Interface
 
 Uses sdl, sdl_mixer, sdl_gfx, sdl_image, sdl_ttf, sysutils, Math, Unit_Constants;
 
-  // - - Graphismes
+// - - Graphismes
 
+// Structure de couleur
 Type Type_Color = Record
   Red, Green, Blue, Alpha : Byte;
 End;
 
 // - - - Interface
 
+// Structure d'étiquette
 Type Type_Label = Record
   Position, Size : Type_Coordinates;
   Text : String;
@@ -25,6 +27,7 @@ Type Type_Label = Record
   Pre_Render : Boolean;
 End;
 
+// Structure de panneau
 Type Type_Panel = Record
   Position, Size : Type_Coordinates;
   Surface : PSDL_Surface;
@@ -32,11 +35,13 @@ Type Type_Panel = Record
   Hidden : Boolean;
 End;
 
+// Structure d'image
 Type Type_Image = Record
   Position, Size : Type_Coordinates;
   Surface : PSDL_Surface;
 End;
 
+// Structure de boutton
 Type Type_Button = Record
   Position, Size : Type_Coordinates;
   Pressed : Boolean;
@@ -45,6 +50,7 @@ Type Type_Button = Record
   Hidden : Boolean;
 End;
 
+// Structure de boutton à deux états
 Type Type_Dual_State_Button = Record
   Position, Size : Type_Coordinates;
   Pressed : Boolean;
@@ -53,6 +59,7 @@ Type Type_Dual_State_Button = Record
   Surface_Released : array[0 .. 1] Of PSDL_Surface;
 End;
 
+// Structure de diagrame
 Type Type_Pie = Record
   Position, Size : Type_Coordinates;
   Surface : PSDL_Surface;
@@ -63,7 +70,9 @@ End;
 
 // - - Temps
 
+
 Type Type_Time = Longword;
+
 
 Type Type_Day = (Day_Monday,
                  Day_Tuesday,
@@ -76,10 +85,13 @@ Type Type_Day = (Day_Monday,
 
   // Structure contenant tous pointeurs des sprites du jeu.
 
+// Enumeration des tailles de police.
 Type Type_Font_Size = (Font_Small, Font_Medium, Font_Big);
 
+// Enumeration des épaisseurs de police.
 Type Type_Font_Weight = (Font_Normal, Font_Bold);
 
+// Enumeration des couleurs.
 Type Type_Color_Name = (Color_Black,
                         Color_Red,
                         Color_Purple,
@@ -108,10 +120,13 @@ Type Type_Color_Name = (Color_Black,
 
 // - - Entités du jeux.
 
+// Enumeraton des formes.
 Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
 
+// Type pointeur de station.
 Type Type_Station_Pointer = ^Type_Station;
 
+// Structure de passager
   Type_Passenger = Record
     // Taille du passager.
     Size : Type_Coordinates;
@@ -123,69 +138,50 @@ Type Type_Station_Pointer = ^Type_Station;
     Itinerary : Array Of Type_Station_Pointer;
   End;
 
+// Pointeur de passager
   Type_Passenger_Pointer = ^Type_Passenger;
 
-  // - - Station
-
+  // Structure de Station
   Type_Station = Record
-    // Position, position centrée et taille de la stations.
     Position, Size, Position_Centered : Type_Coordinates;
-    // Forme de la station.
     Shape : Type_Shape;
-    // Pointeur vers le sprite de la station.
     Sprite : PSDL_Surface;
-    // Passagers de la station.
     Passengers : array Of Type_Passenger_Pointer;
-    // 
     Timer : Type_Pie;
-    // 
     Overfill_Timer : Type_Time;
   End;
 
+  // Structure de véhicule
   Type_Vehicle = Record
-    // Passagers dans le véhicule.
     Passengers : Array[0 .. (Vehicle_Maximum_Passengers_Number - 1)] Of Type_Passenger_Pointer;
   End;
 
+  // Structure de train
   Type_Train = Record
-    // Position du train.
     Position, Size : Type_Coordinates;
-    // Sprite du train.
     Sprite : PSDL_Surface;
-    
     Start_Time : Type_Time;
-
     Deceleration_Time : Real;
-    // Détermine si le train est à l'arrêt ou non.
     Driving : Boolean;
-    // Pointeur de la dernière station.
     Last_Station : Type_Station_Pointer;
-    // Pointeur de la prochaine station.
     Next_Station : Type_Station_Pointer;
-    // Distance parcourue depuis la dernière station en pixel.
     Distance : Integer;
-    // Copie de la position intermédiaire actuelle entre les stations.
     Intermediate_Position : Type_Coordinates;
-    // Distance de la prochaine position intermédiaire.
     Intermediate_Position_Distance : Integer;
-    // Direction directe ou indirecte du train (indexe des stations de la ligne croissant ou décroissant).
     Direction : Boolean;
-    // - Vitesse du train.
     Speed : Integer;
-    //  Tableau contenant les wagons du train.
     Vehicles : array Of Type_Vehicle;
-    // Etiquette 
     Passengers_Label : Type_Label;
-    // Indexe de la couleur du train.
     Color_Index : Byte;
   End;
 
+  // Type pointeur de train.
   Type_Train_Pointer = ^Type_Train;
+  
   // - - Line
 
-Type Type_Line_Colors = (Red, Purple, Indigo, Teal, Green, Yellow, Orange, Brown);
-
-  Type_Line = Record
+// Structure de ligne
+Type  Type_Line = Record
     // Couleur de la ligne.
     Color : Type_Color;
     // Tableau dynamique de pointeur vers les stations.
@@ -200,8 +196,7 @@ Type Type_Line_Colors = (Red, Purple, Indigo, Teal, Green, Yellow, Orange, Brown
 
   Type_Line_Pointer = ^Type_Line;
 
-  // Structure renfermant les données du joueur.
-
+// Structure renfermant les données du joueur.
 Type Type_Player = Record
   // Score du joueur (nombre de passager transporté)
   Score : Integer;
@@ -217,8 +212,10 @@ End;
 
 // - Itineraries
 
+// Type de tableau de graph.
 Type Type_Graph_Table = Array Of Array Of Array Of Type_Line_Pointer;
 
+// Structure de cellule de Dijkstra.
 Type Type_Dijkstra_Cell = Record
   isConnected : Boolean;
   isAvailable : Boolean;
@@ -227,6 +224,7 @@ Type Type_Dijkstra_Cell = Record
   Weight : Real;
 End;
 
+// Type de tableau de cellule de Dijkstra.
 Type Type_Itinerary_Indexes = Array Of Integer;
 
 
@@ -272,9 +270,8 @@ End;
 
 // - - Partie
 
+// Structure de type jeu
 Type Type_Game = Record
-
-  Performance : Type_Time;
 
   Animation : Type_Animation;
 
