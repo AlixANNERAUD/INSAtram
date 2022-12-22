@@ -101,7 +101,9 @@ Const Path_Ressources =  'Resources/';
       Path_Image_Button_Locomotive = Path_Images + 'Locomotive.png';
       Path_Image_Button_Wagon = Path_Images + 'Wagon.png';
       Path_Image_Button_Tunnel = Path_Images + 'Tunnel.png';
-      Path_Image_Button_Escape = Path_Images + 'Escape.png';
+      Path_Image_Button_Restart = Path_Images + 'Restart.png';
+      Path_Image_Button_Sound_Off = Path_Images + 'Sound_Off.png';
+      Path_Image_Button_Sound_On = Path_Images + 'Sound_On.png';
 
   // - - - Polices
 

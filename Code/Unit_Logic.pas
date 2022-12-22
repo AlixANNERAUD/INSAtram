@@ -37,7 +37,7 @@ End;
 
 // - - Fonctions et procédures relatives au passagers 
 
-Procedure Logic_Rewards(Var Game : Type_Game);
+Procedure Panel_Reward_Load(Var Game : Type_Game);
 
 Var Rewards : Array[0 .. 1] Of Byte;
   i : Byte;
@@ -970,7 +970,7 @@ Begin
           // Mise à jour de l'étiquette du jour.
           Label_Set_Text(Game.Clock_Label, Day_To_String(Game.Day));
           If (Game.Day = Day_Sunday) Then
-            Logic_Rewards(Game);
+            Panel_Reward_Load(Game);
         End;
 
       // Si le timer de génération de passagers a été dépassé.
