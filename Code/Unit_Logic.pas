@@ -563,7 +563,7 @@ for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
 end;
 
 // Fonction qui détermine si le passager doit monter dans un train.
-Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
+Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station; Var Current_Station : Type_Station) : Boolean;
 Var i : Byte;
 Begin
       writeln('====================================');
@@ -571,7 +571,30 @@ Begin
       writeln(' Passenger shape : ', Passenger^.Shape);
       writeln('Next station shape = ', Next_Station.Shape);
      
-      // Vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
+      Passenger_Get_On := False;
+      
+      for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
+        begin
+          if Passenger^.Itinerary[i] = @Current_Station then
+            begin
+              if @Next_Station = Passenger^.Itinerary[i] then
+                begin
+                  Passenger_Get_On := True;
+                end; 
+            end;
+        end;
+      
+      // Parcourt le tableau contenant l'itinéraire du passager et vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
+      {for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
+        begin
+          if @Next_Station = Passenger^.Itinerary[i] then
+            begin
+              Passenger_Get_On := True;
+            end;
+        end;}
+
+      
+      {// Vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
       if Passenger^.Itinerary[low(Passenger^.itinerary)+1] = @Next_Station then
       begin
         Passenger_Get_On := True;
@@ -583,7 +606,7 @@ Begin
       else
       begin
         Passenger_Get_On := False;
-      end;
+      end;}
 
   For i := low(Passenger^.itinerary) To high(Passenger^.Itinerary) Do
   Begin
@@ -881,7 +904,7 @@ Begin
                   For k := low(Train.Last_Station^.Passengers) To high(Train.Last_Station^.Passengers) Do
                     Begin
                       // Si le passager doit monter dans le train, son pointeur est déplacé dans le train.
-                      If (Passenger_Get_On(Train.Last_Station^.Passengers[k], Train.Next_Station^)) Then
+                      If (Passenger_Get_On(Train.Last_Station^.Passengers[k], Train.Next_Station^, Train.Last_Station^)) Then
                         Begin
                           // Copie du pointeur du passager dans le train.
                           Train.Vehicles[i].Passengers[j] := Train.Last_Station^.Passengers[k];
