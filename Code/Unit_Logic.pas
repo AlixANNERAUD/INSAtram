@@ -545,22 +545,42 @@ Begin
 End;
 
 // Fonction qui détermine si le passager doit descendre du train (autrement dit, si il a atteint sa destination).
-Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
+Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station; Var Current_Station : Type_Station) : Boolean;
 
 Var i : Byte;
 
 Begin
 Passenger_Get_Off := True;
 
-// Parcourt le tableau contenant l'itinéraire du passager et vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
+writeln('Ma CurrentStation = ', Current_Station.Shape);
+writeln('Ma NextStation = ', Next_Station.Shape);
+// Parcourt le tableau contenant l'itinéraire du passager.
 for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
+  begin
+    // Se localise dans son propre itinéraire et vérfie si il correspond à la station actuelle ou à la prochaine station (le second cas étant dans le scénario où l'itinéraire ne fait qu'une étape (la prochaine station)).
+    if (Passenger^.Itinerary[i] = @Current_Station) or (Passenger^.Itinerary[i] = @Next_Station) then
+      begin
+        // Si la prochaine station du train correspond à 
+        if @Next_Station = Passenger^.Itinerary[i+1] then
+          begin
+            Passenger_Get_Off := False;
+          end
+        else if @Next_Station = Passenger^.Itinerary[i] then
+          begin
+            Passenger_Get_Off := False;
+          end;
+      end;
+  end;
+end;
+// Parcourt le tableau contenant l'itinéraire du passager et vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
+{for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
   begin
     if @Next_Station = Passenger^.Itinerary[i] then
       begin
         Passenger_Get_Off := False;
       end;
   end;
-end;
+end;}
 
 // Fonction qui détermine si le passager doit monter dans un train.
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station; Var Current_Station : Type_Station) : Boolean;
@@ -572,15 +592,26 @@ Begin
       writeln('Next station shape = ', Next_Station.Shape);
      
       Passenger_Get_On := False;
-      
+      writeln('Ma CurrentStation = ', Current_Station.Shape);
+      writeln('Ma NextStation = ', Next_Station.Shape);
+      // Parcourt le tableau contenant l'itinéraire du passager.
       for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
         begin
-          if Passenger^.Itinerary[i] = @Current_Station then
+          // Se localise dans son propre itinéraire et vérfie si il correspond à la station actuelle ou à la prochaine station (le second cas étant dans le scénario où l'itinéraire ne fait qu'une étape (la prochaine station)).
+          if (Passenger^.Itinerary[i] = @Current_Station) or (Passenger^.Itinerary[i] = @Next_Station) then
             begin
-              if @Next_Station = Passenger^.Itinerary[i] then
+              // Si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager,
+              if @Next_Station = Passenger^.Itinerary[i+1] then
                 begin
+                  // Le passager monte dans le train.
                   Passenger_Get_On := True;
-                end; 
+                end
+              // Cas de l'itinéraire à une seule étape. Vérifie que l'unique étape de l'itinéraire correspond à la prochaine station du train,
+              else if @Next_Station = Passenger^.Itinerary[i] then
+                begin
+                  // Le passager monte dans le train.
+                  Passenger_Get_On := True;
+                end;
             end;
         end;
       
@@ -694,14 +725,12 @@ Begin
 
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      For j := 0 To 5 Do
+      For j := 0 To 2 Do
         Begin
           inc(Total);
           Passenger_Create(Game.Stations[i]^, Game);
         End;
     End;
-
-  {writeln('!!!!!!!!!!!!!! NB DE PASSAGER A SUCER : ', Total);}
 
   Passenger_Create(Game.Stations[0]^, Game);
 
@@ -875,7 +904,7 @@ Begin
                   Label_Set_Text(Game.Score_Label, IntToStr(Game.Player.Score));
                 End
                 // Si le passager doit descendre du train, son pointeur est déplacé dans le tampon.
-              Else If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j], Train.Next_Station^)) Then
+              Else If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j], Train.Next_Station^, Train.Last_Station^)) Then
                      Begin
                        // Copie du pointeur du passager dans le tampon.
                        SetLength(Passengers_Queue, length(Passengers_Queue) + 1);
