@@ -471,14 +471,14 @@ End;
 // Procédure qui calcule l'itinéaire des stations correspondant à la forme du passager, puis détermine la plus "proche" en prenant l'itinéraire le plus court.
 Procedure Passengers_Compute_Itinerary(Game : Type_Game);
 
-Var i,j,k,l : Byte;
+Var i,j,k,l, m : Byte;
   Index_Table_Of_Same_Shape, Itinerary_Indexes, Reverse_Itinerary_Indexes : Type_Itinerary_Indexes;
-  Lowest_Weight, m : Integer;
+  Lowest_Weight : Integer;
   Shortest_Itinerary_Indexes : Type_Itinerary_Indexes;
   Station_Is_Isolated : Boolean;
 
 Begin
-  // Itère parmi les stations.
+  // Itère parmi les stations du jeu.
   For i:= low(Game.Stations) To high(Game.Stations) Do
     // Parcourt toutes les stations pour ensuite parcourir les passagers contenus dans ces stations.
     Begin
@@ -559,12 +559,12 @@ end;
 
 // Fonction qui détermine si le passager doit monter dans un train.
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
-{Var i : Byte;}
+Var i : Byte;
 Begin
-      {writeln('====================================');
+      writeln('====================================');
 
       writeln(' Passenger shape : ', Passenger^.Shape);
-      writeln('Next station shape = ', Next_Station.Shape);}
+      writeln('Next station shape = ', Next_Station.Shape);
      
       // Vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
       if Passenger^.Itinerary[low(Passenger^.itinerary)+1] = @Next_Station then
@@ -580,10 +580,10 @@ Begin
         Passenger_Get_On := False;
       end;
 
-  {For i := low(Passenger^.itinerary) To high(Passenger^.Itinerary) Do
+  For i := low(Passenger^.itinerary) To high(Passenger^.Itinerary) Do
   Begin
     writeln(' Itinerary : ', Passenger^.Itinerary[i]^.Shape);
-  End;}
+  End;
 End;
 
 // - - Fonctions et procédures relatives à la logique générale.
