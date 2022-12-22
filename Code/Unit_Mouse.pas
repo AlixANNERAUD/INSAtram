@@ -15,29 +15,123 @@ Procedure Mouse_Load(Var Mouse : Type_Mouse);
 
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
 
-// - Attributs
-
-Function Mouse_Get_Press_Position(Game : Type_Game) : Type_Coordinates;
-Function Mouse_Get_Press_Position(Game : Type_Game; Size : Type_Coordinates) : Type_Coordinates;
-Function Mouse_Get_Release_Position(Game : Type_Game) : Type_Coordinates;
 Function Mouse_Get_Position() : Type_Coordinates;
-Function Mouse_Is_Pressed(Game : Type_Game) : Boolean;
 
-
-// - Détection de collisions / superpositions.
-
-Function Mouse_On_Panel(Mouse_Position : Type_Coordinates; Panel : Type_Panel) : Boolean;
-Function Mouse_On_Object(Mouse_Position : Type_Coordinates; Object_Position, Object_Size : Type_Coordinates; Panel : Type_Panel) : Boolean;
-
-// - 
-
-Procedure Mouse_Line_Add_Train(Var Game : Type_Game);
-Procedure Mouse_Line_Add_Station(Var Game : Type_Game);
-Procedure Mouse_Train_Add_Wagon(Var Game : Type_Game);
-
-Function Mouse_Pressed_On_Line(Var Game : Type_Game) : Boolean;
 
 Implementation
+
+// - Chargement de l'unité souris.
+
+// Procédure qui initialise les attributs de l'unité.
+Procedure Mouse_Load(Var Mouse : Type_Mouse);
+Begin
+  Mouse.Press_Position.X := 0;
+  Mouse.Press_Position.Y := 0;
+  Mouse.Release_Position.X := 0;
+  Mouse.Release_Position.Y := 0;
+  Mouse.State := False;
+End;
+
+// Fonction qui retourne la position actuelle de la souris.
+Function Mouse_Get_Position() : Type_Coordinates;
+
+Var Position : Type_Coordinates;
+Begin
+  SDL_GetMouseState(Position.X, Position.Y);
+  Mouse_Get_Position := Position;
+End;
+
+// Fonction qui retourne la position de la souris lorsqu'elle a été pressée (pour la dernière fois).
+Function Mouse_Get_Press_Position(Game : Type_Game) : Type_Coordinates;
+Begin
+  Mouse_Get_Press_Position := Game.Mouse.Press_Position;
+End;
+
+// Fonction qui calcule et retourne la position de la hit box de la souris.
+Function Mouse_Get_Press_Position(Game : Type_Game; Size : Type_Coordinates) : Type_Coordinates;
+Begin
+  Mouse_Get_Press_Position.X := Mouse_Get_Press_Position(Game).X - round(0.5 * Size.X);
+  Mouse_Get_Press_Position.Y := Mouse_Get_Press_Position(Game).Y - round(0.5 * Size.Y);
+End;
+
+// Fonction qui retourne si la souris est pressée ou relâchée.
+Function Mouse_Is_Pressed(Game : Type_Game) : Boolean;
+Begin
+  Mouse_Is_Pressed := Game.Mouse.State;
+End;
+
+// Fonction qui retourne la position de la souris lorsqu'elle a été relâchée (pour la dernière fois).
+Function Mouse_Get_Release_Position(Game : Type_Game) : Type_Coordinates;
+Begin
+  Mouse_Get_Release_Position := Game.Mouse.Release_Position;
+End;
+
+// Fonction qui vérifie si la souris se trouve sur un objet donné.
+Function Mouse_On_Object(Mouse_Position : Type_Coordinates; Object_Position, Object_Size : Type_Coordinates; Panel : Type_Panel) : Boolean;
+Begin
+  If (Mouse_Position.X >= Object_Position.X + Panel.Position.X) And (Mouse_Position.X <= Object_Position.X + Object_Size.X + Panel.Position.X) And
+     (Mouse_Position.Y >= Object_Position.Y + Panel.Position.Y) And (Mouse_Position.Y <= Object_Position.Y + Object_Size.Y + Panel.Position.Y) Then
+    Mouse_On_Object := True
+  Else
+    Mouse_On_Object := False;
+End;
+
+// Fonction qui vérifie si la souris se trouve sur un panneau donné.
+Function Mouse_On_Panel(Mouse_Position : Type_Coordinates; Panel : Type_Panel) : Boolean;
+Begin
+  If (Mouse_Position.X >= Panel.Position.X) And (Mouse_Position.X <= Panel.Position.X + Panel.Size.X) And
+     (Mouse_Position.Y >= Panel.Position.Y) And (Mouse_Position.Y <= Panel.Position.Y + Panel.Size.Y) Then
+    Mouse_On_Panel := True
+  Else
+    Mouse_On_Panel := False;
+End;
+
+// Fonction qui détermine si la souris est pressée sur une ligne et détermine la station précédente et la station suivante qui servira à l'insertion de la nouvelle station.
+Function Mouse_Pressed_On_Line(Var Game : Type_Game) : Boolean;
+
+Var Mouse_Position : Type_Coordinates;
+  i : Byte;
+  Line : Type_Line_Pointer;
+Begin
+  Mouse_Pressed_On_Line := false;
+
+  Line := Lines_Get_Selected(Game);
+
+  // Vérifie si il y a bien une ligne selectionnée.
+  If (Line <> Nil) Then
+    Begin
+      // Calcul des coordonnées du pointeur dans le tableau.
+      Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Press_Position(Game), Game.Panel_Right);
+
+      // Prise en compte de la hit box de la souris.
+      Mouse_Position.X := Mouse_Position.X - (Mouse_Size.X Div 2);
+      Mouse_Position.Y := Mouse_Position.Y - (Mouse_Size.Y Div 2);
+
+      // Vérifie que la ligne contient des stations
+      If (length(Line^.Stations) > 0) Then
+        Begin
+          // Itère parmi les stations de la ligne selectionnée.
+          For i := low(Line^.Stations) To high(Line^.Stations) - 1 Do
+            Begin
+              // Vérifie si le pointeur de la souris est en collision avec la ligne.
+              If (Line_Rectangle_Colliding(Line^.Stations[i]^.Position_Centered, Line^.Intermediate_Positions[i], Mouse_Position, Mouse_Size)) Or (Line_Rectangle_Colliding(Line^.Intermediate_Positions
+                 [i], Line^.Stations[i + 1]^.Position_Centered, Mouse_Position, Mouse_Size)) Then
+                Begin
+                  Game.Mouse.Selected_Line := Line;
+                  Game.Mouse.Selected_Last_Station := Line^.Stations[i];
+                  Game.Mouse.Selected_Next_Station := Line^.Stations[i + 1];
+                  Game.Mouse.Mode := Type_Mouse_Mode.Line_Insert_Station;
+
+                  Mouse_Pressed_On_Line := true;
+                  Break;
+                  Break;
+                End;
+            End;
+        End;
+    End;
+End;
+
+
 
 // - Panneau de droite.
 
@@ -226,51 +320,6 @@ Begin
     End;
 End;
 
-// Fonction qui détermine si la souris est pressée sur une ligne et détermine la station précédente et la station suivante qui servira à l'insertion de la nouvelle station.
-Function Mouse_Pressed_On_Line(Var Game : Type_Game) : Boolean;
-
-Var Mouse_Position : Type_Coordinates;
-  i : Byte;
-  Line : Type_Line_Pointer;
-Begin
-  Mouse_Pressed_On_Line := false;
-
-  Line := Lines_Get_Selected(Game);
-
-  // Vérifie si il y a bien une ligne selectionnée.
-  If (Line <> Nil) Then
-    Begin
-      // Calcul des coordonnées du pointeur dans le tableau.
-      Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Press_Position(Game), Game.Panel_Right);
-
-      // Prise en compte de la hit box de la souris.
-      Mouse_Position.X := Mouse_Position.X - (Mouse_Size.X Div 2);
-      Mouse_Position.Y := Mouse_Position.Y - (Mouse_Size.Y Div 2);
-
-      // Vérifie que la ligne contient des stations
-      If (length(Line^.Stations) > 0) Then
-        Begin
-          // Itère parmi les stations de la ligne selectionnée.
-          For i := low(Line^.Stations) To high(Line^.Stations) - 1 Do
-            Begin
-              // Vérifie si le pointeur de la souris est en collision avec la ligne.
-              If (Line_Rectangle_Colliding(Line^.Stations[i]^.Position_Centered, Line^.Intermediate_Positions[i], Mouse_Position, Mouse_Size)) Or (Line_Rectangle_Colliding(Line^.Intermediate_Positions
-                 [i], Line^.Stations[i + 1]^.Position_Centered, Mouse_Position, Mouse_Size)) Then
-                Begin
-                  Game.Mouse.Selected_Line := Line;
-                  Game.Mouse.Selected_Last_Station := Line^.Stations[i];
-                  Game.Mouse.Selected_Next_Station := Line^.Stations[i + 1];
-                  Game.Mouse.Mode := Type_Mouse_Mode.Line_Insert_Station;
-
-                  Mouse_Pressed_On_Line := true;
-                  Break;
-                  Break;
-                End;
-            End;
-        End;
-    End;
-End;
-
 // Procédure qui détermine si la souris est relâchée sur une ligne et détermine comment ajouter le train.
 Procedure Mouse_Line_Add_Train(Var Game : Type_Game);
 
@@ -353,25 +402,7 @@ Begin
     End;
 End;
 
-// Fonction qui vérifie si la souris se trouve sur un objet donné.
-Function Mouse_On_Object(Mouse_Position : Type_Coordinates; Object_Position, Object_Size : Type_Coordinates; Panel : Type_Panel) : Boolean;
-Begin
-  If (Mouse_Position.X >= Object_Position.X + Panel.Position.X) And (Mouse_Position.X <= Object_Position.X + Object_Size.X + Panel.Position.X) And
-     (Mouse_Position.Y >= Object_Position.Y + Panel.Position.Y) And (Mouse_Position.Y <= Object_Position.Y + Object_Size.Y + Panel.Position.Y) Then
-    Mouse_On_Object := True
-  Else
-    Mouse_On_Object := False;
-End;
 
-// Fonction qui vérifie si la souris se trouve sur un panneau donné.
-Function Mouse_On_Panel(Mouse_Position : Type_Coordinates; Panel : Type_Panel) : Boolean;
-Begin
-  If (Mouse_Position.X >= Panel.Position.X) And (Mouse_Position.X <= Panel.Position.X + Panel.Size.X) And
-     (Mouse_Position.Y >= Panel.Position.Y) And (Mouse_Position.Y <= Panel.Position.Y + Panel.Size.Y) Then
-    Mouse_On_Panel := True
-  Else
-    Mouse_On_Panel := False;
-End;
 
 // Procédure qui gère les interractions avec la souris.
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
@@ -468,55 +499,9 @@ Begin
                  End;
              End;
 
-
-
       Game.Mouse.Mode := Type_Mouse_Mode.Normal;
 
     End;
-End;
-
-// Procédure qui initialise les attributs de l'unité.
-Procedure Mouse_Load(Var Mouse : Type_Mouse);
-Begin
-  Mouse.Press_Position.X := 0;
-  Mouse.Press_Position.Y := 0;
-  Mouse.Release_Position.X := 0;
-  Mouse.Release_Position.Y := 0;
-  Mouse.State := False;
-End;
-
-// Fonction qui retourne la position actuelle de la souris.
-Function Mouse_Get_Position() : Type_Coordinates;
-
-Var Position : Type_Coordinates;
-Begin
-  SDL_GetMouseState(Position.X, Position.Y);
-  Mouse_Get_Position := Position;
-End;
-
-// Fonction qui retourne la position de la souris lorsqu'elle a été pressée (pour la dernière fois).
-Function Mouse_Get_Press_Position(Game : Type_Game) : Type_Coordinates;
-Begin
-  Mouse_Get_Press_Position := Game.Mouse.Press_Position;
-End;
-
-// Fonction qui calcule et retourne la position de la hit box de la souris.
-Function Mouse_Get_Press_Position(Game : Type_Game; Size : Type_Coordinates) : Type_Coordinates;
-Begin
-  Mouse_Get_Press_Position.X := Mouse_Get_Press_Position(Game).X - round(0.5 * Size.X);
-  Mouse_Get_Press_Position.Y := Mouse_Get_Press_Position(Game).Y - round(0.5 * Size.Y);
-End;
-
-// Fonction qui retourne si la souris est pressée ou relâchée.
-Function Mouse_Is_Pressed(Game : Type_Game) : Boolean;
-Begin
-  Mouse_Is_Pressed := Game.Mouse.State;
-End;
-
-// Fonction qui retourne la position de la souris lorsqu'elle a été relâchée (pour la dernière fois).
-Function Mouse_Get_Release_Position(Game : Type_Game) : Type_Coordinates;
-Begin
-  Mouse_Get_Release_Position := Game.Mouse.Release_Position;
 End;
 
 End.

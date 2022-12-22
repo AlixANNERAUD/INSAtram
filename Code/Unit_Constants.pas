@@ -19,7 +19,6 @@ End;
 // - - Graphismes
 
 Const Color_Depth =   32;
-      Full_Screen =  False;
       Screen_Width =  960;
       Screen_Height =  720;
       Mask_Alpha =  $FF000000;

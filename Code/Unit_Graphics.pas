@@ -26,42 +26,13 @@ Procedure Graphics_Draw_River(Position_1, Position_2 :
                               Type_Coordinates; Color :
                               Type_Color; Var Panel : Type_Panel);
 
-// - - Objets liés à l'interface graphique.
-
-// - - - Ressources
-
-Procedure Ressources_Load(Var Ressources : Type_Ressources);
-
-// - - - Curseur
-
-Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
-
-// - - - Bouton
-
-Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
-Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
-
-// - - - Bouton à deux états.
-
-Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
-
-
-// - - - Images
-
-Procedure Image_Render(Var Image : Type_Image; Destination_Panel : Type_Panel);
-Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
-
-// - - - Couleurs
-
-Function Color_To_Longword(Color : Type_Color) : Longword;
-
 // - - - Etiquette
 
 
 // - - - Panneaux
 
-Procedure Panel_Create(Var Panel : Type_Panel; X,Y, Width, Height : Integer);
-Procedure Panel_Delete(Var Panel : Type_Panel);
+
+
 Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
 Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
 
@@ -80,9 +51,152 @@ Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
 
 Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
-Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var Game : Type_Game) : Byte;
 
 Implementation
+
+
+
+// Procédure qui rend le curseur dans le fenêtre principale.
+Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+  // Si le curseur est en mode ajout de locomotives ou de wagons.
+  If (Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Or (Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
+    Begin
+      Destination_Rectangle.x := Mouse_Get_Position().X - Vehicle_Size.X Div 2;
+      Destination_Rectangle.y := Mouse_Get_Position().Y - Vehicle_Size.Y Div 2;
+
+      SDL_BlitSurface(Game.Ressources.Vehicles[8][0], Nil, Game.Window.Surface, @Destination_Rectangle);
+    End
+End;
+
+// Procédure qui rend un bouton à double état.
+Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+  Destination_Rectangle.x := Button.Position.X;
+  Destination_Rectangle.y := Button.Position.Y;
+  Destination_Rectangle.w := Button.Size.X;
+  Destination_Rectangle.h := Button.Size.Y;
+
+  If Button.Pressed Then
+    If (Button.State = False) Then
+      SDL_BlitSurface(Button.Surface_Pressed[0], Nil, Destination_Panel.Surface, @Destination_Rectangle)
+  Else
+    SDL_BlitSurface(Button.Surface_Pressed[1], Nil, Destination_Panel.Surface, @Destination_Rectangle)
+  Else
+    If (Button.State = False) Then
+      SDL_BlitSurface(Button.Surface_Released[0], Nil, Destination_Panel.Surface, @Destination_Rectangle)
+  Else
+    SDL_BlitSurface(Button.Surface_Released[1], Nil, Destination_Panel.Surface, @Destination_Rectangle);
+End;
+
+
+
+
+// Procédure qui rend un bouton dans un panneau donné.
+Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
+
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+  If (Not(Button.Hidden)) Then
+    Begin
+      Destination_Rectangle.x := Button.Position.X;
+      Destination_Rectangle.y := Button.Position.Y;
+      Destination_Rectangle.w := Button.Size.X;
+      Destination_Rectangle.h := Button.Size.Y;
+
+      If Button.Pressed Then
+        SDL_BlitSurface(Button.Surface_Pressed, Nil, Destination_Panel.Surface, @Destination_Rectangle)
+      Else
+        SDL_BlitSurface(Button.Surface_Released, Nil, Destination_Panel.Surface, @Destination_Rectangle);
+    End;
+End;
+
+// Procédure qui rend un image dans un panneau donnée.
+Procedure Image_Render(Var Image : Type_Image; Destination_Panel : Type_Panel);
+
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+  Destination_Rectangle.x := Image.Position.X;
+  Destination_Rectangle.y := Image.Position.Y;
+  Destination_Rectangle.w := Image.Size.X;
+  Destination_Rectangle.h := Image.Size.Y;
+
+  SDL_BlitSurface(Image.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
+End;
+
+
+
+// Procédure qui rend un panneau dans un autre panneau donné.
+Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
+
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+  If (Not(Panel.Hidden)) Then
+    Begin
+      Destination_Rectangle.x := Panel.Position.X;
+      Destination_Rectangle.y := Panel.Position.Y;
+      Destination_Rectangle.w := Panel.Size.X;
+      Destination_Rectangle.h := Panel.Size.Y;
+
+      SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
+    End;
+End;
+
+// Procédure qui effectue un rendu anticipé d'une étiquette (pré-rendu).
+Procedure Label_Pre_Render(Var Laabel : Type_Label);
+
+Var   Characters : pChar;
+  SDL_Color : PSDL_Color;
+Begin
+  new(SDL_Color);
+
+
+  SDL_Color^.r := Laabel.Color.Red;
+  SDL_Color^.g := Laabel.Color.Green;
+  SDL_Color^.b := Laabel.Color.Blue;
+
+  SDL_FreeSurface(Laabel.Surface);
+
+  // Conversion du string en pChar.
+  Characters := String_To_Characters(Laabel.Text);
+
+  Laabel.Surface := TTF_RENDERTEXT_BLENDED(Laabel.Font, Characters,
+                    SDL_Color^);
+
+  TTF_SizeText(Laabel.Font, Characters, Laabel.Size.X, Laabel.Size.Y);
+
+  dispose(SDL_Color);
+  strDispose(Characters);
+
+End;
+
+// Procédure qui pré-rend le texte dans une surface lorsqu'un attribut de l'étiquette est modifié (moins lourd pour l'affichage) puis rend dans le panneau de destination.
+Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
+
+Var Destination_Rectangle : TSDL_Rect;
+Begin
+
+  If (Laabel.Pre_Render) Then
+    Begin
+      Label_Pre_Render(Laabel);
+      Laabel.Pre_Render := false;
+    End;
+
+  Destination_Rectangle.x := Laabel.Position.X;
+  Destination_Rectangle.y := Laabel.Position.Y;
+
+  SDL_BlitSurface(Laabel.Surface, Nil, Panel.Surface, @Destination_Rectangle);
+End;
+
+
+// Fonction qui convertit une structure couleur en un nombre.
+Function Color_To_Longword(Color : Type_Color) : Longword;
+Begin
+  Color_To_Longword := (Color.Red << 16) Or (Color.Green << 8) Or (Color.Blue) Or (Color.Alpha << 24);
+End;
+
 
 // Procédure qui dessine une ligne épaisse entre deux points.
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
@@ -136,22 +250,15 @@ Begin
 
 End;
 
-// - - Station
-
 // Procédure qui trace les lignes parrallèelement les unes aux autres.
 Procedure Graphics_Draw_Lines(Position_1, Position_2 : Type_Coordinates; Colors : Array Of Type_Color; Var Panel : Type_Panel);
 
 Var Direction : Integer;
   i : Integer;
-  End_Position : Type_Coordinates;
   Temporary_Position : Type_Coordinates;
 
   Intermediate_Position : Type_Coordinates;
   Intermediate_Position_2 : Type_Coordinates;
-
-  Angle : Real;
-
-  Depart : Type_Coordinates;
 
   P : Type_Coordinates;
 
@@ -164,7 +271,6 @@ Begin
       Position_1 := Position_2;
       Position_2 := Temporary_Position;
       Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
-      Angle := Get_Angle(Position_1, Position_2);
     End;
 
   // - Traçage du segment entre la postion de la première station et la position intermédiaire.
@@ -256,22 +362,6 @@ Begin
 
 End;
 
-// Fonction qui renvoie l'index absolu (dans le tableau de stations du jeu) d'une station à partir de son pointeur.
-Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var Game : Type_Game) : Byte;
-
-Var i : Byte;
-Begin
-  Station_Get_Absolute_Index := 255;
-
-  For i := low(Game.Stations) To high(Game.Stations) Do
-    Begin
-      If Station_Pointer = Game.Stations[i] Then
-        Begin
-          Station_Get_Absolute_Index := i;
-          break;
-        End;
-    End;
-End;
 
 // Procédure qui dessine le panneau des récompenses.
 Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
@@ -341,7 +431,6 @@ Procedure Panel_Right_Render(Var Game : Type_Game; Var Destination_Panel : Type_
 
 Var i, j, k : Byte;
   Intermediate_Position, Mouse_Position: Type_Coordinates;
-  Indexes : Array [0..1] Of Byte;
   Colors : Array Of Type_Color;
   Mouse_Colors : Array Of Type_Color;
 Begin
@@ -669,190 +758,6 @@ Begin
 
 End;
 
-// Procédure qui rend le curseur dans le fenêtre principale.
-Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
-Var Destination_Rectangle : TSDL_Rect;
-  Intermediate_Position : Type_Coordinates;
-  Mouse_Position : Type_Coordinates;
-Begin
-  // Si le curseur est en mode ajout de locomotives ou de wagons.
-  If (Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Or (Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
-    Begin
-      Destination_Rectangle.x := Mouse_Get_Position().X - Vehicle_Size.X Div 2;
-      Destination_Rectangle.y := Mouse_Get_Position().Y - Vehicle_Size.Y Div 2;
-
-      SDL_BlitSurface(Game.Ressources.Vehicles[8][0], Nil, Game.Window.Surface, @Destination_Rectangle);
-    End
-End;
-
-// Procédure qui rend un bouton à double état.
-Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
-
-Var Destination_Rectangle : TSDL_Rect;
-Begin
-  Destination_Rectangle.x := Button.Position.X;
-  Destination_Rectangle.y := Button.Position.Y;
-  Destination_Rectangle.w := Button.Size.X;
-  Destination_Rectangle.h := Button.Size.Y;
-
-  If Button.Pressed Then
-    If (Button.State = False) Then
-      SDL_BlitSurface(Button.Surface_Pressed[0], Nil, Destination_Panel.Surface, @Destination_Rectangle)
-  Else
-    SDL_BlitSurface(Button.Surface_Pressed[1], Nil, Destination_Panel.Surface, @Destination_Rectangle)
-  Else
-    If (Button.State = False) Then
-      SDL_BlitSurface(Button.Surface_Released[0], Nil, Destination_Panel.Surface, @Destination_Rectangle)
-  Else
-    SDL_BlitSurface(Button.Surface_Released[1], Nil, Destination_Panel.Surface, @Destination_Rectangle);
-End;
-
-
-// Procédure qui définit tout les attributs d'un bouton.
-Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
-Begin
-  Button.Surface_Pressed := Surface_Pressed;
-  Button.Surface_Released := Surface_Released;
-  Button.Size.X := Surface_Released^.w;
-  Button.Size.Y := Surface_Released^.h;
-End;
-
-// Procédure qui qui définit tout les attributs d'une image.
-Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
-Begin
-  Image.Size.X := Surface^.w;
-  Image.Size.Y := Surface^.h;
-  Image.Surface := Surface;
-End;
-
-// Procédure qui supprime un panneau.
-Procedure Panel_Delete(Var Panel : Type_Panel);
-Begin
-  SDL_FreeSurface(Panel.Surface);
-End;
-
-// Fonction qui convertit une structure couleur en un nombre.
-Function Color_To_Longword(Color : Type_Color) : Longword;
-Begin
-  Color_To_Longword := (Color.Red << 16) Or (Color.Green << 8) Or (Color.Blue) Or (Color.Alpha << 24);
-End;
-
-// Procédure qui rend un bouton dans un panneau donné.
-Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
-
-Var Destination_Rectangle : TSDL_Rect;
-Begin
-  If (Not(Button.Hidden)) Then
-    Begin
-      Destination_Rectangle.x := Button.Position.X;
-      Destination_Rectangle.y := Button.Position.Y;
-      Destination_Rectangle.w := Button.Size.X;
-      Destination_Rectangle.h := Button.Size.Y;
-
-      If Button.Pressed Then
-        SDL_BlitSurface(Button.Surface_Pressed, Nil, Destination_Panel.Surface, @Destination_Rectangle)
-      Else
-        SDL_BlitSurface(Button.Surface_Released, Nil, Destination_Panel.Surface, @Destination_Rectangle);
-    End;
-End;
-
-// Procédure qui rend un image dans un panneau donnée.
-Procedure Image_Render(Var Image : Type_Image; Destination_Panel : Type_Panel);
-
-Var Destination_Rectangle : TSDL_Rect;
-Begin
-  Destination_Rectangle.x := Image.Position.X;
-  Destination_Rectangle.y := Image.Position.Y;
-  Destination_Rectangle.w := Image.Size.X;
-  Destination_Rectangle.h := Image.Size.Y;
-
-  SDL_BlitSurface(Image.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
-End;
-
-// Procédure qui crée (alloue la mémoire) et définit les attributs d'un panneau donné.
-Procedure Panel_Create(Var Panel : Type_Panel; X,Y, Width, Height : Integer);
-
-Var Surface : PSDL_Surface;
-  Color_Key : Longword;
-Begin
-  Panel.Position.X := X;
-  Panel.Position.Y := Y;
-  Panel.Size.X := Width;
-  Panel.Size.Y := Height;
-  Surface := Graphics_Surface_Create(Width, Height);
-  // Optimisation de la surface.
-  Panel.Surface := SDL_DisplayFormat(Surface);
-  Color_Key := SDL_MapRGB(Panel.Surface^.format, 255, 0, 255);
-  SDL_SetColorKey(Panel.Surface, SDL_SRCCOLORKEY, Color_Key);
-  // Libération de la surface temporaire.
-  SDL_FreeSurface(Surface);
-
-  Panel.Surface := SDL_DisplayFormat(Graphics_Surface_Create(Width, Height));
-  Panel_Set_Hidden(false, Panel);
-End;
-
-// Procédure qui rend un panneau dans un autre panneau donné.
-Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
-
-Var Destination_Rectangle : TSDL_Rect;
-Begin
-  If (Not(Panel.Hidden)) Then
-    Begin
-      Destination_Rectangle.x := Panel.Position.X;
-      Destination_Rectangle.y := Panel.Position.Y;
-      Destination_Rectangle.w := Panel.Size.X;
-      Destination_Rectangle.h := Panel.Size.Y;
-
-      SDL_BlitSurface(Panel.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
-    End;
-End;
-
-// Procédure qui effectue un rendu anticipé d'une étiquette (pré-rendu).
-Procedure Label_Pre_Render(Var Laabel : Type_Label);
-
-Var   Characters : pChar;
-  SDL_Color : PSDL_Color;
-Begin
-  new(SDL_Color);
-
-
-  SDL_Color^.r := Laabel.Color.Red;
-  SDL_Color^.g := Laabel.Color.Green;
-  SDL_Color^.b := Laabel.Color.Blue;
-
-  SDL_FreeSurface(Laabel.Surface);
-
-  // Conversion du string en pChar.
-  Characters := String_To_Characters(Laabel.Text);
-
-  Laabel.Surface := TTF_RENDERTEXT_BLENDED(Laabel.Font, Characters,
-                    SDL_Color^);
-
-  TTF_SizeText(Laabel.Font, Characters, Laabel.Size.X, Laabel.Size.Y);
-
-  dispose(SDL_Color);
-  strDispose(Characters);
-
-End;
-
-// Procédure qui pré-rend le texte dans une surface lorsqu'un attribut de l'étiquette est modifié (moins lourd pour l'affichage) puis rend dans le panneau de destination.
-Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
-
-Var Destination_Rectangle : TSDL_Rect;
-Begin
-
-  If (Laabel.Pre_Render) Then
-    Begin
-      Label_Pre_Render(Laabel);
-      Laabel.Pre_Render := false;
-    End;
-
-  Destination_Rectangle.x := Laabel.Position.X;
-  Destination_Rectangle.y := Laabel.Position.Y;
-
-  SDL_BlitSurface(Laabel.Surface, Nil, Panel.Surface, @Destination_Rectangle);
-End;
-
 // - - Graphics
 
 // Procédure qui charge les graphismes.
@@ -866,10 +771,7 @@ Begin
   TTF_INIT();
 
   // - Création du panneau fenêtre.
-  If Full_Screen Then
-    Game.Window.Surface := SDL_SetVideoMode(0, 0, Color_Depth, SDL_HWSURFACE Or SDL_FULLSCREEN)
-  Else
-    Game.Window.Surface := SDL_SetVideoMode(Screen_Width, Screen_Height, Color_Depth, SDL_HWSURFACE);
+  Game.Window.Surface := SDL_SetVideoMode(Screen_Width, Screen_Height, Color_Depth, SDL_HWSURFACE);
 
   // - Obtention des informations de la fenêtre.
   Video_Informations := SDL_GetVideoInfo();
@@ -888,7 +790,6 @@ Begin
   Ressources_Load(Game.Ressources);
 
   // - Panneau de droite.
-
 
   // - Panneau de haut.
 
@@ -984,8 +885,10 @@ Procedure Graphics_Unload(Var Game : Type_Game);
 
 Var i, j : Byte;
 Begin
+
   // Libération de la mémoire des sprites.
   For i := 0 To 8 Do
+
     For j := 0 To 3 Do
       SDL_FreeSurface(Game.Ressources.Vehicles[i][j]);
 
@@ -995,7 +898,11 @@ Begin
       SDL_FreeSurface(Game.Ressources.Passengers[i]);
     End;
 
-
+  SDL_FreeSurface(Game.Ressources.Train_Add);
+  SDL_FreeSurface(Game.Ressources.Wagon_Add );
+  SDL_FreeSurface(Game.Ressources.Tunnel_Add);
+  SDL_FreeSurface(Game.Ressources.Line_Add);
+  
   // Libération des polices de caractères.
   TTF_CloseFont(Game.Ressources.Fonts[Font_Small][Font_Normal]);
   TTF_CloseFont(Game.Ressources.Fonts[Font_Medium][Font_Normal]);
@@ -1003,6 +910,37 @@ Begin
   TTF_CloseFont(Game.Ressources.Fonts[Font_Small][Font_Bold]);
   TTF_CloseFont(Game.Ressources.Fonts[Font_Medium][Font_Bold]);
   TTF_CloseFont(Game.Ressources.Fonts[Font_Big][Font_Bold]);
+
+  Label_Delete(Game.Title_Label);
+  Label_Delete(Game.Message_Label);
+  Label_Delete(Game.Reward_Labels[0]);
+  Label_Delete(Game.Reward_Labels[1]);
+  Button_Delete(Game.Reward_Buttons[0]);
+  Button_Delete(Game.Reward_Buttons[1]);
+  Button_Delete(Game.Escape_Button);
+  Dual_State_Button_Delete(Game.Play_Pause_Button);
+  Label_Delete(Game.Score_Label);
+  Image_Delete(Game.Score_Image);
+  Label_Delete(Game.Clock_Label);
+  Image_Delete(Game.Clock_Image);
+  Button_Delete(Game.Locomotive_Button[0]);
+  Button_Delete(Game.Locomotive_Button[1]);
+  Button_Delete(Game.Locomotive_Button[2]);
+  Button_Delete(Game.Wagon_Button[0]);
+  Button_Delete(Game.Wagon_Button[1]);
+  Button_Delete(Game.Wagon_Button[2]);
+  Button_Delete(Game.Tunnel_Button[0]);
+  Button_Delete(Game.Tunnel_Button[1]);
+  Button_Delete(Game.Tunnel_Button[2]);
+
+
+  // Suppression des panneaux de l'interface graphique.
+  Panel_Delete(Game.Panel_Left);
+  Panel_Delete(Game.Panel_Right);
+  Panel_Delete(Game.Panel_Top);
+  Panel_Delete(Game.Panel_Bottom);
+  Panel_Delete(Game.Panel_Reward);
+  Panel_Delete(Game.Window);
 End;
 
 // Procédure rafraîchissant tout les éléments graphiques de l'écran.
@@ -1119,7 +1057,6 @@ Procedure Line_Render(Var Line : Type_Line; Var Panel : Type_Panel; Mouse : Type
 
 Var Intermediate_Position, Mouse_Position :   Type_Coordinates;
   i : Byte;
-  Indexes : Array[0 .. 1] Of Byte;
 Begin
   // Si la ligne contient au moins une station.
   If (length(Line.Stations) > 0) Then

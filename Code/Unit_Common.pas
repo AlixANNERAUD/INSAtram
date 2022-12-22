@@ -10,42 +10,114 @@ Uses sdl, sdl_gfx, sdl_ttf, sysutils, math, Unit_Types, Unit_Constants;
 
 // - Déclaration des fonctions et procédures.
 
+// - - Général
 
+Function String_To_Characters(String_To_Convert : String) : pChar;
+
+// - - Jeu
+
+Procedure Game_Resume(Var Game : Type_Game);
+Procedure Game_Pause(Var Game : Type_Game);
+
+// - - Graphismes
+
+// - - - Général
+
+Function Get_Distance(Position_1, Position_2 : Type_Coordinates) : Integer;
+Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
+Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
+Function Lines_Intersects(a1, a2, b1, b2 : Type_Coordinates) : Boolean;
+Procedure Graphics_Draw_Filled_Circle(Surface : PSDL_Surface; Center : Type_Coordinates; Radius : Integer; Color : Type_Color);
+Procedure Graphics_Draw_Filled_Rectangle(Surface : PSDL_Surface; Position, Size : Type_Coordinates; Color : Type_Color);
 Function Get_Center_Position(Position, Size : Type_Coordinates) : Type_Coordinates;
-
 Function Get_Centered_Position(Container_Size, Size : Integer) : Integer;
+Function Graphics_Get_Direction(Angle : Real) : Integer;
 
 
-// - - Stations
+// - - - Couleurs
 
-Function Station_Create(Var Game: Type_Game) : Boolean;
-Procedure Stations_Delete(Var Game : Type_Game);
+Function Color_Get(Color_Name : Type_Color_Name) : Type_Color;
+Function Color_Get(Color_Name : Type_Color_Name; Alpha : Byte) : Type_Color;
+Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
+operator = (x, y: Type_Color) b : Boolean;
 
-// - Lignes
+// - - - Interface
+
+// - - - - Bouton
+
+Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
+Procedure Button_Delete(Var Button : Type_Button);
+
+// - - - - Boutton à double état
+
+Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
+Procedure Dual_State_Button_Delete(Var Dual_State_Button : Type_Dual_State_Button);
+
+// - - - - Image
+
+Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
+Procedure Image_Delete(Var Image : Type_Image);
+
+// - - - - Etiquette
+
+Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : pTTF_Font; Color : Type_Color);
+Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
+Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
+Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
+Procedure Label_Delete(Var Laabel : Type_Label);
+
+// - - - - Panneau
+
+Procedure Panel_Create(Var Panel : Type_Panel; X,Y, Width, Height : Integer);
+Procedure Panel_Delete(Var Panel : Type_Panel);
+Function Panel_Get_Relative_Position(Absolute_Position : Type_Coordinates; Panel : Type_Panel) : Type_Coordinates;
+Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
+
+// - - - - Chronomètre
+
+Procedure Pie_Create(Var Pie : Type_Pie; Radius : Integer; Color : Type_Color; Percentage : Real);
+Procedure Pie_Set_Percentage(Var Pie : Type_Pie; Percentage : Real);
+Procedure Pie_Delete(Var Pie : Type_Pie);
+
+
+// - - Objets
+
+// - - - Lignes
 
 Function Line_Create(Var Game : Type_Game) : Boolean;
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
-
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
-
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
-
 Function Line_Rectangle_Colliding(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
-
 Function Lines_Get_Selected(Game : Type_Game) : Type_Line_Pointer;
-
 
 // - Trains
 
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
+Procedure Train_Refresh_Label(Var Train : Type_Train);
 
 // - Véhicules
 
 Function Vehicle_Create(Var Train : Type_Train) : Boolean;
+Function Vehicle_Delete(Var Train : Type_Train) : Boolean;
 
-// - Passagers
+
+// - - Entités
+
+Function Number_To_Shape(Number : Byte) : Type_Shape;
+
+// - - - Rivière
+
+Procedure River_Create(Var Game : Type_Game);
+
+// - - - Station
+
+Function Station_Create(Var Game: Type_Game) : Boolean;
+Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
+
+// - - - Passagers
 
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
 Function Passenger_Delete(Var Passenger : Type_Passenger_Pointer) : Boolean;
@@ -54,65 +126,87 @@ Function Passenger_Delete(Var Passenger : Type_Passenger_Pointer) : Boolean;
 
 Function Time_Get_Current(): Type_Time;
 Function Time_Get_Elapsed(Start_Time : Type_Time) : Type_Time;
-
-// - - Formes
-
-Function Number_To_Shape(Number : Byte) : Type_Shape;
-
-Function String_To_Characters(String_To_Convert : String) : pChar;
-
-Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
-
-Function Get_Distance(Position_1, Position_2 : Type_Coordinates) : Integer;
-Function Station_Get_Intermediate_Position(Position_1, Position_2 : Type_Coordinates) :   Type_Coordinates;
-
+Function Day_To_String(Day : Type_Day) : String;
 Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
 
-Function Day_To_String(Day : Type_Day) : String;
-
-Function Panel_Get_Relative_Position(Absolute_Position : Type_Coordinates; Panel : Type_Panel) : Type_Coordinates;
-
-Function Lines_Intersects(a1, a2, b1, b2 : Type_Coordinates) : Boolean;
-
-Procedure Graphics_Draw_Filled_Circle(Surface : PSDL_Surface; Center : Type_Coordinates; Radius : Integer; Color : Type_Color);
-
-Procedure Graphics_Draw_Filled_Rectangle(Surface : PSDL_Surface; Position, Size : Type_Coordinates; Color : Type_Color);
-
-
-Function Color_Get(Color_Name : Type_Color_Name) : Type_Color;
-Function Color_Get(Color_Name : Type_Color_Name; Alpha : Byte) : Type_Color;
-Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
-
-operator = (x, y: Type_Color) b : Boolean;
-
-Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
-
-Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
-
-// - Etiquettes
-
-Procedure Label_Set(Var Laabel : Type_Label; Text_String : String; Font : pTTF_Font; Color : Type_Color);
-Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
-Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
-Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
-
-Procedure Game_Resume(Var Game : Type_Game);
-Procedure Game_Pause(Var Game : Type_Game);
-
-Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
-
-Procedure River_Create(Var Game : Type_Game);
-
-Procedure Pie_Create(Var Pie : Type_Pie; Radius : Integer; Color : Type_Color; Percentage : Real);
-Procedure Pie_Set_Percentage(Var Pie : Type_Pie; Percentage : Real);
-
-Function Vehicle_Delete(Var Train : Type_Train) : Boolean;
-
-Function Graphics_Get_Direction(Angle : Real) : Integer;
-
-Procedure Train_Refresh_Label(Var Train : Type_Train);
+// - Définition des fonctions et procédures
 
 Implementation
+
+Procedure Button_Delete(Var Button : Type_Button);
+Begin
+  SDL_FreeSurface(Button.Surface_Pressed);
+  SDL_FreeSurface(Button.Surface_Released);
+End;
+
+Procedure Dual_State_Button_Delete(Var Dual_State_Button : Type_Dual_State_Button);
+Begin
+  SDL_FreeSurface(Dual_State_Button.Surface_Pressed[0]);
+  SDL_FreeSurface(Dual_State_Button.Surface_Pressed[1]);
+  SDL_FreeSurface(Dual_State_Button.Surface_Released[0]);
+  SDL_FreeSurface(Dual_State_Button.Surface_Released[1]);
+End;
+
+Procedure Image_Delete(Var Image : Type_Image);
+Begin
+  SDL_FreeSurface(Image.Surface);
+End;
+
+Procedure Label_Delete(Var Laabel : Type_Label);
+Begin
+  SDL_FreeSurface(Laabel.Surface);
+End;
+
+Procedure Pie_Delete(Var Pie : Type_Pie);
+Begin
+  SDL_FreeSurface(Pie.Surface);
+End;
+
+// Procédure qui supprime un panneau.
+Procedure Panel_Delete(Var Panel : Type_Panel);
+Begin
+  SDL_FreeSurface(Panel.Surface);
+End;
+
+// Procédure qui crée (alloue la mémoire) et définit les attributs d'un panneau donné.
+Procedure Panel_Create(Var Panel : Type_Panel; X,Y, Width, Height : Integer);
+
+Var Surface : PSDL_Surface;
+  Color_Key : Longword;
+Begin
+  Panel.Position.X := X;
+  Panel.Position.Y := Y;
+  Panel.Size.X := Width;
+  Panel.Size.Y := Height;
+  Surface := Graphics_Surface_Create(Width, Height);
+  // Optimisation de la surface.
+  Panel.Surface := SDL_DisplayFormat(Surface);
+  Color_Key := SDL_MapRGB(Panel.Surface^.format, 255, 0, 255);
+  SDL_SetColorKey(Panel.Surface, SDL_SRCCOLORKEY, Color_Key);
+  // Libération de la surface temporaire.
+  SDL_FreeSurface(Surface);
+
+  Panel.Surface := SDL_DisplayFormat(Graphics_Surface_Create(Width, Height));
+  Panel_Set_Hidden(false, Panel);
+End;
+
+// Procédure qui définit tout les attributs d'un bouton.
+Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
+Begin
+  Button.Surface_Pressed := Surface_Pressed;
+  Button.Surface_Released := Surface_Released;
+  Button.Size.X := Surface_Released^.w;
+  Button.Size.Y := Surface_Released^.h;
+End;
+
+// Procédure qui qui définit tout les attributs d'une image.
+Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
+Begin
+  Image.Size.X := Surface^.w;
+  Image.Size.Y := Surface^.h;
+  Image.Surface := Surface;
+End;
+
 
 Procedure Train_Refresh_Label(Var Train : Type_Train);
 
@@ -649,6 +743,7 @@ Begin
 
   // Convention d'affichage
 
+
   //Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
   Angle := Get_Angle(Position_1, Position_2);
 
@@ -657,8 +752,8 @@ Begin
       Temporary_Position := Position_1;
       Position_1 := Position_2;
       Position_2 := Temporary_Position;
-      Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
       Angle := Get_Angle(Position_1, Position_2);
+      //Angle := Get_Angle(Position_1, Position_2);
     End;
 
   Station_Get_Intermediate_Position := Position_1;
@@ -714,29 +809,6 @@ Begin
       Station_Get_Intermediate_Position.X := Position_2.X + abs(Position_2.Y - Position_1.Y);
     End;
 
-End;
-
-// Procédure qui supprime les stations d'une partie.
-Procedure Stations_Delete(Var Game : Type_Game);
-
-Var i, j : Byte;
-Begin
-
-  // Itère parmi les stations d'une partie.
-  For i := low(Game.Stations) To high(Game.Stations) Do
-    Begin
-      // Itère parmi les passagers d'une station.
-      For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
-        Begin
-          // Suppression du passager.
-          Passenger_Delete(Game.Stations[i]^.Passengers[j]);
-          // Suppression de l'emplacement du passager dans la station.
-          delete(Game.Stations[i]^.Passengers, j, 1);
-        End;
-      // Suppression de la station.
-      Dispose(Game.Stations[i]);
-      delete(Game.Stations, i, 1);
-    End;
 End;
 
 // Fonction qui convertit une chaîne de caractères (dyanmique) en un tableau de caractères (statique).
@@ -1001,6 +1073,7 @@ Begin
       Line_Compute_Intermediate_Positions(Line);
 
       Game.Refresh_Graph_Table := True;
+      Game.Itinerary_Refresh := True;
 
       Line_Add_Station := True;
     End
@@ -1047,6 +1120,7 @@ Begin
                       Line_Compute_Intermediate_Positions(Line);
 
                       Game.Refresh_Graph_Table := True;
+                      Game.Itinerary_Refresh := True;
 
                       Line_Add_Station := true;
                       Break;
@@ -1100,6 +1174,7 @@ Begin
                 Line_Compute_Intermediate_Positions(Line);
 
                 Game.Refresh_Graph_Table := True;
+                Game.Itinerary_Refresh := True;
 
                 Line_Remove_Station := True;
               End;
@@ -1129,6 +1204,8 @@ Begin
   // Définition de la taille du passager.
   Station.Passengers[high(Station.Passengers)]^.Size.X := Station.Passengers[high(Station.Passengers)]^.Sprite^.w;
   Station.Passengers[high(Station.Passengers)]^.Size.Y := Station.Passengers[high(Station.Passengers)]^.Sprite^.h;
+
+  Game.Itinerary_Refresh := True;
 End;
 
 // Fonction qui crée un train dans une ligne.

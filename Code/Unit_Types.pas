@@ -276,6 +276,8 @@ End;
 // Structure de type jeu
 Type Type_Game = Record
 
+  Itinerary_Refresh : Boolean;
+
   Animation : Type_Animation;
 
   Start_Time : Type_Time;

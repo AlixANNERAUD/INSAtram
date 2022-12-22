@@ -30,6 +30,24 @@ Procedure Logic_Rewards(Var Game : Type_Game);
 
 Implementation
 
+
+// Fonction qui renvoie l'index absolu (dans le tableau de stations du jeu) d'une station à partir de son pointeur.
+Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var Game : Type_Game) : Byte;
+
+Var i : Byte;
+Begin
+  Station_Get_Absolute_Index := 255;
+
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
+      If Station_Pointer = Game.Stations[i] Then
+        Begin
+          Station_Get_Absolute_Index := i;
+          break;
+        End;
+    End;
+End;
+
 // - - Fonctions et procédures relatives au passagers 
 
 Procedure Logic_Rewards(Var Game : Type_Game);
@@ -649,10 +667,6 @@ Begin
       Line_Add_Station(Game.Stations[i], Game.Lines[0], Game);
     End;
 
-
-  Game_Refresh_Graph_Table(Game);
-
-
 {
   For i := high(Game.Stations) - 2 To high(Game.Stations) Do
     Begin
@@ -682,9 +696,6 @@ Begin
   Passenger_Create(Game.Stations[0]^, Game);
 
 
-  // Calcul des itinéaires des passagers créés.
-  Passengers_Compute_Itinerary(Game);
-
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
   //Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
   //Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
@@ -707,13 +718,18 @@ Begin
   // Itère parmi les stations
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-
-      Stations_Delete(Game);
-
-      // TODO : Suppresion des stations.
+      // Itère parmis les passagers d'une station.
+      For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
+        Begin
+          // Suppression du passager.
+          Passenger_Delete(Game.Stations[i]^.Passengers[j]);
+        End;
+    
+        SetLength(Game.Stations[i]^.Passengers, 0);
+      // Suppression de la station.
+      Dispose(Game.Stations[i]);
     End;
-
-
+    
   SetLength(Game.Stations, 0);
 
   // Suppression des passagers dans les véhicules des trains.
@@ -745,12 +761,7 @@ Begin
           End;
       End;
 
-  // Suppression des panneaux de l'interface graphique.
-  Panel_Delete(Game.Panel_Left);
-  Panel_Delete(Game.Panel_Right);
-  Panel_Delete(Game.Panel_Top);
-  Panel_Delete(Game.Panel_Bottom);
-  Panel_Delete(Game.Window);
+
 
   // Pas besoin de supprimer les autres objets, ils seront automatiquement détruits lors de la suppression de l'objet Game.
 
@@ -815,7 +826,7 @@ Begin
               //Passengers_Compute_Itinerary(Game);
 
               // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
-              Game.Passengers_Timer := Time_Get_Current() + round((exp(-1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
+              Game.Passengers_Timer := Time_Get_Current() + round((exp(-1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 1) * 1000));
 
             End;
         End;
@@ -831,6 +842,25 @@ Begin
           Game.Stations_Timer := Time_Get_Current() + 25000;
         End;
 
+      
+      // - Reconstruction de la Graph_Table.
+
+      If Game.Refresh_Graph_Table Then
+        Begin
+          writeln('Refresh graph table');
+          Game_Refresh_Graph_Table(Game);
+          Game.Refresh_Graph_Table := false;
+        End;
+
+      // - Calcul des itinéraires des passagers.
+
+      If Game.Itinerary_Refresh Then
+        Begin
+          writeln('Refresh itinerary');
+          // Calcul des itinéraires des passagers.
+          Passengers_Compute_Itinerary(Game);
+          Game.Itinerary_Refresh := False;
+        End;
 
 
       // - Gestion des trains arrivés à quai.
@@ -852,14 +882,6 @@ Begin
                     End;
                 End;
             End;
-        End;
-
-      // - Reconstruction de la Graph_Table.
-
-      If (Game.Refresh_Graph_Table) Then
-        Begin
-          Game_Refresh_Graph_Table(Game);
-          Game.Refresh_Graph_Table := false;
         End;
 
       // - Vérification de l'encombrement des stations.
@@ -1043,9 +1065,6 @@ Begin
 
 
   Train.Deceleration_Time := ((Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time;
-
-  writeln('Train.Deceleration_Time : ', Train.Deceleration_Time);
-  writeln('Train max distance : ', Maximum_Distance);
 
 
 
