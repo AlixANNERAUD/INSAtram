@@ -125,7 +125,9 @@ Présentation
 \end_layout
 
 \begin_layout Standard
-Le nom du projet est 
+Dans le cadre du projet informatique que nous réalisons suite aux cours
+ de I1 et I2, nous avons décidé de développer un jeu.
+ Le nom du projet est 
 \begin_inset Quotes fld
 \end_inset
 
@@ -133,8 +135,7 @@ INSAtram
 \begin_inset Quotes frd
 \end_inset
 
-.
- Cela fait référence au mot 
+ où 
 \begin_inset Quotes fld
 \end_inset
 
@@ -142,55 +143,32 @@ Tram
 \begin_inset Quotes frd
 \end_inset
 
- désignant un moyen de transport urbain.
- Ainsi, le jeu consiste en la construction et gestion d’un réseau de transport
+ fait référence au moyen de transport urbain.
+ Le jeu consiste en la construction et gestion d'un réseau de transport
  ferroviaire.
- Le concept n'est pas original.
- En effet, il a été inspiré du jeu 
-\begin_inset Quotes fld
-\end_inset
-
-Mini Metro
-\begin_inset Quotes frd
-\end_inset
-
- de l'éditeur <>.
-\end_layout
-
-\begin_layout Standard
-L’objectif du joueur est que l’acheminement des passagers vers leurs destination
-s soit optimal.
- Plusieurs stations qu’il faudra relier entre elles apparaissent au fil
+ C'est pourquoi, l'identité graphique du jeu s'apparente aux cartes de réseau
+ disponibles dans les transports en commun.
+ Le concept n'est pas original puisqu'il est inspiré du jeu Mini Metro de
+ l'éditeur Dinosaur Polo Club.
+ L'objectif du joueur est d’acheminer des passagers vers leur destination,
+ et ce, de manière optimale.
+ Plusieurs stations qu'il faudra relier entre elles apparaissent au cours
  de la partie.
- Les passagers apparaîtront à côté de leur station de départ et emprunteront
- la ou les lignes qui desservent leur station afin d’atteindre leur destination.
- Certaines cartes pourront contenir des fleuves dès le début de la partie.
- L’identité graphique du jeu s’apparentera aux cartes de réseaux disponibles
- dans les transports en commun.
-\end_layout
-
-\begin_layout Standard
-Les lignes reliant les stations seront de différentes couleurs, elles sont
- semblables à celles que l'on voit sur les vraies cartes de transport en
- commun.
- Lorsqu’une ligne est créée, un véhicule apparaîtra sur cette dernière et
- y fera des allers-retours.
- Il est possible de librement supprimer ou réorganiser les lignes à tout
- moment de la partie.
-\end_layout
-
-\begin_layout Standard
-Les réseaux deviennent de plus en plus complexes au fur et à mesure de la
- partie, le joueur pourra recevoir des objets (items cités dans les fonctionnali
-tés) à différents moments de la partie afin de l’aider dans la gestion des
- réseaux.
+ Les passagers apparaissent à côté de leur station de départ et empruntent
+ la ou les lignes qui desservent leur station afin d'atteindre leur destination.
  
 \end_layout
 
 \begin_layout Standard
-Enfin, le joueur perd lorsque son réseau n’est plus efficace.
- C’est-à-dire lorsqu’une station accueille un nombre de passagers supérieur
- à sa capacité pendant un certain temps.
+Ce projet était à réaliser en groupe, le nôtre était composé de 3 membres.
+ Par conséquent, en plus de la mobilisation des connaissances acquises en
+ informatique, il était nécessaire de prendre en compte le travail de groupe
+ et donc la communication ainsi que la répartition des tâches.
+ Cette dimension, bien qu'indispensable, a rajouté une difficulté à la plannific
+ation du projet.
+ En effet, jusqu'ici, nous étions habitués à travailler de manière individuelle
+ et sans trop se soucier d'établir un plan de projet de A à Z.
+ Nous présentons dans ce rapport notre façon d'appréhender ce nouvel exercice.
 \end_layout
 
 \begin_layout Subsection
@@ -386,6 +364,28 @@ Fin de partie :
 \end_deeper
 \begin_layout Section
 Structure
+\end_layout
+
+\begin_layout Standard
+Au début du projet, nous avons essayé d'être le plus rigoureux possible
+ lorsque l'on a déterminé la structure du projet.
+ Cependant, certaines parties ne pouvaient être prédites lorsque le projet
+ était encore au stade de simple idée.
+ Nous donc dû apporter des modifications à notre analyse descendante initiale,
+ la version qui a été mise à jour se trouve en annexe du rapport.
+ Nous avons également veillé à séparer le code en plusieurs unités et à
+ laisser des commentaires dans le but d'avoir un code lisible et compréhensible.
+ Certains 
+\begin_inset Quotes fld
+\end_inset
+
+writeln
+\begin_inset Quotes frd
+\end_inset
+
+ qui ne sont pas utiles à l'exécution du code ont été ajoutés afin d'afficher
+ du texte dans le terminal pour faciliter la compréhension du déroulement
+ de la partie.
 \end_layout
 
 \begin_layout Subsection
@@ -676,18 +676,6 @@ INSAtram.pas
 .
 \end_layout
 
-\begin_layout Subsection
-Conclusion
-\end_layout
-
-\begin_layout Standard
-Au début du projet, nous avons essayé d'être le plus rigoureux possible
- lorsque l'on a déterminé la structure du projet.
- Cependant, certaines parties ne pouvaient être prédites lorsque le projet
- était encore au stade de simple idée.
- Nous donc dû apporter des modifications à notre analyse descendante 
-\end_layout
-
 \begin_layout Standard
 \begin_inset Newpage pagebreak
 \end_inset
@@ -738,6 +726,11 @@ Inkscape : Logiciel de dessin vectoriel utilisé pour la création des ressource
  graphiques du jeu.
 \end_layout
 
+\begin_layout Itemize
+Mermaid : Outil de création dynamique de diagrammes et de graphiques utilisé
+ pour la création de l'analyse descendante.
+\end_layout
+
 \begin_layout Subsection
 Répartition du travail
 \end_layout
@@ -752,7 +745,8 @@ Afin d'avoir une répartition du travail la plus homogène possible, nous
  Puis, chaque personne pouvait récupérer une tâche dès que la précédente
  était implémentée, testée et validée par les autres.
  Cette méthode permettait alors à chacun d'explorer différentes parties
- du développement.
+ du développement et d'avoir une vision d'ensemble quant à l'avancement
+ du projet.
  Cependant, certaines tâches nécessitaient des calculs et raisonnements
  complexes, dans ces cas-là, nous étions au moins deux à travailler dessus.
  De ce fait, il serait difficile d'établir une liste exhaustive des tâches
@@ -767,7 +761,7 @@ Afin de ne pas avoir à être systématiquement en présentiel pour pouvoir
  de collaborer le plus facilement possible.
  C'est pour cette raison que nous avons utilisé l'éditeur de code Visual
  Studio Code.
- Bien sûr, en cas de soucis ou de problème difficiles à résoudre (voir section
+ Bien sûr, en cas de soucis ou de problème difficile à résoudre (voir section
  4), nous nous concertions et élaborions une solution ensemble.
 \end_layout
 
@@ -1192,7 +1186,7 @@ Toute la difficulté du jeu reposant sur la performance du réseau créé, il
  d'en adopter un assez connu : l'algorithme de Dijkstra.
  Cet algorithme est supposé être de complexité O((n + a)log(n)).
  Cependant, étant donné que nous avons fait l'implémentation de cet algorithme
- assez théorique de nous même, en s'inspirant seulement de son fonctionnement
+ assez théorique nous-même, en s'inspirant seulement de son fonctionnement
  quand il est exécuté à la main, il serait très peu surprenant d'apprendre
  que sa complexité s'en soit trouvée agrandie.
  L'écriture des fonctions et procédures liées à la résolution d'itinéraire
@@ -1415,10 +1409,46 @@ Une interface graphique est nécéssaire pour que l'utilisateur puisse interagir
 \end_layout
 
 \begin_layout Itemize
-Type : 
+Type :
 \end_layout
 
 \begin_layout Standard
+Manque de temps 
+\end_layout
+
+\begin_layout Standard
+Les fonctionnalités obligatoires que nous souhaitions implémenter au début
+ du projet ont pu être réalisées.
+ Cependant, par faute de temps, beaucoup de fonctionnalités optionnelles
+ n'ont pas pu être développées.
+ Par exemple, la fonctionnalité 
+\begin_inset Quotes fld
+\end_inset
+
+Chargement/Sauvegarde Partie
+\begin_inset Quotes frd
+\end_inset
+
+ présente dans la première analyse descendante a été abandonnée.
+ En effet, la gestion de la mémoire pour ce projet étant surtout dynamique,
+ nous avons estimé que de se lancer dans l’implémentation d’un système de
+ sauvegarde de la partie ne serait pas une idée très sage.
+ Le type 
+\begin_inset Quotes fld
+\end_inset
+
+arcade
+\begin_inset Quotes frd
+\end_inset
+
+ du jeu ne s’y prête de toute manière pas vraiment.
+ Ce manque de temps nous a également empêché de réaliser certaines optimisations
+ dans le code, notamment pour garder en mémoire les itinéraires afin de
+ réduire le nombre de fois où l'on calcule les itinéraires.
+ De même, bien que commencée, la fonctionnalité de gestion des fleuves,
+ de leurs intersections avec les lignes ainsi que de leur contournement
+ via les tunnels comme présentée dans la première analyse descendante n’a
+ pas pu aboutir faute de temps.
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -1430,7 +1460,18 @@ Conclusion
 \end_layout
 
 \begin_layout Standard
-Annexe
+La réalisation de ce projet nous semblait compliquée voire impossible lorsque
+ le concept nous a été expliqué.
+ Néanmoins, cela nous a poussé à faire preuve d'autonomie et à avoir une
+ bonne organisation afin de respecter notre cahier des charges.
+ C'était une introduction efficace et parfois perilleuse à la gestion de
+ projet mais également un moyen de développer nos compétences en algorithmie
+ et de découvrir certains concepts que nous n'avions pas eu l'occasion d'explore
+r en cours l'année dernière.
+ Nous avons également rencontré plusieurs difficultés au cours de la réalisation
+ du projet ce qui nous a poussé à faire preuve d'ingéniosité et à faire
+ des recherches afin de trouver des solutions adaptées aux problèmes qui
+ sont survenus.
 \end_layout
 
 \begin_layout Subsection

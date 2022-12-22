@@ -177,7 +177,7 @@ Begin
 
 End;
 
-
+// Procédure qui construit le tableau des liens entres les stations.
 Procedure Game_Refresh_Graph_Table(Var Game : Type_Game);
 
 Var i, j : Byte;
@@ -303,7 +303,7 @@ Begin
   Get_Weight := Get_Distance(Station_1.Position_Centered, Intermediate_Position) + Get_Distance(Intermediate_Position, Station_2.Position_Centered);
 End;
 
-// Fonction qui calcule le poids (la distance) d'un itinéraire.
+// Fonction qui calcule le poids (la distance) d'un itinéraire complet.
 Function Itinerary_Get_Weight(Game : Type_Game; Itinerary_Indexes : Type_Itinerary_Indexes) : Integer;
 
 Var i : Byte;
@@ -324,6 +324,7 @@ Begin
 
 End;
 
+// Procedure déterminant le plus court chemin entre deux stations données.
 Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Var Reverse_Itinerary_Indexes : Type_Itinerary_Indexes; Game :
                    Type_Game; Var Station_Is_Isolated : Boolean);
 
@@ -588,9 +589,6 @@ Var i : Byte;
 
 Begin
   Passenger_Get_Off := True;
-writeln('!!!! Entrée dans Get_Off !!!!');
-writeln('Ma CurrentStation = ', Current_Station.Shape);
-writeln('Ma NextStation = ', Next_Station.Shape);
 // Parcourt le tableau contenant l'itinéraire du passager.
 for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
   begin
@@ -614,15 +612,6 @@ for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
       end;
   end;
 end;
-// Parcourt le tableau contenant l'itinéraire du passager et vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
-{for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
-  begin
-    if @Next_Station = Passenger^.Itinerary[i] then
-      begin
-        Passenger_Get_Off := False;
-      end;
-  end;
-end;}
 
 // Fonction qui détermine si le passager doit monter dans un train.
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station; Var Current_Station : Type_Station) : Boolean;
@@ -631,12 +620,10 @@ Var i : Byte;
 Begin
   writeln('====================================');
 
-      writeln(' Passenger shape : ', Passenger^.Shape);
+      writeln(' Passenger shape = ', Passenger^.Shape);
       writeln('Next station shape = ', Next_Station.Shape);
      
       Passenger_Get_On := False;
-      writeln('Ma CurrentStation = ', Current_Station.Shape);
-      writeln('Ma NextStation = ', Next_Station.Shape);
       // Parcourt le tableau contenant l'itinéraire du passager.
       for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
         begin
@@ -659,32 +646,6 @@ Begin
                 end;
             end;
         end;
-      
-      // Parcourt le tableau contenant l'itinéraire du passager et vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
-      {for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
-        begin
-          if @Next_Station = Passenger^.Itinerary[i] then
-            begin
-              Passenger_Get_On := True;
-            end;
-        end;}
-
-
-
-
-{// Vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
-      if Passenger^.Itinerary[low(Passenger^.itinerary)+1] = @Next_Station then
-      begin
-        Passenger_Get_On := True;
-      end
-      else if Passenger^.Itinerary[low(Passenger^.itinerary)] = @Next_Station then
-      begin
-        Passenger_Get_On := True;
-      end
-      else
-      begin
-        Passenger_Get_On := False;
-      end;}
 
   For i := low(Passenger^.itinerary) To high(Passenger^.Itinerary) Do
     Begin
@@ -866,7 +827,6 @@ Begin
                         Begin
                           // Copie du pointeur du passager dans le train.
                           Train.Vehicles[i].Passengers[j] := Train.Last_Station^.Passengers[k];
-                          writeln('Le passager ', Train.Last_Station^.Passengers[k]^.Shape, ' est monté dans le train');
                           // Suppression du pointeur du passager de la station.
                           delete(Train.Last_Station^.Passengers, k, 1);
                           // On quitte la boucle.

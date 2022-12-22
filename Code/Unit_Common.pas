@@ -242,19 +242,6 @@ Begin
       Line_Add_Station(Game.Stations[i], Game.Lines[0], Game);
     End;
 
-
-{
-  For i := high(Game.Stations) - 2 To high(Game.Stations) Do
-    Begin
-      Line_Add_Station(@Game.Stations[i], Game.Lines[1]);
-    End;
-
-  For i := high(Game.Stations) - 6 To high(Game.Stations) - 3 Do
-    Begin
-      Line_Add_Station(@Game.Stations[i], Game.Lines[2]);
-    End;
-}
-
   For i := low(Game.Stations) To high(Game.Stations) Do
       For j := 0 To Random(6) Do
           Passenger_Create(Game.Stations[i]^, Game);
@@ -875,24 +862,6 @@ Begin
     End;
 
   Station_Get_Intermediate_Position := Position_1;
-
-
-{
-  Case Direction Of 
-    0 :
-      Station_Get_Intermediate_Position.X := Position_2.X - abs(Position_2.Y - Position_1.Y);
-
-    45 :
-      Station_Get_Intermediate_Position.Y := Position_2.Y - abs(Position_2.X - Position_1.X);
-    
-    90, 135 :
-       Station_Get_Intermediate_Position.Y := Position_2.Y + abs(Position_2.X - Position_1.X);
-      
-
-    180 : 
-        Station_Get_Intermediate_Position.X := Position_2.X + abs(Position_2.Y - Position_1.Y);
-  End;
-}
 
   //  45 - 90 - 135
   If ((Angle >= (Pi/4)) And (Angle <= ((3*Pi)/4))) Then
