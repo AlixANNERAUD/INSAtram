@@ -276,6 +276,17 @@ End;
 // Structure de type jeu
 Type Type_Game = Record
 
+  Panel_Game_Over : Type_Panel;
+  Game_Over_Title_Label : Type_Label;
+  Game_Over_Message_Label : Type_Label;
+  Game_Over_Retry_Label : Type_Label;
+  Game_Over_Quit_Label : Type_Label;
+  
+  Panel_Start : Type_Panel;
+  Start_Play_Label : Type_Label;
+  Sound_Button : Type_Dual_State_Button;
+  
+
   Itinerary_Refresh : Boolean;
 
   Animation : Type_Animation;
@@ -303,14 +314,14 @@ Type Type_Game = Record
 
   // Panneau de récompenses.
   Panel_Reward : Type_Panel;
-  Title_Label : Type_Label;
-  Message_Label : Type_Label;
+  Reward_Title_Label : Type_Label;
+  Reward_Message_Label : Type_Label;
   Reward_Buttons : Array[0 .. 1] Of Type_Button;
   Reward_Labels : Array[0 .. 1] Of Type_Label;
 
   // Panneau contenant l'interface du haut (score, heure ...).
   Panel_Top : Type_Panel;
-  Escape_Button : Type_Button;
+  Restart_Button : Type_Button;
 
   Play_Pause_Button : Type_Dual_State_Button;
   Score_Label : Type_Label;

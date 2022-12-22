@@ -344,9 +344,16 @@ Les lignes seront les infrastructures permettant aux locomotives de circuler
  Les lignes seront représentées à la manière d’un plan de métro, c’est-à-dire
  en utilisant des lignes horizontales et verticales ainsi que des angles
  à 45° pour les virages.
- oWagons : Les wagons sont des véhicules pouvant être ajoutés à une locomotive
- afin d’augmenter le nombre de passagers qu’elle peut transporter en une
- seule fois.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Wagons :
+\series default
+ Les wagons sont des véhicules pouvant être ajoutés à une locomotive afin
+ d’augmenter le nombre de passagers qu’elle peut transporter en une seule
+ fois.
 \end_layout
 
 \begin_layout Itemize
@@ -758,7 +765,7 @@ Structure générale
 \end_layout
 
 \begin_layout Standard
-Le projet était structuré en plusieurs fichiers de la manière suivante :
+Le projet est structuré en plusieurs fichiers de la manière suivante :
 \end_layout
 
 \begin_layout Standard
@@ -766,10 +773,6 @@ Le projet était structuré en plusieurs fichiers de la manière suivante :
 wide false
 sideways false
 status open
-
-\begin_layout Plain Layout
-
-\end_layout
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -799,15 +802,27 @@ Arbre des dépendances
 \end_layout
 
 \begin_layout Itemize
-Unit_Types : Unité contenant tout les types
+
+\series bold
+Unit_Types :
+\series default
+ Unité contenant tout les types
 \end_layout
 
 \begin_layout Itemize
-Unit_Constants : Unité contenant toutes les constantes du jeu.
+
+\series bold
+Unit_Constants :
+\series default
+ Unité contenant toutes les constantes du jeu.
 \end_layout
 
 \begin_layout Itemize
-Unit_Common : Unité contenant toutes les fonctions 
+
+\series bold
+Unit_Common :
+\series default
+ Unité contenant toutes les fonctions 
 \begin_inset Quotes fld
 \end_inset
 
@@ -819,21 +834,37 @@ Unit_Common : Unité contenant toutes les fonctions
 \end_layout
 
 \begin_layout Itemize
-Unit_Mouse : Unité regroupant toutes les fonctions responsable de la prise
- en charge de la souris.
+
+\series bold
+Unit_Mouse :
+\series default
+ Unité regroupant toutes les fonctions responsable de la prise en charge
+ de la souris.
 \end_layout
 
 \begin_layout Itemize
-Unit_Animation : Unité regroupant toutes les fonctions responsable des animation
-s (déplacement des trains, ).
+
+\series bold
+Unit_Animation :
+\series default
+ Unité regroupant toutes les fonctions responsable des animations (déplacement
+ des trains, ).
 \end_layout
 
 \begin_layout Itemize
-Unit_Graphics : Unité regroupant toutes les fonctions relatives aux graphismes.
+
+\series bold
+Unit_Graphics :
+\series default
+ Unité regroupant toutes les fonctions relatives aux graphismes.
 \end_layout
 
 \begin_layout Itemize
-Unit_Logic : Unité regroupant toute la logique du jeu.
+
+\series bold
+Unit_Logic :
+\series default
+ Unité regroupant toute la logique du jeu.
  C'est l'unité 
 \begin_inset Quotes fld
 \end_inset
@@ -1503,6 +1534,10 @@ Décélération : le temps
 \end_inset
 
  que le train train met pour atteindre une vitesse nulle.
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \begin_layout Standard

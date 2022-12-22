@@ -300,14 +300,14 @@ class Type_Game {
 
   // Panneau de récompense.
   Panel_Reward : Type_Panel
-  Title_Label : Type_Label
-  Message_Label : Type_Label
+  Reward_Title_Label : Type_Label
+  Reward_Message_Label : Type_Label
   Reward_Buttons : Array[0 .. 1] Of Type_Button
   Reward_Labels : Array[0 .. 1] Of Type_Label
 
   // Panneau contenant l'interface du haut (score heure ...).
   Panel_Top : Type_Panel
-  Escape_Button : Type_Button
+  Restart_Button : Type_Button
 
   Play_Pause_Button : Type_Dual_State_Button
   Score_Label : Type_Label

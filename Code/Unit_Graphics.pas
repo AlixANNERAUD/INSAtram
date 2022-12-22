@@ -19,37 +19,6 @@ Procedure Graphics_Refresh(Var Game : Type_Game);
 
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
-Procedure Graphics_Draw_Line(Position_1, Position_2 :
-                             Type_Coordinates; Color :
-                             Type_Color; Var Panel : Type_Panel);
-Procedure Graphics_Draw_River(Position_1, Position_2 :
-                              Type_Coordinates; Color :
-                              Type_Color; Var Panel : Type_Panel);
-
-// - - - Etiquette
-
-
-// - - - Panneaux
-
-
-
-Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
-Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
-
-
-// - - Entités du jeux.
-
-Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
-Procedure Line_Render(Var Line : Type_Line; Var Panel : Type_Panel; Mouse : Type_Mouse);
-
-Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
-
-Procedure Left_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
-Procedure Panel_Right_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
-
-Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
-
-Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 
 Implementation
@@ -385,8 +354,8 @@ Begin
         End;
 
 
-      Label_Render(Game.Title_Label, Game.Panel_Reward);
-      Label_Render(Game.Message_Label, Game.Panel_Reward);
+      Label_Render(Game.Reward_Title_Label, Game.Panel_Reward);
+      Label_Render(Game.Reward_Message_Label, Game.Panel_Reward);
 
       Button_Render(Game.Reward_Buttons[0], Game.Panel_Reward);
       Button_Render(Game.Reward_Buttons[1], Game.Panel_Reward);
@@ -397,6 +366,64 @@ Begin
       Panel_Render(Game.Panel_Reward, Destination_Panel);
     End;
 End;
+
+// Procédure qui dessine une ligne très épaisse (rivière entre deux points).
+Procedure Graphics_Draw_River(Position_1, Position_2 :
+                              Type_Coordinates; Color :
+                              Type_Color; Var Panel : Type_Panel);
+
+Var Direction : Integer;
+  i : Integer;
+Begin
+
+  Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
+
+  // Index_Max  := Width / (sqrt(2) * 2)
+
+  Case Direction Of 
+    0, 180 :
+             Begin
+               For i := -20 To 20 Do
+                 lineRGBA(Panel.Surface, Position_1.X, Position_1.Y  + i, Position_2.X, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+             End;
+    45, -135 :
+               Begin
+                 For i := -14 To 0 Do
+                   Begin
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i - 1, Position_2.X + i, Position_2.Y + i - 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+                 For i := 0 To 14 Do
+                   Begin
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y + i, Position_2.X + i + 1, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+               End;
+    90, -90 :
+              Begin
+                For i := -20 To 20 Do
+                  lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y, Position_2.X + i, Position_2.Y, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+              End;
+    135, -45 :
+               Begin
+                 For i := -14 To 0 Do
+                   Begin
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i + 1, Position_2.X + i, Position_2.Y - i + 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+                 For i := 0 To 14 Do
+                   Begin
+                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                     lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y - i, Position_2.X + i + 1, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
+                   End;
+               End;
+  End;
+
+  Graphics_Draw_Filled_Circle(Panel.Surface, Position_1, 20, Color);
+
+End;
+
+
 
 // Procédure qui affiche le timer des stations.
 Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
@@ -425,6 +452,190 @@ Begin
 
   SDL_BlitSurface(Pie.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
+
+// Procédure qui rend un train dans un panneau donné.
+Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
+
+Var Destination_Rectangle : TSDL_Rect;
+    Direction, Norme : Integer;
+  
+Begin
+  // Si le train est en mouvement (évite de refaire les calculs inutilement).
+  If (Train.Driving) Then
+    Begin
+      // Si le train se trouve avant le point intermédiaire.
+      If (Train.Distance <= Train.Intermediate_Position_Distance) Then
+        Begin
+          // Calcul de l'angle et de la direction (arrondissement de l'angle à 45 degré près).
+          Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Train.Intermediate_Position));
+
+          Train.Position := Train.Last_Station^.Position_Centered;
+
+          If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
+            Norme := Train.Distance
+          Else
+            Norme := round(sqrt(sqr(Train.Distance) * 0.5));
+        End
+        // Si le train se trouve après le point intermédiaire.
+      Else
+        Begin
+          // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
+          Direction := Graphics_Get_Direction(Get_Angle(Train.Intermediate_Position, Train.Next_Station^.Position_Centered));
+
+          Train.Position := Train.Intermediate_Position;
+
+          If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
+            Norme := Train.Distance - Train.Intermediate_Position_Distance
+          Else
+            Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance)) * 0.5));
+
+        End;
+
+      // - Application de la norme en fonction de la direction du train et modification de son sprite en conséquence.
+
+      Case Direction Of 
+        0 :
+            Begin
+              Train.Position.X := Train.Position.X + Norme;
+              Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
+            End;
+        180 :
+              Begin
+                Train.Position.X := Train.Position.X - Norme;
+                Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
+              End;
+        90 :
+             Begin
+               Train.Position.Y := Train.Position.Y - Norme;
+               Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
+             End;
+        -90 :
+              Begin
+                Train.Position.Y := Train.Position.Y + Norme;
+                Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
+              End;
+        -45 :
+              Begin
+                Train.Position.X := Train.Position.X + Norme;
+                Train.Position.Y := Train.Position.Y + Norme;
+                Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
+              End;
+        -135 :
+               Begin
+                 Train.Position.X := Train.Position.X - Norme;
+                 Train.Position.Y := Train.Position.Y + Norme;
+                 Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
+               End;
+        45:
+            Begin
+              Train.Position.X := Train.Position.X + Norme;
+              Train.Position.Y := Train.Position.Y - Norme;
+              Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
+
+            End;
+        135:
+             Begin
+               Train.Position.X := Train.Position.X - Norme;
+               Train.Position.Y := Train.Position.Y - Norme;
+               Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
+             End;
+      End;
+
+      // Transformation des coordonnées centrées en coordonnées en haut à gauche.
+      Train.Position.X := round(Train.Position.X - (Train.Size.X*0.5));
+      Train.Position.Y := round(Train.Position.Y - (Train.Size.Y*0.5));
+
+    End;
+
+  Train.Size.X := Train.Sprite^.w;
+  Train.Size.Y := Train.Sprite^.h;
+
+
+  Destination_Rectangle.x := Train.Position.X;
+  Destination_Rectangle.y := Train.Position.Y;
+
+  SDL_BlitSurface(Train.Sprite, Nil, Panel.Surface, @Destination_Rectangle);
+
+  // - Affichage de l'étiquette du train.
+
+  // Définition du texte de l'étiquette.
+
+  Train.Passengers_Label.Position.X := Destination_Rectangle.x + Get_Centered_Position(Train.Size.X, Train.Passengers_Label.Size.X);
+  Train.Passengers_Label.Position.Y := Destination_Rectangle.y + Get_Centered_Position(Train.Size.Y, Train.Passengers_Label.Size.Y);
+
+  Label_Render(Train.Passengers_Label, Panel);
+End;
+
+// Procédure qui rend une station dans un panneau donné.
+Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
+
+Var Destination_Rectangle :   TSDL_Rect;
+  i :   Byte;
+Begin
+  // - Affichage de la station.
+  Destination_Rectangle.x := Station.Position.X;
+  Destination_Rectangle.y := Station.Position.Y;
+  Destination_Rectangle.w := Station.Size.X;
+  Destination_Rectangle.h := Station.Size.Y;
+
+  SDL_BlitSurface(Station.Sprite, Nil, Panel.Surface, @Destination_Rectangle);
+
+  // - Affichage des passagers de la station.
+
+  If (length(Station.Passengers) > 0) Then
+    Begin
+      For i := low(Station.Passengers) To high(Station.Passengers) Do
+        Begin
+
+          If (i < (low(Station.Passengers) + 3)) Then
+            Begin
+              Destination_Rectangle.x := (Station.Position.X - (2 *
+                                         Station.Passengers[i]^.Size.X));
+
+              Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
+                                         Station.Passengers[i]^.Size.Y + 4));
+            End
+          Else If (i < (low(Station.Passengers) + 6)) Then
+                 Begin
+                   Destination_Rectangle.x := (Station.Position.X + Station.Size.X +
+                                              Station.Passengers[i]^.Size.X);
+
+                   Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
+                                              Station.Passengers[i]^.Size.Y + 4));
+                 End
+          Else If (i < (low(Station.Passengers) + 9)) Then
+                 Begin
+                   Destination_Rectangle.x := Station.Position.X + ((i Mod 3) * (
+                                              Station.Passengers[i]^.Size.X + 4));
+
+                   Destination_Rectangle.y := (Station.Position.Y - (2 *
+                                              Station.Passengers[i]^.Size.Y));
+                 End
+          Else If (i < (low(Station.Passengers) + 12)) Then
+                 Begin
+                   Destination_Rectangle.x := Station.Position.X + ((i Mod 3) * (
+                                              Station.Passengers[i]^.Size.X + 4));
+
+                   Destination_Rectangle.y := (Station.Position.Y + Station.Size.Y +
+                                              Station.Passengers[i]^.Size.Y);
+                 End;
+
+
+          SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Panel.Surface, @
+                          Destination_Rectangle);
+        End;
+    End;
+
+  // Affichage du minuteur de la station.
+
+  If (Station.Overfill_Timer <> 0) Then
+    Begin
+      Pie_Set_Percentage(Station.Timer, (Time_Get_Elapsed(Station.Overfill_Timer) / (Station_Overfill_Timer * 10)) mod 100);
+      Pie_Render(Station.Timer, Panel);
+    End;
+
+End;
+
 
 // Procédure qui rend le panneau de droite dans la fenêtre principale.
 Procedure Panel_Right_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
@@ -636,13 +847,19 @@ Function Image_Load(Path : String) : PSDL_Surface;
 Var Image : PSDL_Surface;
   Optimized_Image : PSDL_Surface;
   Color_Key : Longword;
+  Path_Characters : pChar;
 Begin
-  Image := IMG_Load(String_To_Characters(Path));
-
+  // Conversion de la chaîne de caractères en tableau de caractères.
+  Path_Characters := String_To_Characters(Path);
+  // Chargement de l'image.
+  Image := IMG_Load(Path_Characters);
+  // Optimisation de l'image.
   Optimized_Image := SDL_DisplayFormatAlpha(Image);
-
+  // Libération de l'image non optimisée.
   SDL_FreeSurface(Image);
-
+  // Suppression de la chaîne de caractères.
+  strDispose(Path_Characters);
+  // Définition de la clé couleur.
   Color_Key := SDL_MapRGBA(Optimized_Image^.Format, 255, 0, 255, 255);
   SDL_SetColorKey(Optimized_Image, SDL_SRCCOLORKEY, Color_Key);
 
@@ -676,6 +893,41 @@ Begin
     End;
 
   Panel_Render(Game.Panel_Left, Destination_Panel);
+End;
+
+Procedure Ressources_Unload(Var Ressources : Type_Ressources);
+Var i, j : Byte;
+Begin
+
+  writeln('Chier dedans');
+
+  // Libération de la mémoire des sprites.
+  For i := 0 To 8 Do
+
+    For j := 0 To 3 Do
+      SDL_FreeSurface(Ressources.Vehicles[i][j]);
+
+  For i := 0 To Game_Shapes_Number - 1 Do
+    Begin
+      SDL_FreeSurface(Ressources.Stations[i]);
+      SDL_FreeSurface(Ressources.Passengers[i]);
+    End;
+
+  SDL_FreeSurface(Ressources.Train_Add);
+  SDL_FreeSurface(Ressources.Wagon_Add );
+  SDL_FreeSurface(Ressources.Tunnel_Add);
+  SDL_FreeSurface(Ressources.Line_Add);
+  
+  // Libération des polices de caractères.
+  TTF_CloseFont(Ressources.Fonts[Font_Small][Font_Normal]);
+  TTF_CloseFont(Ressources.Fonts[Font_Medium][Font_Normal]);
+  TTF_CloseFont(Ressources.Fonts[Font_Big][Font_Normal]);
+  TTF_CloseFont(Ressources.Fonts[Font_Small][Font_Bold]);
+  TTF_CloseFont(Ressources.Fonts[Font_Medium][Font_Bold]);
+  TTF_CloseFont(Ressources.Fonts[Font_Big][Font_Bold]);
+
+
+
 End;
 
 // Procédure qui charge les ressources graphiques.
@@ -817,9 +1069,9 @@ Begin
   Game.Clock_Image.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Clock_Image.Size.Y);
   Game.Clock_Image.Position.X := Game.Clock_Label.Position.X - 16 - Game.Clock_Image.Size.X;
 
-  Button_Set(Game.Escape_Button, Image_Load(Path_Image_Button_Escape), Image_Load(Path_Image_Button_Escape));
-  Game.Escape_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Escape_Button.Size.Y);
-  Game.Escape_Button.Position.X := 16;
+  Button_Set(Game.Restart_Button, Image_Load(Path_Image_Button_Escape), Image_Load(Path_Image_Button_Escape));
+  Game.Restart_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Restart_Button.Size.Y);
+  Game.Restart_Button.Position.X := 16;
 
   Dual_State_Button_Set(Game.Play_Pause_Button, Image_Load(Path_Image_Pause), Image_Load(Path_Image_Play), Image_Load(Path_Image_Pause), Image_Load(Path_Image_Play));
 
@@ -868,8 +1120,8 @@ Begin
 
   // - - Définition des polices et couleurs des titres.
 
-  Label_Set(Game.Title_Label, '', Game.Ressources.Fonts[Font_Big][Font_Bold], Color_Get(Color_Black));
-  Label_Set(Game.Message_Label, '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+  Label_Set(Game.Reward_Title_Label, '', Game.Ressources.Fonts[Font_Big][Font_Bold], Color_Get(Color_Black));
+  Label_Set(Game.Reward_Message_Label, '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
   Label_Set(Game.Reward_Labels[0], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
   Label_Set(Game.Reward_Labels[1], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
 
@@ -882,42 +1134,16 @@ End;
 
 // Procédure qui décharge les graphismes de l'écran.
 Procedure Graphics_Unload(Var Game : Type_Game);
-
-Var i, j : Byte;
 Begin
+  Ressources_Unload(Game.Ressources);
 
-  // Libération de la mémoire des sprites.
-  For i := 0 To 8 Do
-
-    For j := 0 To 3 Do
-      SDL_FreeSurface(Game.Ressources.Vehicles[i][j]);
-
-  For i := 0 To Game_Shapes_Number - 1 Do
-    Begin
-      SDL_FreeSurface(Game.Ressources.Stations[i]);
-      SDL_FreeSurface(Game.Ressources.Passengers[i]);
-    End;
-
-  SDL_FreeSurface(Game.Ressources.Train_Add);
-  SDL_FreeSurface(Game.Ressources.Wagon_Add );
-  SDL_FreeSurface(Game.Ressources.Tunnel_Add);
-  SDL_FreeSurface(Game.Ressources.Line_Add);
-  
-  // Libération des polices de caractères.
-  TTF_CloseFont(Game.Ressources.Fonts[Font_Small][Font_Normal]);
-  TTF_CloseFont(Game.Ressources.Fonts[Font_Medium][Font_Normal]);
-  TTF_CloseFont(Game.Ressources.Fonts[Font_Big][Font_Normal]);
-  TTF_CloseFont(Game.Ressources.Fonts[Font_Small][Font_Bold]);
-  TTF_CloseFont(Game.Ressources.Fonts[Font_Medium][Font_Bold]);
-  TTF_CloseFont(Game.Ressources.Fonts[Font_Big][Font_Bold]);
-
-  Label_Delete(Game.Title_Label);
-  Label_Delete(Game.Message_Label);
+  Label_Delete(Game.Reward_Title_Label);
+  Label_Delete(Game.Reward_Message_Label);
   Label_Delete(Game.Reward_Labels[0]);
   Label_Delete(Game.Reward_Labels[1]);
   Button_Delete(Game.Reward_Buttons[0]);
   Button_Delete(Game.Reward_Buttons[1]);
-  Button_Delete(Game.Escape_Button);
+  Button_Delete(Game.Restart_Button);
   Dual_State_Button_Delete(Game.Play_Pause_Button);
   Label_Delete(Game.Score_Label);
   Image_Delete(Game.Score_Image);
@@ -933,7 +1159,6 @@ Begin
   Button_Delete(Game.Tunnel_Button[1]);
   Button_Delete(Game.Tunnel_Button[2]);
 
-
   // Suppression des panneaux de l'interface graphique.
   Panel_Delete(Game.Panel_Left);
   Panel_Delete(Game.Panel_Right);
@@ -941,6 +1166,7 @@ Begin
   Panel_Delete(Game.Panel_Bottom);
   Panel_Delete(Game.Panel_Reward);
   Panel_Delete(Game.Window);
+
 End;
 
 // Procédure rafraîchissant tout les éléments graphiques de l'écran.
@@ -962,7 +1188,7 @@ Begin
   Label_Render(Game.Clock_Label, Game.Panel_Top);
   Image_Render(Game.Clock_Image, Game.Panel_Top);
   Dual_State_Button_Render(Game.Play_Pause_Button, Game.Panel_Top);
-  Button_Render(Game.Escape_Button, Game.Panel_Top);
+  Button_Render(Game.Restart_Button, Game.Panel_Top);
 
   // - Rendu dans le panneau du bas.Game_Maximum_Lines_Number
   For i := low(Game.Lines) To high(Game.Lines) Do
@@ -993,61 +1219,6 @@ End;
 
 
 
-// Procédure qui dessine une ligne très épaisse (rivière entre deux points).
-Procedure Graphics_Draw_River(Position_1, Position_2 :
-                              Type_Coordinates; Color :
-                              Type_Color; Var Panel : Type_Panel);
-
-Var Direction : Integer;
-  i : Integer;
-Begin
-
-  Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
-
-  // Index_Max  := Width / (sqrt(2) * 2)
-
-  Case Direction Of 
-    0, 180 :
-             Begin
-               For i := -20 To 20 Do
-                 lineRGBA(Panel.Surface, Position_1.X, Position_1.Y  + i, Position_2.X, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-             End;
-    45, -135 :
-               Begin
-                 For i := -14 To 0 Do
-                   Begin
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i - 1, Position_2.X + i, Position_2.Y + i - 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                   End;
-                 For i := 0 To 14 Do
-                   Begin
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y + i, Position_2.X + i, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                     lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y + i, Position_2.X + i + 1, Position_2.Y + i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                   End;
-               End;
-    90, -90 :
-              Begin
-                For i := -20 To 20 Do
-                  lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y, Position_2.X + i, Position_2.Y, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-              End;
-    135, -45 :
-               Begin
-                 For i := -14 To 0 Do
-                   Begin
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i + 1, Position_2.X + i, Position_2.Y - i + 1, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                   End;
-                 For i := 0 To 14 Do
-                   Begin
-                     lineRGBA(Panel.Surface, Position_1.X + i, Position_1.Y - i, Position_2.X + i, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                     lineRGBA(Panel.Surface, Position_1.X + i + 1, Position_1.Y - i, Position_2.X + i + 1, Position_2.Y - i, Color.Red, Color.Green, Color.Blue, Color.Alpha);
-                   End;
-               End;
-  End;
-
-  Graphics_Draw_Filled_Circle(Panel.Surface, Position_1, 20, Color);
-
-End;
 
 
 
@@ -1092,187 +1263,6 @@ Begin
     End;
 End;
 
-// Procédure qui rend un train dans un panneau donné.
-Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
-Var Destination_Rectangle : TSDL_Rect;
-    Direction, Norme : Integer;
-  
-Begin
-  // Si le train est en mouvement (évite de refaire les calculs inutilement).
-  If (Train.Driving) Then
-    Begin
-      // Si le train se trouve avant le point intermédiaire.
-      If (Train.Distance <= Train.Intermediate_Position_Distance) Then
-        Begin
-          // Calcul de l'angle et de la direction (arrondissement de l'angle à 45 degré près).
-          Direction := Graphics_Get_Direction(Get_Angle(Train.Last_Station^.Position_Centered, Train.Intermediate_Position));
-
-          Train.Position := Train.Last_Station^.Position_Centered;
-
-          If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
-            Norme := Train.Distance
-          Else
-            Norme := round(sqrt(sqr(Train.Distance) * 0.5));
-        End
-        // Si le train se trouve après le point intermédiaire.
-      Else
-        Begin
-          // - Détermination de l'angle de la droite entre le point intermédiaire et la station d'arrivée.
-          Direction := Graphics_Get_Direction(Get_Angle(Train.Intermediate_Position, Train.Next_Station^.Position_Centered));
-
-          Train.Position := Train.Intermediate_Position;
-
-          If ((Direction = 0) Or (Direction = 180) Or (Direction = 90) Or (Direction = -90)) Then
-            Norme := Train.Distance - Train.Intermediate_Position_Distance
-          Else
-            Norme := round(sqrt(sqr((Train.Distance - Train.Intermediate_Position_Distance)) * 0.5));
-
-        End;
-
-      // - Application de la norme en fonction de la direction du train et modification de son sprite en conséquence.
-
-      Case Direction Of 
-        0 :
-            Begin
-              Train.Position.X := Train.Position.X + Norme;
-              Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
-            End;
-        180 :
-              Begin
-                Train.Position.X := Train.Position.X - Norme;
-                Train.Sprite := Ressources.Vehicles[Train.Color_Index][0];
-              End;
-        90 :
-             Begin
-               Train.Position.Y := Train.Position.Y - Norme;
-               Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
-             End;
-        -90 :
-              Begin
-                Train.Position.Y := Train.Position.Y + Norme;
-                Train.Sprite := Ressources.Vehicles[Train.Color_Index][2];
-              End;
-        -45 :
-              Begin
-                Train.Position.X := Train.Position.X + Norme;
-                Train.Position.Y := Train.Position.Y + Norme;
-                Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
-              End;
-        -135 :
-               Begin
-                 Train.Position.X := Train.Position.X - Norme;
-                 Train.Position.Y := Train.Position.Y + Norme;
-                 Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
-               End;
-        45:
-            Begin
-              Train.Position.X := Train.Position.X + Norme;
-              Train.Position.Y := Train.Position.Y - Norme;
-              Train.Sprite := Ressources.Vehicles[Train.Color_Index][1];
-
-            End;
-        135:
-             Begin
-               Train.Position.X := Train.Position.X - Norme;
-               Train.Position.Y := Train.Position.Y - Norme;
-               Train.Sprite := Ressources.Vehicles[Train.Color_Index][3];
-             End;
-      End;
-
-      // Transformation des coordonnées centrées en coordonnées en haut à gauche.
-      Train.Position.X := round(Train.Position.X - (Train.Size.X*0.5));
-      Train.Position.Y := round(Train.Position.Y - (Train.Size.Y*0.5));
-
-    End;
-
-  Train.Size.X := Train.Sprite^.w;
-  Train.Size.Y := Train.Sprite^.h;
-
-
-  Destination_Rectangle.x := Train.Position.X;
-  Destination_Rectangle.y := Train.Position.Y;
-
-  SDL_BlitSurface(Train.Sprite, Nil, Panel.Surface, @Destination_Rectangle);
-
-  // - Affichage de l'étiquette du train.
-
-  // Définition du texte de l'étiquette.
-
-  Train.Passengers_Label.Position.X := Destination_Rectangle.x + Get_Centered_Position(Train.Size.X, Train.Passengers_Label.Size.X);
-  Train.Passengers_Label.Position.Y := Destination_Rectangle.y + Get_Centered_Position(Train.Size.Y, Train.Passengers_Label.Size.Y);
-
-  Label_Render(Train.Passengers_Label, Panel);
-End;
-
-// Procédure qui rend une station dans un panneau donné.
-Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
-
-Var Destination_Rectangle :   TSDL_Rect;
-  i :   Byte;
-Begin
-  // - Affichage de la station.
-  Destination_Rectangle.x := Station.Position.X;
-  Destination_Rectangle.y := Station.Position.Y;
-  Destination_Rectangle.w := Station.Size.X;
-  Destination_Rectangle.h := Station.Size.Y;
-
-  SDL_BlitSurface(Station.Sprite, Nil, Panel.Surface, @Destination_Rectangle);
-
-  // - Affichage des passagers de la station.
-
-  If (length(Station.Passengers) > 0) Then
-    Begin
-      For i := low(Station.Passengers) To high(Station.Passengers) Do
-        Begin
-
-          If (i < (low(Station.Passengers) + 3)) Then
-            Begin
-              Destination_Rectangle.x := (Station.Position.X - (2 *
-                                         Station.Passengers[i]^.Size.X));
-
-              Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
-                                         Station.Passengers[i]^.Size.Y + 4));
-            End
-          Else If (i < (low(Station.Passengers) + 6)) Then
-                 Begin
-                   Destination_Rectangle.x := (Station.Position.X + Station.Size.X +
-                                              Station.Passengers[i]^.Size.X);
-
-                   Destination_Rectangle.y := Station.Position.Y + ((i Mod 3) * (
-                                              Station.Passengers[i]^.Size.Y + 4));
-                 End
-          Else If (i < (low(Station.Passengers) + 9)) Then
-                 Begin
-                   Destination_Rectangle.x := Station.Position.X + ((i Mod 3) * (
-                                              Station.Passengers[i]^.Size.X + 4));
-
-                   Destination_Rectangle.y := (Station.Position.Y - (2 *
-                                              Station.Passengers[i]^.Size.Y));
-                 End
-          Else If (i < (low(Station.Passengers) + 12)) Then
-                 Begin
-                   Destination_Rectangle.x := Station.Position.X + ((i Mod 3) * (
-                                              Station.Passengers[i]^.Size.X + 4));
-
-                   Destination_Rectangle.y := (Station.Position.Y + Station.Size.Y +
-                                              Station.Passengers[i]^.Size.Y);
-                 End;
-
-
-          SDL_BlitSurface(Station.Passengers[i]^.Sprite, Nil, Panel.Surface, @
-                          Destination_Rectangle);
-        End;
-    End;
-
-  // Affichage du minuteur de la station.
-
-  If (Station.Overfill_Timer <> 0) Then
-    Begin
-      Pie_Set_Percentage(Station.Timer, (Time_Get_Elapsed(Station.Overfill_Timer) / (Station_Overfill_Timer * 10)) mod 100);
-      Pie_Render(Station.Timer, Panel);
-    End;
-
-End;
 
 End.

@@ -344,9 +344,16 @@ Les lignes seront les infrastructures permettant aux locomotives de circuler
  Les lignes seront représentées à la manière d’un plan de métro, c’est-à-dire
  en utilisant des lignes horizontales et verticales ainsi que des angles
  à 45° pour les virages.
- oWagons : Les wagons sont des véhicules pouvant être ajoutés à une locomotive
- afin d’augmenter le nombre de passagers qu’elle peut transporter en une
- seule fois.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Wagons :
+\series default
+ Les wagons sont des véhicules pouvant être ajoutés à une locomotive afin
+ d’augmenter le nombre de passagers qu’elle peut transporter en une seule
+ fois.
 \end_layout
 
 \begin_layout Itemize
