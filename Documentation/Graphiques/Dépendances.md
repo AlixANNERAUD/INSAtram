@@ -12,28 +12,28 @@ stateDiagram-v2
 
     SDL --> INSAtram
 
-    state Incluses_dans_fpc {
+    state fpc {
         sysutils
         Math
         crt
     }
     
-    Incluses_dans_fpc --> INSAtram
+    fpc --> INSAtram
 
     state INSAtram {
 
-    state Unites_De_Base {
+    state Base {
 
     Unit_Types --> Unit_Common
     Unit_Constants --> Unit_Common
     }
 
-    Unites_De_Base --> Unit_Animation
+    Base --> Unit_Animation
 
-    Unites_De_Base --> Unit_Graphics
-    Unites_De_Base --> Unit_Logic
-    Unites_De_Base --> Unit_Sound
-    Unites_De_Base --> Unit_Mouse
+    Base --> Unit_Graphics
+    Base --> Unit_Logic
+    Base --> Unit_Sound
+    Base --> Unit_Mouse
 
     Unit_Animation --> Unit_Graphics
 

@@ -700,14 +700,22 @@ Begin
 
   Randomize();
 
+
   Graphics_Load(Game);
 
   Sounds_Load(Game);
   Sounds_Play(Game.Ressources.Music);
   Sounds_Set_Volume(Sounds_Maximum_Volume);
 
-  Game_Load(Game);
-
+    Panel_Set_Hidden(False, Game.Panel_Start);
+    Panel_Set_Hidden(True, Game.Panel_Reward);
+    Panel_Set_Hidden(True, Game.Panel_Game_Over);
+    Panel_Set_Hidden(True, Game.Panel_Right);
+    Panel_Set_Hidden(True, Game.Panel_Left);
+    Panel_Set_Hidden(True, Game.Panel_Top);
+    Panel_Set_Hidden(True, Game.Panel_Bottom);
+    
+ // Game_Load(Game);
 
   Mouse_Load(Game.Mouse);
 

@@ -201,6 +201,7 @@ Begin
   Game.Sound_Button.State := True;
   Game.Play_Pause_Button.State := True;
 
+  Panel_Set_Hidden(True, Game.Panel_Start);
     Panel_Set_Hidden(True, Game.Panel_Reward);
     Panel_Set_Hidden(True, Game.Panel_Game_Over);
     Panel_Set_Hidden(False, Game.Panel_Right);
@@ -1276,9 +1277,8 @@ Begin
                         Break;
                       End;
                   End;
-              End
-            Else
-              Busy := false;
+              End;
+
 
             // Si un train n'est pas à destination ou au départ de la station, on peut enlever la station de la ligne.
             If Not(Busy) Then
@@ -1288,6 +1288,7 @@ Begin
                 // Si il n'y a plus qu'une station dans la ligne, alors, on supprime la seule station restante.
                 If (length(Line.Stations) = 1) Then
                   SetLength(Line.Stations, 0);
+
                 Line_Compute_Intermediate_Positions(Line);
 
                 Game.Refresh_Graph_Table := True;
@@ -1421,7 +1422,7 @@ Function Vehicle_Delete(Var Train : Type_Train) : Boolean;
 Var i : Byte;
 Begin
   // Vérifie que le train possède bien des véhicules.
-  If (length(Train.Vehicles) > 1) Then
+  If (length(Train.Vehicles) > 0) Then
     Begin
       // - Déchargement des passagers dans la station précédente.
 
@@ -1437,6 +1438,9 @@ Begin
 
       // Suppression du dernier véhicule.
       SetLength(Train.Vehicles, length(Train.Vehicles) - 1);
+
+      If (length(Train.Vehicles) > 0) Then
+        Train_Refresh_Label(Train);
 
       // Mise à jour de l'étiquette du train.
 

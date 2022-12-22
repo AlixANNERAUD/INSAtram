@@ -7,8 +7,11 @@
    viewBox="0 0 135.46666 128.05833"
    version="1.1"
    id="svg1424"
-   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01, custom)"
    sodipodi:docname="Logo.svg"
+   inkscape:export-filename="../80405009/Logo.png"
+   inkscape:export-xdpi="48"
+   inkscape:export-ydpi="48"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,14 +28,16 @@
      showgrid="false"
      units="px"
      inkscape:zoom="1.3361472"
-     inkscape:cx="240.6172"
-     inkscape:cy="269.8056"
+     inkscape:cx="218.91301"
+     inkscape:cy="389.55289"
      inkscape:window-width="1920"
      inkscape:window-height="1016"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     inkscape:showpageshadow="0"
+     inkscape:deskcolor="#d1d1d1" />
   <defs
      id="defs1421" />
   <g
@@ -66,15 +71,15 @@
        inkscape:connector-curvature="0" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:63.7191px;line-height:1.25;font-family:'Titillium Web';-inkscape-font-specification:'Titillium Web Bold';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264029"
-       x="-0.82834834"
-       y="105.59787"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.2055px;line-height:1.25;font-family:'Titillium Web';-inkscape-font-specification:'Titillium Web Bold';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.208033"
+       x="-0.24511412"
+       y="101.09206"
        id="text3134"><tspan
          sodipodi:role="line"
          id="tspan3132"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:63.7191px;font-family:'Titillium Web';-inkscape-font-specification:'Titillium Web Bold';stroke-width:0.264029"
-         x="-0.82834834"
-         y="105.59787">Tram</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:50.2055px;font-family:'Titillium Web';-inkscape-font-specification:'Titillium Web Bold';stroke-width:0.208033"
+         x="-0.24511412"
+         y="101.09206">Tram</tspan></text>
     <rect
        style="fill:#000000;stroke:#000000;stroke-width:0.536791;stroke-linejoin:round"
        id="rect32823"
@@ -94,14 +99,14 @@
        id="rect32827-3"
        width="23.877182"
        height="8.002183"
-       x="14.738085"
+       x="16.636408"
        y="119.82391" />
     <rect
        style="fill:#000000;stroke:#000000;stroke-width:0.464484;stroke-linejoin:round"
        id="rect32827-9"
        width="23.877182"
        height="8.002183"
-       x="94.872131"
+       x="94.953072"
        y="119.82391" />
   </g>
 </svg>

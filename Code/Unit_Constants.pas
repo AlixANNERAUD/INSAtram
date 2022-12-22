@@ -103,6 +103,7 @@ Const Path_Ressources =  'Resources/';
       Path_Image_Button_Sound_Off = Path_Images + 'Sound_Off.png';
       Path_Image_Button_Sound_On = Path_Images + 'Sound_On.png';
       Path_Image_Button_Quit = Path_Images + 'Quit.png';
+      Path_Image_INSAtram = Path_Images + 'Logo.png';
 
   // - - - Polices
 

@@ -132,8 +132,6 @@ Begin
     End;
 End;
 
-
-
 // - Panneau de droite.
 
 // Fonction qui vérifie si la souris est sur une station et détermine la ligne actuellement sélectionnée.
@@ -211,7 +209,13 @@ Begin
                     Begin
                       // Supprime un wagon au train.
                       Vehicle_Delete(Game.Lines[i].Trains[j]);
-                      dec(Game.Player.Wagon_Token);
+                      If (length(Game.Lines[i].Trains[j].Vehicles) = 0) Then
+                        Begin
+                          Delete(Game.Lines[i].Trains, j, 1);
+                          inc(Game.Player.Locomotive_Token);
+                        End
+                      Else
+                        inc(Game.Player.Wagon_Token);
                       Mouse_Pressed_On_Train := true;
                       Break;
                       Break;
@@ -290,6 +294,28 @@ Begin
     End;
 End;
 
+// Procédure qui prend en charge les appuis de la souris sur le panneau de démarage.
+Procedure Panel_Start_Pressed(Var Game : Type_Game);
+
+Var i : Byte;
+Begin
+  // Vérifie si le panneau des récompenses n'est pas dissimulé.
+  If Not(Game.Panel_Start.Hidden) Then
+    Begin
+      // Vérifie si la souris est sur le panneau des récompenses.
+      If (Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Start)) Then
+        Begin
+          If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Start_Play_Button.Position, Game.Start_Play_Button.Size, Game.Panel_Start)) Then
+            // Démarre le jeu.
+            Game_Load(Game)
+          Else If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Start_Quit_Button.Position, Game.Start_Quit_Button.Size, Game.Panel_Start)) Then
+                 SDL_Quit();
+
+        End;
+    End;
+End;
+
+
 // Procédure qui prend en charge les appuis de la souris sur le panneau de game over.
 Procedure Panel_Game_Over_Pressed(Var Game : Type_Game);
 
@@ -307,8 +333,8 @@ Begin
             End
           Else If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Game_Over_Restart_Button.Position, Game.Game_Over_Restart_Button.Size, Game.Panel_Game_Over)) Then
                  Begin
-                    Game_Unload(Game);
-                    Game_Load(Game);
+                   Game_Unload(Game);
+                   Game_Load(Game);
                  End;
         End;
     End;
@@ -437,25 +463,25 @@ Begin
       Else
         Game_Resume(Game);
     End
-  // Vérifie si le clic est sur le bouton de restart.
+    // Vérifie si le clic est sur le bouton de restart.
   Else If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Restart_Button.Position, Game.Restart_Button.Size, Game.Panel_Top) Then
          Begin
            Game_Unload(Game);
            Game_Load(Game);
          End
-  // Vérifie si le clic est sur le boutton de son.
+         // Vérifie si le clic est sur le boutton de son.
   Else If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Sound_Button.Position, Game.Sound_Button.Size, Game.Panel_Top) Then
          Begin
-            Game.Sound_Button.State := Not(Game.Sound_Button.State);
+           Game.Sound_Button.State := Not(Game.Sound_Button.State);
            If (Game.Sound_Button.State) Then
-              Sounds_Set_Volume(Sounds_Maximum_Volume)
+             Sounds_Set_Volume(Sounds_Maximum_Volume)
            Else
              Sounds_Set_Volume(0);
          End
-    // Vérifie si le clic est sur le bouton pour quitter.
+         // Vérifie si le clic est sur le bouton pour quitter.
   Else If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Quit_Button.Position, Game.Quit_Button.Size, Game.Panel_Top) Then
          Begin
-            SDL_Quit();
+           SDL_Quit();
          End;
 End;
 
@@ -486,6 +512,8 @@ Begin
     End;
 
 End;
+
+
 
 // Procédure qui gère les interractions avec la souris.
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
@@ -519,18 +547,23 @@ Begin
 
       // Si le panneau de récompenses n'est pas caché (on obstrue les appuis sur les autres panneaux).
 
-      If Not(Game.Panel_Game_Over.Hidden) Then
+      If Not(Game.Panel_Start.Hidden) Then
+      Begin
+        If (Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Start)) Then
+          Panel_Start_Pressed(Game);
+      End
+      Else If Not(Game.Panel_Game_Over.Hidden) Then
         Begin
           If (Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Game_Over)) Then
             Panel_Game_Over_Pressed(Game);
         End
       Else If Not(Game.Panel_Reward.Hidden) Then
-        Begin
-          // Si la pression de la souris se trouve dans le panneau de récompenses.
-          If Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Reward) Then
-            Panel_Reward_Pressed(Game);
-        End
-        // Si la souris se trouve dans le panneau de gauche.
+             Begin
+               // Si la pression de la souris se trouve dans le panneau de récompenses.
+               If Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Reward) Then
+                 Panel_Reward_Pressed(Game);
+             End
+             // Si la souris se trouve dans le panneau de gauche.
       Else If Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Left) Then
              Begin
                Panel_Left_Pressed(Game);
@@ -544,12 +577,21 @@ Begin
   Else
     Begin
 
-      // Vérifie si le panneau des récompenses n'est pas dissimulé.
-      If Not(Game.Panel_Reward.Hidden) Then
+      If Not(Game.Panel_Start.Hidden) Then
         Begin
 
         End
-        // Si il y a un clic dans le panneau du haut.
+
+      Else If Not(Game.Panel_Game_Over.Hidden) Then
+        Begin
+
+        End
+        // Vérifie si le panneau des récompenses n'est pas dissimulé.
+      Else If Not(Game.Panel_Reward.Hidden) Then
+             Begin
+
+             End
+             // Si il y a un clic dans le panneau du haut.
       Else If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Top)) Then
              Panel_Top_Released(Game)
 

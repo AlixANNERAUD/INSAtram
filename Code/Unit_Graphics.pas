@@ -922,6 +922,7 @@ Begin
   SDL_FreeSurface(Ressources.Play);
   SDL_FreeSurface(Ressources.Pause);
   SDL_FreeSurface(Ressources.Quit);
+  SDL_FreeSurface(Ressources.INSAtram);
 
   // Libération des polices de caractères.
   TTF_CloseFont(Ressources.Fonts[Font_Small][Font_Normal]);
@@ -1001,6 +1002,7 @@ Begin
   Ressources.Pause := Image_Load(Path_Image_Button_Pause);
   Ressources.Clock := Image_Load(Path_Image_Clock);
   Ressources.Quit := Image_Load(Path_Image_Button_Quit);
+  Ressources.INSAtram := Image_Load(Path_Image_INSAtram);
 
   Position.X := 16;
   Position.Y := 16;
@@ -1048,12 +1050,29 @@ Begin
   Ressources_Load(Game.Ressources);
 
   // - Création des sous-panneaux.
+
   Panel_Create(Game.Panel_Top, 0, 0, Game.Window.Size.X, 64);
   Panel_Create(Game.Panel_Bottom, 0, Game.Window.Size.Y - 64, Game.Window.Size.X, 64);
   Panel_Create(Game.Panel_Left, 0, Game.Panel_Top.Size.Y, 64, Game.Window.Size.Y - Game.Panel_Top.Size.Y - Game.Panel_Bottom.Size.Y);
   Panel_Create(Game.Panel_Right, Game.Panel_Left.Size.X, Game.Panel_Top.Size.Y, Game.Window.Size.X - Game.Panel_Left.Size.X, Game.Window.Size.Y - Game.Panel_Top.Size.Y - Game.Panel_Bottom.Size.Y);
 
+  // - Panneau de démarage.
 
+  Panel_Create(Game.Panel_Start, 0, 0, Game.Window.Size.X, Game.Window.Size.Y);
+
+  Image_Set(Game.INSAtram_Image, Game.Ressources.INSAtram);
+  Game.INSAtram_Image.Position.X := Get_Centered_Position(Game.Panel_Start.Size.X, Game.INSAtram_Image.Size.X);
+  Game.INSAtram_Image.Position.Y := Game.Panel_Start.Size.Y Div 2 - Game.INSAtram_Image.Size.Y;
+  
+  Button_Set(Game.Start_Play_Button, Game.Ressources.Play, Game.Ressources.Play);
+  Game.Start_Play_Button.Position.X := Game.Panel_Start.Size.X Div 2 - Game.Start_Play_Button.Size.X - 32;
+  Game.Start_Play_Button.Position.Y := Game.INSAtram_Image.Position.Y + Game.INSAtram_Image.Size.Y + Game.INSAtram_Image.Size.Y Div 2;
+
+
+  Button_Set(Game.Start_Quit_Button, Game.Ressources.Quit, Game.Ressources.Quit);
+  Game.Start_Quit_Button.Position.X := Game.Panel_Start.Size.X Div 2 + 32;
+  Game.Start_Quit_Button.Position.Y := Game.Start_Play_Button.Position.Y;
+  
 
   // - Panneau de droite.
 
@@ -1202,6 +1221,7 @@ Procedure Panel_Bottom_Render(Var Game : Type_Game; Var Destination_Panel : Type
 
 Var i : Byte;
 Begin
+
   If Not(Game.Panel_Bottom.Hidden) Then
     Begin
       // Nettoyage du panneau.
@@ -1249,6 +1269,26 @@ Begin
     End
 End;
 
+
+Procedure Panel_Start_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+Var i : Byte;
+Begin
+
+  If Not(Game.Panel_Start.Hidden) Then
+    Begin
+
+      // Nettoyage du panneau.
+      SDL_FillRect(Game.Panel_Start.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+
+      Image_Render(Game.INSAtram_Image, Game.Panel_Start);
+      Button_Render(Game.Start_Play_Button, Game.Panel_Start);
+      Button_Render(Game.Start_Quit_Button, Game.Panel_Start);
+    
+      Panel_Render(Game.Panel_Start, Destination_Panel);
+    End
+End;
+
+
 // Procédure rafraîchissant tout les éléments graphiques de l'écran.
 Procedure Graphics_Refresh(Var Game : Type_Game);
 Begin
@@ -1265,14 +1305,13 @@ Begin
   Panel_Right_Render(Game, Game.Window);
   Panel_Reward_Render(Game, Game.Window);
   Panel_Game_Over_Render(Game, Game.Window);
+  Panel_Start_Render(Game, Game.Window);
 
   // - Rendu du curseur
 
   Cursor_Render(Game.Mouse, Game.Window, Game);
 
   // - Regroupement des surfaces dans la fenêtre.
-
-
 
   SDL_Flip(Game.Window.Surface);
   Animation_Refresh(Game);
