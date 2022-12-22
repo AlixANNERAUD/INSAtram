@@ -4,7 +4,7 @@ Unit Unit_Common;
 
 Interface
 
-// - Définition d
+// - Définition des dépendances.
 
 Uses sdl, sdl_gfx, sdl_ttf, sysutils, math, Unit_Types, Unit_Constants;
 
@@ -16,12 +16,12 @@ Function Get_Center_Position(Position, Size : Type_Coordinates) : Type_Coordinat
 Function Get_Centered_Position(Container_Size, Size : Integer) : Integer;
 
 
-// - - Station
+// - - Stations
 
 Function Station_Create(Var Game: Type_Game) : Boolean;
 Procedure Stations_Delete(Var Game : Type_Game);
 
-// - Lines
+// - Lignes
 
 Function Line_Create(Var Game : Type_Game) : Boolean;
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
@@ -33,31 +33,29 @@ Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_P
 Function Line_Remove_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
 Function Line_Rectangle_Colliding(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
-Function Lines_Colliding(Line_1, Line_2, Line_3, Line_4 : Type_Coordinates) : Boolean;
 
 Function Lines_Get_Selected(Game : Type_Game) : Type_Line_Pointer;
 
 
-// - Train
+// - Trains
 
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
-// - Vehicle
+// - Véhicules
 
 Function Vehicle_Create(Var Train : Type_Train) : Boolean;
-// - Passenger
+
+// - Passagers
 
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
 Function Passenger_Delete(Var Passenger : Type_Passenger_Pointer) : Boolean;
 
-// - - Time
+// - - Temps
 
 Function Time_Get_Current(): Type_Time;
 Function Time_Get_Elapsed(Start_Time : Type_Time) : Type_Time;
 
-// - - Shape
-
-
+// - - Formes
 
 Function Number_To_Shape(Number : Byte) : Type_Shape;
 
@@ -129,6 +127,7 @@ Begin
   Label_Set_Text(Train.Passengers_Label, IntToStr(k) + '/' + IntToStr(length(Train.Vehicles) * Vehicle_Maximum_Passengers_Number));
 End;
 
+// Fonction qui détermine l'indice d'une station au sein d'une ligne.
 Function Line_Get_Station_Index(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line) : Byte;
 
 Var i : Byte;
@@ -141,6 +140,7 @@ Begin
       End
 End;
 
+// Procédure qui crée un chronomètre (timer).
 Procedure Pie_Create(Var Pie : Type_Pie; Radius : Integer; Color : Type_Color; Percentage : Real);
 Begin
   Pie.Color := Color;
@@ -151,14 +151,14 @@ Begin
   Pie.Pre_Render := true;
 End;
 
-
+// Procédure qui définit le pourcentage d'avancement d'un chronomètre.
 Procedure Pie_Set_Percentage(Var Pie : Type_Pie; Percentage : Real);
 Begin
   Pie.Percentage := Percentage;
   Pie.Pre_Render := true;
 End;
 
-// Fonction qui génère aléatoire une rivière.
+// Procédure qui génère aléatoirement une rivière.
 Procedure River_Create(Var Game : Type_Game);
 
 Var Side : Array[0 .. 1] Of Byte;
@@ -206,21 +206,25 @@ Begin
     Until Side[0] <> Side[1];
 
     Case Side[1] Of 
+      // Côté gauche.
       0 :
           Begin
             Game.River[high(Game.River)].X := 0 - River_Width;
             Game.River[high(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
           End;
+      // Côté haut.
       1 :
           Begin
             Game.River[high(Game.River)].X := Random(Game.Panel_Right.Size.X);
             Game.River[high(Game.River)].Y := 0 - River_Width;
           End;
+      // Côté droit.
       2 :
           Begin
             Game.River[high(Game.River)].X := Game.Panel_Right.Size.X + River_Width;
             Game.River[high(Game.River)].Y := Random(Game.Panel_Right.Size.Y);
           End;
+      // Côté bas.
       3 :
           Begin
             Game.River[high(Game.River)].X := Random(Game.Panel_Right.Size.X);
@@ -232,7 +236,7 @@ Begin
   // Détermination des coordonnées des points.
   For i := low(Game.River) + 1 To high(Game.River) - 1 Do
     Begin
-      // Index pair (points de contrôle)
+      // Index paire (points de contrôle)
       If i Mod 2 = 0 Then
         Begin
           Game.River[i].X := Random(Game.Panel_Right.Size.X - River_Width) + River_Width;
@@ -243,7 +247,7 @@ Begin
   // - Calcul des points intermédiaires.
   For i := low(Game.River) + 1 To high(Game.River) - 1 Do
     Begin
-      // Index impair (positions intermédiaires)
+      // Index impaire (positions intermédiaires)
       If (i Mod 2) <> 0 Then
         Begin
           // Calcul de la position intermédiaire.
@@ -253,11 +257,13 @@ Begin
 
 End;
 
+// Procédure qui définit si un panneau est caché.
 Procedure Panel_Set_Hidden(Hidden : Boolean; Var Panel : Type_Panel);
 Begin
   Panel.Hidden := Hidden;
 End;
 
+// Procédure qui met le jeu en pause.
 Procedure Game_Pause(Var Game : Type_Game);
 Begin
   Game.Play_Pause_Button.State := False;
@@ -265,6 +271,7 @@ Begin
   Game.Pause_Time := Time_Get_Current();
 End;
 
+// Procédure qui relance le jeu (quitter le mode pause).
 Procedure Game_Resume(Var Game : Type_Game);
 
 Var i, j : Byte;
@@ -281,22 +288,21 @@ Begin
 
   // Vérifie que la partie contient des lignes.
   If (length(Game.Lines) > 0) Then
-    // Itère parmis les lignes.
+    // Itère parmi les lignes.
     For i := low(Game.Lines) To high(Game.Lines) Do
       // Vérifie que la ligne contient des trains.
       If (length(Game.Lines[i].Trains) > 0) Then
-        // Itère parmis les trains de la ligne.
+        // Itère parmi les trains de la ligne.
         For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
           Game.Lines[i].Trains[j].Start_Time := Game.Lines[i].Trains[j].Start_Time + Game.Pause_Time;
 
-  // - Mise à jour des timer de surcharge des stations.
+  // - Mise à jour des chronomètres de surcharge des stations.
 
-  // Itère parmis les stations.
+  // Itère parmi les stations.
   For i := low(Game.Stations) To high(Game.Stations) Do
     // Si la station est surchargée.
     If (Game.Stations[i]^.Overfill_Timer <> 0) Then
       Game.Stations[i]^.Overfill_Timer := Game.Stations[i]^.Overfill_Timer + Game.Pause_Time;
-
 
   Game.Pause_Time := 0;
 End;
@@ -311,29 +317,34 @@ Begin
   Laabel.Pre_Render := true;
 End;
 
+// Procédure qui définit le texte d'un label. 
 Procedure Label_Set_Text(Var Laabel : Type_Label; Text_String : String);
 Begin
   Laabel.Text := Text_String;
   Laabel.Pre_Render := true;
 End;
 
+// Procédure qui définit la police du texte dans un label.
 Procedure Label_Set_Font(Var Laabel : Type_Label; Font : pTTF_Font);
 Begin
   Laabel.Font := Font;
   Laabel.Pre_Render := true;
 End;
 
+// Procédure qui définit la couleur dans un label.
 Procedure Label_Set_Color(Var Laabel : Type_Label; Color : Type_Color);
 Begin
   Laabel.Color := Color;
   Laabel.Pre_Render := true;
 End;
 
+// Procédure qui dessine un rectangle plein.
 Procedure Graphics_Draw_Filled_Rectangle(Surface : PSDL_Surface; Position, Size : Type_Coordinates; Color : Type_Color);
 Begin
   BoxRGBA(Surface, Position.X, Position.Y, Position.X + Size.X, Position.Y + Size.Y, Color.Red, Color.Green, Color.Blue, Color.Alpha);
 End;
 
+// Fonction qui retourne une structure couleur à partir de ses composantes.
 Function Color_Get(Red,Green,Blue,Alpha : Byte) : Type_Color;
 Begin
   Color_Get.Red := Red;
@@ -342,11 +353,13 @@ Begin
   Color_Get.Alpha := Alpha;
 End;
 
+// Procédure qui dessine un cercle plein.
 Procedure Graphics_Draw_Filled_Circle(Surface : PSDL_Surface; Center : Type_Coordinates; Radius : Integer; Color : Type_Color);
 Begin
   FilledCircleRGBA(Surface, Center.X, Center.Y, Radius, Color.Red, Color.Green, Color.Blue, Color.Alpha);
 End;
 
+// Procédure qui définit tout les attributs d'un bouton à double état.
 Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
 Begin
   Dual_State_Button.Surface_Pressed[0] := Surface_Pressed_Disabled;
@@ -358,27 +371,27 @@ Begin
   Dual_State_Button.State := False;
 End;
 
+// Fonction qui crée une surface SDL.
 Function Graphics_Surface_Create(Width, Height : Integer) : PSDL_Surface;
 Begin
-  // Création d'une surface SDL avec les masques de couleurs aproriés.
+  // Création d'une surface SDL avec les masques de couleurs appropriés.
   Graphics_Surface_Create := SDL_CreateRGBSurface(0, Width, Height, Color_Depth, Mask_Red, Mask_Green, Mask_Blue,Mask_Alpha);
 End;
 
-
-// Surcharge de l'opérateur = permetant de comparer des couleurs.
+// Surcharge de l'opérateur = permet de comparer des couleurs.
 operator = (x, y: Type_Color) b : Boolean;
 Begin
   b := (x.Red = y.Red) And (x.Green = y.Green) And (x.Blue = y.Blue) And (x.Alpha = y.Alpha);
 End;
 
+// Fonction qui détermine la position relative d'un panneau.
 Function Panel_Get_Relative_Position(Absolute_Position : Type_Coordinates; Panel : Type_Panel) : Type_Coordinates;
 Begin
   Panel_Get_Relative_Position.X := Absolute_Position.X - Panel.Position.X;
   Panel_Get_Relative_Position.Y := Absolute_Position.Y - Panel.Position.Y;
 End;
 
-
-// Fonction qui renvoie la ligne actuellement sélectionnée où Nil s'il y en a pas.
+// Fonction qui renvoie la ligne actuellement sélectionnée ou Nil s'il y en a pas.
 Function Lines_Get_Selected(Game : Type_Game) : Type_Line_Pointer;
 
 Var i : Byte;
@@ -399,7 +412,7 @@ Begin
     End;
 End;
 
-// Fonction qui converti le nom d'une couleur en la couleur associée.
+// Fonction qui convertit le nom d'une couleur en la couleur associée selon la palette du material design.
 Function Color_Get(Color_Name : Type_Color_Name) : Type_Color;
 Begin
   Case Color_Name Of 
@@ -426,21 +439,21 @@ Begin
   End;
 End;
 
+// Fonction identique à la précédente mais qui permet de définir l'opacité de la couleur.
 Function Color_Get(Color_Name : Type_Color_Name; Alpha : Byte) : Type_Color;
 Begin
   Color_Get := Color_Get(Color_Name);
   Color_Get.Alpha := Alpha;
 End;
 
-// Fonction qui détecte si un rectangle et une ligne sont en colision.
+// Fonction qui détecte si un rectangle et une ligne sont en collision.
 Function Line_Rectangle_Colliding(Line_A, Line_B, Rectangle_Position, Rectangle_Size : Type_Coordinates) : Boolean;
 
-Var 
-  Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
+Var Temporary_Line : Array[0 .. 1] Of Type_Coordinates;
 Begin
-  // Les quatres côtés du rectangles sont décomposés en 4 lignes.
+  // Les quatre côtés du rectangle sont décomposés en 4 lignes.
   // La détection se fait ensuite ligne par ligne.
-  // Les détections sont imbriqués afin de ne pas faire de calculs inutiles.
+  // Les détections sont imbriquées afin de ne pas faire de calculs inutiles.
 
   // Côté gauche du rectangle.
   Temporary_Line[0].X := Rectangle_Position.X;
@@ -459,8 +472,7 @@ Begin
       If (Lines_Intersects(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
         Begin
 
-          // Côté en haut du rectangle.
-
+          // Côté haut du rectangle.
           Temporary_Line[0].X := Rectangle_Position.X;
           Temporary_Line[0].Y := Rectangle_Position.Y;
           Temporary_Line[1].X := Rectangle_Position.X + Rectangle_Size.X;
@@ -468,7 +480,7 @@ Begin
 
           If (Lines_Intersects(Line_A, Line_B, Temporary_Line[0], Temporary_Line[1]) = False) Then
             Begin
-              // Coté en bas du rectangle.
+              // Coté bas du rectangle.
               Temporary_Line[0].X := Rectangle_Position.X;
               Temporary_Line[0].Y := Rectangle_Position.Y+Rectangle_Size.Y;
               Temporary_Line[1].X := Rectangle_Position.X+Rectangle_Size.X;
@@ -489,8 +501,7 @@ Begin
     Line_Rectangle_Colliding := True;
 End;
 
-
-// a1 is line1 start, a2 is line1 end, b1 is line2 start, b2 is line2 end
+// Fonction qui détermine si il y a des intersections entre les lignes.
 Function Lines_Intersects(a1, a2, b1, b2 : Type_Coordinates) : Boolean;
 
 Var B, D, C : Type_Coordinates;
@@ -528,24 +539,7 @@ Begin
     End;
 End;
 
-
-// Fonction qui détecte si deux lignes sont sécantes.
-Function Lines_Colliding(Line_1, Line_2, Line_3, Line_4 : Type_Coordinates) : Boolean;
-
-Var Coeffcient_A, Coeffcient_B : Real;
-Begin
-
-  Coeffcient_A := ((Line_4.X-Line_3.X)*(Line_1.Y-Line_3.Y) - (Line_4.Y-Line_3.Y)*(Line_1.X-Line_3.X)) / ((Line_4.Y-Line_3.Y)*(Line_2.X-Line_1.X) - (Line_4.X-Line_3.X)*(Line_2.Y-Line_1.Y));
-
-  Coeffcient_B := ((Line_2.X-Line_1.X)*(Line_1.Y-Line_3.Y) - (Line_2.Y-Line_1.Y)*(Line_1.X-Line_3.X)) / ((Line_4.Y-Line_3.Y)*(Line_2.X-Line_1.X) - (Line_4.X-Line_3.X)*(Line_2.Y-Line_1.Y));
-
-  If ((Coeffcient_A  >= 0) And (Coeffcient_A <= 1) And (Coeffcient_B >= 0) And (Coeffcient_B <= 1)) Then
-    Lines_Colliding := true
-  Else
-    Lines_Colliding := false;
-End;
-
-
+// Fonction qui convertit le jour de Type_Day en un String.
 Function Day_To_String(Day : Type_Day) : String;
 Begin
   Case Day Of 
@@ -559,6 +553,7 @@ Begin
   End;
 End;
 
+// Fonction qui renvoie un jour selon l'indice du temps.
 Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
 Begin
   Case Day_Index Of 
@@ -572,6 +567,7 @@ Begin
   End;
 End;
 
+// Fonction qui calcule la distance entre deux points.
 Function Get_Distance(Position_1, Position_2 : Type_Coordinates):   Integer;
 Begin
   Get_Distance := round(sqrt(sqr(Position_2.X-Position_1.X)+sqr(Position_2.Y-Position_1.Y)));
@@ -579,16 +575,15 @@ End;
 
 // - Définition des fonctions et procédures.
 
-// Fonction qui renvoi l'angle entre deux points.
+// Fonction qui renvoie l'angle entre deux points.
 Function Get_Angle(Position_1, Position_2 : Type_Coordinates):   Real;
 Begin
   Get_Angle := ArcTan2(-Position_2.Y + Position_1.Y,
                Position_2.X - Position_1.X);
 End;
 
-// Fonction qui calcule les positions intermédiaires spérant les stations d'une ligne.
+// Procédure qui calcule les positions intermédiaires séparant les stations d'une ligne.
 Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
-
 Var i : Byte;
 Begin
   // Vérifie qu'il y a bien au moins une stations dans la ligne.
@@ -600,34 +595,28 @@ Begin
       For i := low(Line.Stations) To (high(Line.Stations) - 1) Do
         Begin
           // Calcule la position intermédiaire.
-          Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)] := Station_Get_Intermediate_Position(Line.Stations[i]^.Position_Centered, Line.Stations[i + 1]^.
-                                                                               Position_Centered);
+          Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)] := Station_Get_Intermediate_Position(Line.Stations[i]^.Position_Centered, Line.Stations[i + 1]^.Position_Centered);
         End;
     End;
 
 End;
 
-
-
-
-// Fonction qui calcule les coordonnées centrée d'un objet à partir de sa position dans le repère et sa taille.
-
-// Fonction déterminant l'orientation d'un angle parmis : 0, 45, 90, 135, 180, -45, -90, -135.
+// Fonction déterminant l'orientation d'un angle parmi : 0, 45, 90, 135, 180, -45, -90, -135.
 Function Graphics_Get_Direction(Angle : Real) : Integer;
 
 Var Sign :   Integer;
 Begin
 
-  // Si l'angle est négatif (dans la partie inférieure du cercle),
-  //son signe est inversé, mais pris en compte pour plus tard afin de simplfier la disjonction des cas.
+  // Si l'angle est négatif (dans la partie inférieure du cercle trigonométrique),
+  //Son signe est inversé, mais pris en compte pour plus tard afin de simplfier la disjonction des cas.
   If (Angle < 0) Then
     Begin
       Angle := -Angle;
       Sign := -1;
     End
-    // Si l'angle est positif mais dans la partie inférieur du cercle trigonométrique,
-    // on lui ajoute 2Pi afin d'obtenir son analogue négatif puis comme pour le cas précédent,
-    // on annule son signe et on prend en compte son signe pour plus tard.
+    // Si l'angle est positif mais dans la partie inférieure du cercle trigonométrique,
+    // On lui ajoute 2Pi afin d'obtenir son analogue négatif puis comme pour le cas précédent,
+    // On annule son signe et on prend en compte son signe pour plus tard.
   Else If (Angle > Pi) Then
          Begin
            Angle := -(Angle - (2*Pi));
@@ -647,7 +636,7 @@ Begin
                                    // L'orientation est de 135° ou -135° (en fonction du signe).
   Else If (Angle >= (7*Pi/8)) Then                          // Si l'angle est supérieur à 157.5°.
          Graphics_Get_Direction := 180;
-  // L'orientatino est de 180°
+  // L'orientation est de 180°
 End;
 
 // Fonction qui calcule la position intermédiaire entre deux stations.
@@ -673,7 +662,6 @@ Begin
     End;
 
   Station_Get_Intermediate_Position := Position_1;
-
 
 
 {
@@ -703,7 +691,7 @@ Begin
 
 
 
-    // - Angle between -45° and -135° (included)
+    // - Angle entre -45° and -135° (inclus)
   Else If ((Angle <= (-Pi/4)) And (Angle >= ((-3*Pi)/4))) Then
          //-45 - -90 - -135
          Begin
@@ -711,7 +699,7 @@ Begin
            Station_Get_Intermediate_Position.Y := Position_2.Y - abs(Position_2.X -
                                                   Position_1.X);
          End
-         // - Angle between -45° and 45° (excluded)
+         // - Angle entre -45° and 45° (exclus)
   Else If (((Angle > (-Pi/4)) And (Angle < 0)) Or ((Angle < (Pi/4)) And (Angle
           >= 0))) Then
          Begin
@@ -719,7 +707,7 @@ Begin
            Station_Get_Intermediate_Position.X := Position_2.X - abs(Position_2.Y -
                                                   Position_1.Y);
          End
-         // - Angle between 135° and -135° (excluded)
+         // - Angle entre 135° and -135° (exclus)
   Else
     Begin
       Station_Get_Intermediate_Position.Y := Position_1.Y;
@@ -728,16 +716,16 @@ Begin
 
 End;
 
-// Fonction supprimant les stations d'une partie.
+// Procédure qui supprime les stations d'une partie.
 Procedure Stations_Delete(Var Game : Type_Game);
 
 Var i, j : Byte;
 Begin
 
-  // Itère parmis les stations d'une partie.
+  // Itère parmi les stations d'une partie.
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      // Itère parmis les passagers d'une station.
+      // Itère parmi les passagers d'une station.
       For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
         Begin
           // Suppression du passager.
@@ -751,8 +739,8 @@ Begin
     End;
 End;
 
+// Fonction qui convertit une chaîne de caractères (dyanmique) en un tableau de caractères (statique).
 Function String_To_Characters(String_To_Convert : String) : pChar;
-
 Var Characters : pChar;
 Begin
   Characters := StrAlloc(length(String_To_Convert) + 1);
@@ -764,6 +752,7 @@ End;
 
 // - Création
 
+// Fonction qui détermine les coordonnées de la position centrée.
 Function Get_Center_Position(Position, Size : Type_Coordinates) : Type_Coordinates;
 Begin
   Position.X := Position.X + (Size.X Div 2);
@@ -771,12 +760,13 @@ Begin
   Get_Center_Position := Position;
 End;
 
+// Fonction qui détermine la position centrée d'un objet dans un autre.
 Function Get_Centered_Position(Container_Size, Size : Integer) : Integer;
 Begin
   Get_Centered_Position := (Container_Size - Size) Div 2;
 End;
 
-// Procédure qui alloue de la mémoire pour une station et le référence dans le tableau dynamique, détermine sa forme et position aléatoirement et defini ses attributs.
+// Fonction qui alloue de la mémoire pour une station et la référence dans le tableau dynamique, détermine sa forme, position aléatoirement et definit ses attributs.
 Function Station_Create(Var Game : Type_Game) : Boolean;
 
 Var Shape : Byte;
@@ -787,7 +777,7 @@ Begin
     Begin
       // Allocation de la station dans le tableau.
       SetLength(Game.Stations, length(Game.Stations) + 1);
-      // Définition de l'index de la station créee.
+      // Définition de l'index de la station créée.
       i := high(Game.Stations);
 
       // Allocation de la mémoire au pointeur.
@@ -796,7 +786,7 @@ Begin
       // Initialisation des attributs par défaut.
       // Détermination de la forme de la station.
       If (length(Game.Stations) <= 5) Then
-        // Les 5 premières stations doivent être de forme différentes pour pemetre à tout type de passager d'arriver à destionation.
+        // Les 5 premières stations doivent être de formes différentes pour permettre à tout type de passager d'arriver à destination.
         Shape := length(Game.Stations) - 1
       Else
         // Les stations suivantes peuvent avoir une forme aléatoire.
@@ -819,13 +809,13 @@ Begin
 
         If (Game.Stations_Map[Position.X][Position.Y] = false) Then
           Begin
-            // Itère parmis les points de la rivière.
+            // Itère parmi les points de la rivière.
             For j := low(Game.River) + 1 To high(Game.River) Do
               Begin
-                // Si il y a collision entre la rivière et la station.
+                // Si il y a collision entre la rivière et la station,
                 If (Line_Rectangle_Colliding(Game.River[j - 1], Game.River[j], Game.Stations[i]^.Position, Game.Stations[i]^.Size)) Then
                   Begin
-                    // On maruqe l'emplacement comme occupé pour les prochaines stations crées.
+                    // On marque l'emplacement comme occupé pour les prochaines stations créées.
                     Game.Stations_Map[Position.X][Position.Y] := true;
                     // On sort de la boucle.
                     break;
@@ -837,13 +827,13 @@ Begin
 
       Game.Stations_Map[Position.X][Position.Y] := true;
 
-      // ! : Ajouter la mise à jour de la Graph_Table
+      Game.Refresh_Graph_Table := true;
 
       SetLength(Game.Dijkstra_Table, length(Game.Stations));
       For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
         SetLength(Game.Dijkstra_Table[j], length(Game.Stations));
 
-      // Calcul les coordoonées centré de la station.
+      // Calcul des coordoonées centrées de la station.
       Game.Stations[i]^.Position_Centered := Get_Center_Position(Game.Stations[i]^.Position, Game.Stations[i]^.Size);
 
       // Création du timer de la station.
@@ -851,9 +841,6 @@ Begin
 
       Game.Stations[i]^.Timer.Position.X := Game.Stations[i]^.Position_Centered.X + Game.Stations[i]^.Size.Y Div 2;
       Game.Stations[i]^.Timer.Position.Y := Game.Stations[i]^.Position.Y - Game.Stations[i]^.Size.Y Div 2 - 10;
-
-
-
       Game.Stations[i]^.Overfill_Timer := 0;
 
       Station_Create := True;
@@ -862,6 +849,7 @@ Begin
     Station_Create := False;
 End;
 
+// Fonction qui détermine le nombre nécessaires de tunnels quand il y a une intersection entre une ligne et une rivière.
 Function Lines_Count_Necessary_Tunnel(Var Game : Type_Game) : Byte;
 
 Var i, j, k : Byte;
@@ -875,8 +863,7 @@ Begin
     For j := low(Game.Graph_Table[i]) + i + 1 To high(Game.Graph_Table[i]) Do
       If (length(Game.Graph_Table[i][j]) > 0) Then
         Begin
-          // Vérifie s'il y intersection.
-
+          // Vérifie s'il y a intersection.
           Intermediate_Position := Station_Get_Intermediate_Position(Game.Stations[i]^.Position_Centered, Game.Stations[j]^.Position_Centered);
 
           For k := low(Game.River) To high(Game.River) - 1 Do
@@ -897,7 +884,7 @@ Begin
 
 End;
 
-// Procédure qui créer une ligne.
+// Fonction qui crée une ligne.
 Function Line_Create(Var Game : Type_Game) : Boolean;
 
 Var i, j : Byte;
@@ -909,7 +896,7 @@ Begin
     Begin
       // Création de la ligne.
       SetLength(Game.Lines, length(Game.Lines) + 1);
-      // Récupération de l'index de la ligne crée (dernier élément du tableau).
+      // Récupération de l'index de la ligne créée (dernier élément du tableau).
       i := high(Game.Lines);
 
       // - Détermination de la couleur.
@@ -920,7 +907,7 @@ Begin
       For i := 0 To 7 Do
         Color_Used[i] := False;
 
-      // Itère parmis les lignes.
+      // Itère parmi les lignes.
       For j := low(Game.Lines) To high(Game.Lines) Do
         Begin
           // Si la couleur de la ligne est utilisée, on l'inscrit dans le tableau.
@@ -942,12 +929,12 @@ Begin
                  Color_Used[7] := True;
         End;
 
-      // Itère parmis le tableau des couleurs utilisées.
+      // Itère parmi le tableau des couleurs utilisées.
       For i := 0 To 7 Do
         // Si la couleur n'est pas utilisée.
         If (Color_Used[i] = False) Then
           Begin
-            // On converti l'index en couleur et on l'assigne à la ligne.
+            // Convertit l'index en couleur et on l'assigne à la ligne.
             Case i Of 
               0 : Game.Lines[i].Color := Color_Get(Color_Red);
               1 : Game.Lines[i].Color := Color_Get(Color_Purple);
@@ -962,8 +949,7 @@ Begin
             Break;
           End;
 
-
-      // Création du boutton
+      // Création du bouton
       Dual_State_Button_Set(Game.Lines[i].Button, Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32), Graphics_Surface_Create(32, 32));
 
       Center.X := 16;
@@ -974,18 +960,18 @@ Begin
 
       Graphics_Draw_Filled_Circle(Game.Lines[i].Button.Surface_Released[1], Center, 16, Game.Lines[i].Color);
 
-      // - Recalcul des positions des boutons.
+      // - Recalcule les positions des boutons.
 
-      // Centrage vertical du premier boutton.
+      // Centrage vertical du premier bouton.
 
       Game.Lines[i].Button.Position.Y := Get_Centered_Position(Game.Panel_Bottom.Size.Y, Game.Lines[i].Button.Size.Y);
 
-      // Définition de la position du premier boutton. 
+      // Définition de la position du premier bouton. 
       Game.Lines[low(Game.Lines)].Button.Position.X := Get_Centered_Position(Game.Panel_Bottom.Size.X, (Game.Lines[i].Button.Size.X * length(Game.Lines)) + (16 * (length(Game.Lines) - 1)));
 
       If (length(Game.Lines) > 1) Then
         Begin
-          // Itère parmis les lignes.
+          // Itère parmi les lignes.
           For j := low(Game.Lines) + 1 To high(Game.Lines) Do
             Begin
               Game.Lines[j].Button.Position.Y := Game.Lines[j].Button.Position.Y;
@@ -1011,7 +997,7 @@ Begin
       SetLength(Line.Stations, length(Line.Stations) + 1);
       // Ajout du pointeur de la station.
       Line.Stations[high(Line.Stations)] := Station_Pointer;
-      // Recalcul des positions intermédiaires de la ligne.
+      // Recalcule les positions intermédiaires de la ligne.
       Line_Compute_Intermediate_Positions(Line);
 
       Game.Refresh_Graph_Table := True;
@@ -1036,28 +1022,28 @@ Begin
       If (length(Line.Stations) > 0) Then
         Begin
           Duplicate := false;
-          // - Vérifie si la station n'as pas déjà été ajoutée.
+          // - Vérifie si la station n'a pas déjà été ajoutée.
           For i := low(Line.Stations) To high(Line.Stations) Do
             If (Line.Stations[i] = Station_Pointer) Then
               Duplicate := true;
 
           // - Insertion de la station dans la ligne.
 
-          // Si il la station n'as pas déjà été ajoutée.
+          // Si la station n'a pas déjà été ajoutée.
           If (Duplicate = false) Then
             Begin
-              // Itère parmis les stations de la ligne.
+              // Itère parmi les stations de la ligne.
               For i := low(Line.Stations) To high(Line.Stations) Do
                 Begin
                   If (Line.Stations[i] = Last_Station_Pointer) Then
                     Begin
                       // Agrandissement du tableau dynamique temporaire.
                       SetLength(Temporary_Array, 1);
-                      // Ajout du pointeur de la station au tableau temporarie.
+                      // Ajout du pointeur de la station au tableau temporaire.
                       Temporary_Array[high(Temporary_Array)] := Station_Pointer;
                       // Insertion du pointeur de la station dans le tableau des stations de la ligne.
                       Insert(Temporary_Array, Line.Stations, i + 1);
-                      // Recalcul des positions intermédiaires de la ligne.
+                      // Recalcule les positions intermédiaires de la ligne.
                       Line_Compute_Intermediate_Positions(Line);
 
                       Game.Refresh_Graph_Table := True;
@@ -1078,6 +1064,7 @@ Var i, j : Byte;
   Busy : Boolean;
 Begin
   Line_Remove_Station := False;
+
   // Vérifie que la ligne contient des stations.
   If (length(Line.Stations) > 0) Then
     Begin
@@ -1088,10 +1075,10 @@ Begin
             // Vérifie que la ligne contient des trains.
             If (length(Line.Trains) > 0) Then
               Begin
-                // Itère parmis les trains de la ligne.
+                // Itère parmi les trains de la ligne.
                 For j := low(Line.Trains) To high(Line.Trains) Do
                   Begin
-                    // Vérifie que tous les trains concerné ne sont pas en trainsit i un train est en transit vers où au départ de la station concerné.
+                    // Vérifie que tout les trains concernés ne sont pas en transit vers ou au départ de la station concernée.
                     If (Line.Trains[j].Last_Station = Station_Pointer) Or (Line.Trains[j].Next_Station = Station_Pointer) Then
                       Begin
                         Busy := true;
@@ -1102,7 +1089,7 @@ Begin
             Else
               Busy := false;
 
-            // Si la station n'est pas destionation où départ d'un train, on peut enlever la station de la ligne.
+            // Si un train n'est pas à destination ou au départ de la station, on peut enlever la station de la ligne.
             If Not(Busy) Then
               Begin
                 // Enlève la station.
@@ -1122,7 +1109,7 @@ Begin
     End;
 End;
 
-// Fonction qui créer un passager dans une station.
+// Procédure qui crée un passager dans une station.
 Procedure Passenger_Create(Var Station : Type_Station; Var Game : Type_Game);
 
 Var Shape : Byte;
@@ -1144,6 +1131,7 @@ Begin
   Station.Passengers[high(Station.Passengers)]^.Size.Y := Station.Passengers[high(Station.Passengers)]^.Sprite^.h;
 End;
 
+// Fonction qui crée un train dans une ligne.
 Function Train_Create(Start_Station : Type_Station_Pointer; Direction : Boolean; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
 Var i : Byte;
@@ -1158,11 +1146,10 @@ Begin
       Line.Trains[high(Line.Trains)].Direction := Direction;
       Line.Trains[high(Line.Trains)].Last_Station := Start_Station;
 
-
       // Détermination de la prochaine station.
       If (length(Line.Stations) > 0) Then
         Begin
-          // Itère parmis les stations de la ligne.
+          // Itère parmi les stations de la ligne.
           For i := low(Line.Stations) To high(Line.Stations) Do
             Begin
               If (Line.Stations[i] = Start_Station) Then
@@ -1180,16 +1167,14 @@ Begin
 
                       Line.Trains[high(Line.Trains)].Next_Station := Line.Stations[i + 1];
                       // Calcul du point intermédiaire.
-                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.
-                                                                              Trains)].Next_Station^.Position_Centered);
+                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered);
                     End
                   Else
                     Begin
                       Line.Trains[high(Line.Trains)].Next_Station := Line.Stations[i - 1];
 
                       // Calcul du point intermédiaire.
-                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered, Line.Trains[high(Line.
-                                                                              Trains)].Last_Station^.Position_Centered);
+                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered);
                     End;
                   Break;
                 End;
@@ -1197,8 +1182,7 @@ Begin
         End;
 
       // Calcul de la distance du point intermédiaire.
-      Line.Trains[high(Line.Trains)].Intermediate_Position_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].
-                                                                       Intermediate_Position);
+      Line.Trains[high(Line.Trains)].Intermediate_Position_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position);
 
       If (Line.Color = Color_Get(Color_Red)) Then
         Line.Trains[high(Line.Trains)].Color_Index := 0
@@ -1225,9 +1209,7 @@ Begin
 
       // Calcul de la distance maximale du train.
 
-      Maximum_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position)
-                          +  Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high
-                          (Line.Trains)].Next_Station^.Position_Centered);
+      Maximum_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position) +  Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered);
 
       Line.Trains[high(Line.Trains)].Deceleration_Time := ((Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time;
 
@@ -1249,7 +1231,7 @@ Begin
     Begin
       // - Déchargement des passagers dans la station précédente.
 
-      // Itère parmis les passagers du dernier véhicule.
+      // Itère parmi les passagers du dernier véhicule.
       For i := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
         If (Train.Vehicles[high(Train.Vehicles)].Passengers[i] <> Nil) Then
           Begin
@@ -1258,7 +1240,6 @@ Begin
             // Ajout du passager dans la station précédente.
             Train.Last_Station^.Passengers[high(Train.Last_Station^.Passengers)] := Train.Vehicles[high(Train.Vehicles)].Passengers[i];
           End;
-
 
       // Suppression du dernier véhicule.
       SetLength(Train.Vehicles, length(Train.Vehicles) - 1);
@@ -1272,9 +1253,10 @@ Begin
 
 End;
 
+// Fonction qui crée un véhicule dans un train (wagon ou locomotive).
 Function Vehicle_Create(Var Train : Type_Train) : Boolean;
 
-Var i, j, k : Byte;
+Var i : Byte;
 
 Begin
   // Vérifie que le train n'a pas atteint le nombre maximum de véhicules.
@@ -1283,8 +1265,7 @@ Begin
       // Création d'un nouveau véhicule.
       SetLength(Train.Vehicles, length(Train.Vehicles) + 1);
 
-
-      // Itère parmis les places du véhicule crée.
+      // Itère parmi les places du véhicule créé.
       For i := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
         Train.Vehicles[high(Train.Vehicles)].Passengers[i] := Nil;
 
@@ -1298,6 +1279,7 @@ End;
 
 // - - Object deletion.
 
+// Fonction qui supprime une ligne.
 Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 
 Var i : Byte;
@@ -1319,6 +1301,7 @@ Begin
     Line_Delete := False;
 End;
 
+// Fonction qui supprime un passager.
 Function Passenger_Delete(Var Passenger : Type_Passenger_Pointer) : Boolean;
 Begin
   If (Passenger <> Nil) Then
@@ -1333,11 +1316,13 @@ End;
 
 // - - Time
 
+// Fonction qui renvoie le temps écoulé en millisecondes depuis le lancement du programme.
 Function Time_Get_Current(): Type_Time;
 Begin
   Time_Get_Current := SDL_GetTicks();
 End;
 
+// Fonction qui renvoie le temps écoulé entre le temps actuel et le temps passé en paramètre en millisecondes.
 Function Time_Get_Elapsed(Start_Time : Type_Time) : Type_Time;
 Begin
   Time_Get_Elapsed := SDL_GetTicks() - Start_Time;
@@ -1345,6 +1330,7 @@ End;
 
 // - - Shape
 
+// Fonction qui associe une forme à un chiffre.
 Function Number_To_Shape(Number : Byte) : Type_Shape;
 Begin
   Case Number Of 

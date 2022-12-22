@@ -12,7 +12,7 @@ Uses sdl, sdl_mixer, sdl_gfx, sdl_image, sdl_ttf, sysutils, Math, Unit_Constants
 
 // Structure de couleur
 Type Type_Color = Record
-  Red, Green, Blue, Alpha : Byte;
+    Red, Green, Blue, Alpha : Byte;
 End;
 
 // - - - Interface
@@ -41,7 +41,7 @@ Type Type_Image = Record
   Surface : PSDL_Surface;
 End;
 
-// Structure de boutton
+// Structure de bouton
 Type Type_Button = Record
   Position, Size : Type_Coordinates;
   Pressed : Boolean;
@@ -50,7 +50,7 @@ Type Type_Button = Record
   Hidden : Boolean;
 End;
 
-// Structure de boutton à deux états
+// Structure de bouton à deux états
 Type Type_Dual_State_Button = Record
   Position, Size : Type_Coordinates;
   Pressed : Boolean;
@@ -59,7 +59,7 @@ Type Type_Dual_State_Button = Record
   Surface_Released : array[0 .. 1] Of PSDL_Surface;
 End;
 
-// Structure de diagrame
+// Structure de diagramme
 Type Type_Pie = Record
   Position, Size : Type_Coordinates;
   Surface : PSDL_Surface;
@@ -70,28 +70,26 @@ End;
 
 // - - Temps
 
-
 Type Type_Time = Longword;
 
-
+// Enumération des jours.
 Type Type_Day = (Day_Monday,
                  Day_Tuesday,
                  Day_Wednesday,
                  Day_Thursday,
                  Day_Friday,
                  Day_Saturday,
-                 Day_Sunday
-                );
+                 Day_Sunday);
 
-  // Structure contenant tous pointeurs des sprites du jeu.
+// Structure contenant tout les pointeurs des sprites du jeu.
 
-// Enumeration des tailles de police.
+// Enumération des tailles de police.
 Type Type_Font_Size = (Font_Small, Font_Medium, Font_Big);
 
-// Enumeration des épaisseurs de police.
+// Enumération des épaisseurs de police.
 Type Type_Font_Weight = (Font_Normal, Font_Bold);
 
-// Enumeration des couleurs.
+// Enumération des couleurs.
 Type Type_Color_Name = (Color_Black,
                         Color_Red,
                         Color_Purple,
@@ -118,9 +116,9 @@ Type Type_Color_Name = (Color_Black,
 // - - Jeu
 
 
-// - - Entités du jeux.
+// - - Entités du jeu.
 
-// Enumeraton des formes.
+// Enumération des formes.
 Type Type_Shape = (Circle, Lozenge, Pentagon, Square, Triangle);
 
 // Type pointeur de station.
@@ -141,11 +139,15 @@ Type Type_Station_Pointer = ^Type_Station;
 // Pointeur de passager
   Type_Passenger_Pointer = ^Type_Passenger;
 
-  // Structure de Station
+  // Structure de station
   Type_Station = Record
+    // Coordonnées de la station.
     Position, Size, Position_Centered : Type_Coordinates;
+    // Forme de la station.
     Shape : Type_Shape;
+    // Pointeur vers le sprite de la station.
     Sprite : PSDL_Surface;
+    // Tableau des pointeurs  passagers présents à la station.
     Passengers : array Of Type_Passenger_Pointer;
     Timer : Type_Pie;
     Overfill_Timer : Type_Time;
@@ -190,29 +192,30 @@ Type  Type_Line = Record
     Intermediate_Positions : Array Of Type_Coordinates;
     // Tableau dynamique contenant les trains.
     Trains : array Of Type_Train;
-    // Boutton de la ligne.
+    // Bouton de la ligne.
     Button : Type_Dual_State_Button;
   End;
 
+// Type pointeur de ligne.
   Type_Line_Pointer = ^Type_Line;
 
 // Structure renfermant les données du joueur.
 Type Type_Player = Record
-  // Score du joueur (nombre de passager transporté)
+  // Score du joueur (nombre de passagers transportés)
   Score : Integer;
   // Locomotives du joueur.
   Locomotive_Token : Byte;
-  // Wagon du joueur.
+  // Wagons du joueur.
   Wagon_Token : Byte;
-  // Tunnel du joueur.
+  // Tunnels du joueur.
   Tunnel_Token : Byte;
-  // Tunnel utilisés.
+  // Tunnels utilisés.
   Tunnels_Used : Byte;
 End;
 
-// - Itineraries
+// - Itinéraires
 
-// Type de tableau de graph.
+// Type de tableau de graphes.
 Type Type_Graph_Table = Array Of Array Of Array Of Type_Line_Pointer;
 
 // Structure de cellule de Dijkstra.
@@ -220,7 +223,7 @@ Type Type_Dijkstra_Cell = Record
   isConnected : Boolean;
   isAvailable : Boolean;
   isValidated : Boolean;
-  comingFromStationIndex : Byte;
+  Coming_From_Station_Index : Byte;
   Weight : Real;
 End;
 
@@ -259,7 +262,7 @@ Type Type_Ressources = Record
   Stations : Array [0 .. (Game_Shapes_Number - 1)] Of PSDL_Surface;
   // Passagers (5 formes différentes).
   Passengers : Array [0 .. (Game_Shapes_Number - 1)] Of PSDL_Surface;
-  // Vehicles (locomotive et wagon), la première dimension est pour les couleurs et la deuxième pour l'orientation (0, 45, 90 et 135 degrees).
+  // Vehicules (locomotives et wagons), la première dimension est pour les couleurs et la deuxième pour l'orientation (0, 45, 90 et 135 degrés).
   Vehicles : Array [0 .. 8, 0 .. 3] Of PSDL_Surface;
   // Boutons
   Train_Add, Wagon_Add, Tunnel_Add, Line_Add : PSDL_Surface;
@@ -280,13 +283,13 @@ Type Type_Game = Record
 
   Pause_Time : Type_Time;
 
-  // Temporisateur déterminant rendre les graphismes.
+  // Temporisateur déterminant quand rendre les graphismes.
   Graphics_Timer : Type_Time;
   // Temporisateur déterminant quand générer un nouveau passager.
   Passengers_Timer : Type_Time;
   // Temporisateur déterminant quand générer une nouvelle station.
   Stations_Timer : Type_Time;
-  // Temporisateur déterminant quand rafraishir la logique.
+  // Temporisateur déterminant quand rafraîchir la logique.
   Logic_Timer : Type_Time;
 
   // Souris
@@ -296,7 +299,7 @@ Type Type_Game = Record
   // Panneau contenant le terrain de jeu. 
   Panel_Right : Type_Panel;
 
-  // Panneau de récompense.
+  // Panneau de récompenses.
   Panel_Reward : Type_Panel;
   Title_Label : Type_Label;
   Message_Label : Type_Label;
@@ -316,20 +319,15 @@ Type Type_Game = Record
   // Panneau contenant l'interface du bas (selection des lignes).
   Panel_Bottom : Type_Panel;
 
-  // Panneau contenant l'interface de gauche (train, wagon, tunnel).
+  // Panneau contenant l'interface de gauche (trains, wagons, tunnels).
   Panel_Left : Type_Panel;
   Locomotive_Button : Array[0 .. 2] Of Type_Button;
   Wagon_Button : Array[0 .. 2] Of Type_Button;
   Tunnel_Button : Array[0 .. 2] Of Type_Button;
 
-  // Structure contenant les sprites du jeu.
   Ressources : Type_Ressources;
-  // Inventaire
   Player : Type_Player;
-  // Stations
-  // Tableau dymamique contenant les stations.
   Stations : Array Of Type_Station_Pointer;
-  // Tableau des 
   River : Array Of Type_Coordinates;
   // Un échiquier des stations dont la hauteur contient les lignes qui relient les dites stations.  
   Graph_Table : Type_Graph_Table;
@@ -342,7 +340,7 @@ Type Type_Game = Record
 
 
   // Lignes
-  // Tableau dynamque contenant les lignes.
+  // Tableau dynamique contenant les lignes.
   Lines : array Of Type_Line;
 End;
 

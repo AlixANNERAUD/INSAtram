@@ -59,10 +59,10 @@ Begin
         Random_Draw := false;
       End;
 
-    // Si un des choix le joueur peut choisir une ligne,
+    // Si une ligne figure dans un des choix,
     If (Rewards[0] = 0) Or (Rewards[1] = 0) Then
       Begin
-        // On vérifie que le nombre de ligne n'a pas été dépassé.
+        // On vérifie que le nombre maximal de lignes n'a pas été dépassé.
         If (length(Game.Lines) >= Game_Maximum_Lines_Number) Then
           Begin
             // On refait le tirage le cas échéant.
@@ -103,7 +103,7 @@ Begin
         1 :
             Begin
               Label_Set_Text(Game.Reward_Labels[i], 'Train');
-              Button_Set(Game.Reward_Buttons[i], Game.Ressources.Train_Add, Game.Ressources.Train_Add)
+              Button_Set(Game.Reward_Buttons[i], Game.Ressources.Train_Add, Game.Ressources.Train_Add);
             End;
         // - Wagon
         2 :
@@ -143,8 +143,8 @@ End;
 
 Procedure Game_Refresh_Graph_Table(Var Game : Type_Game);
 
-Var i, j, k : Byte;
-  Indexes : Array[0 .. 1] Of Byte;
+Var i, j : Byte;
+    Indexes : Array[0 .. 1] Of Byte;
 Begin
 
   // - Définit les dimensions de la Graph_Table
@@ -165,7 +165,7 @@ Begin
       // Vérifie que la ligne contient bien des stations.
       If (length(Game.Lines[i].Stations) > 0) Then
         Begin
-          // Itère parmis les stations de la ligne.
+          // Itère parmi les stations de la ligne.
           For j:= low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
             // Pour chacune des stations consécutivement connectées contenues dans le tableau :
             Begin
@@ -179,7 +179,7 @@ Begin
 
               SetLength(Game.Graph_Table[Indexes[1]][Indexes[0]], length(Game.Graph_Table[Indexes[1]][Indexes[0]]) + 1);
 
-              // A partir des indexes, on remplit Graph_Table de manière symétrique en ajoutant les pointeur des lignes corrspondantes.
+              // A partir des indexes, on remplit la Graph_Table de manière symétrique en ajoutant les pointeur des lignes correspondantes.
 
               Game.Graph_Table[Indexes[0]][Indexes[1]][high(Game.Graph_Table[Indexes[0]][Indexes[1]])] := @Game.Lines[i];
               Game.Graph_Table[Indexes[1]][Indexes[0]][high(Game.Graph_Table[Indexes[1]][Indexes[0]])] := @Game.Lines[i];
@@ -190,10 +190,10 @@ Begin
 
 End;
 
-// Procédure qui inscrit dans le tableau de Dijkstra avec quels stations une station donnée peut se connecter.
-Procedure Connect_Stations(Step : Byte; indexStationToConnect : Integer; Game : Type_Game);
+// Procédure qui inscrit dans le tableau de Dijkstra avec quelles stations une station donnée peut se connecter.
+Procedure Connect_Stations(Step : Byte; indexStationToConnect : Byte; Game : Type_Game);
 
-Var i, j : Integer;
+Var i, j : Byte;
 Begin
 
   i := indexStationToConnect;
@@ -220,30 +220,31 @@ End;
 // Procédure qui renvoie toutes les stations qui ont la même forme que le passager donné.
 Procedure Get_Ending_Stations_From_Shape(Game : Type_Game; Passenger : Type_Passenger_Pointer; Var Index_Table : Type_Index_Table);
 
-Var i, counter : Integer;
+Var i : Byte;
 Begin
   SetLength(Index_Table, 0);
 
+  // Parcourt le tableau de stations du jeu.
   For i:= low(Game.Stations) To high(Game.Stations) Do
     Begin
-
+      // Vérifie si la forme de la station contenue dans la case où on se trouve correspond à la forme du passager.
       If Game.Stations[i]^.Shape = Passenger^.Shape Then
         Begin
-
+          // Si c'est le cas, on ajoute cette station au tableau de stations de la même forme que le passager.
           SetLength(Index_Table, length(Index_Table) + 1);
           Index_Table[high(Index_Table)] := i;
-
         End;
     End;
 End;
 
 // Fonction qui signale à l'algorithme de Dijkstra que le calcul d'itinéraire est arrivé à destination.
-Function Destination_Reached(Index_Ending_Station : Integer; Dijkstra_Table : Type_Dijkstra_Table): Boolean;
+Function Destination_Reached(Index_Ending_Station : Byte; Dijkstra_Table : Type_Dijkstra_Table): Boolean;
 
-Var i : Integer;
+Var i : Byte;
 Begin
   Destination_Reached := false;
-  // Itère parmis la première dimension du tableau de dijkstra
+
+  // Itère parmi la première dimension du tableau de dijkstra
   For i := low(Dijkstra_Table) To high(Dijkstra_Table) Do
     Begin
       If (Dijkstra_Table[i][Index_Ending_Station].isValidated = true) Then
@@ -254,13 +255,14 @@ Begin
     End;
 End;
 
+// Fonction qui calcule le poids d'un trajet entre deux stations connectées.
 Function Get_Weight(Var Station_1, Station_2 : Type_Station): Integer;
 
 Var Intermediate_Position : Type_Coordinates;
 Begin
-
+  // Détermine la position intermédiaire entre deux stations données.
   Intermediate_Position := Station_Get_Intermediate_Position(Station_1.Position_Centered, Station_2.Position_Centered);
-
+  // Le poids du trajet pour aller d'une station 1 à une station 2 est égal à la distance séparant les deux stations.
   Get_Weight := Get_Distance(Station_1.Position_Centered, Intermediate_Position) + Get_Distance(Intermediate_Position, Station_2.Position_Centered);
 End;
 
@@ -268,12 +270,16 @@ End;
 Function Itinerary_Get_Weight(Game : Type_Game; Itinerary_Indexes : Type_Itinerary_Indexes) : Integer;
 
 Var i : Byte;
-  Weight : Integer;
-  Intermediate_Position : Type_Coordinates;
+    Weight : Integer;
+ 
 Begin
+  // Initialise le poids de l'itinéraire à 0.
   Weight := 0;
+
+  // Parcourt le tableau contenant les stations constituant l'itinéraire.
   For i := low(Itinerary_Indexes) + 1 To high(Itinerary_Indexes) Do
     Begin
+      // Fait appel à Get_Weight pour calculer le poids du trajet entre deux stations consécutives dans le tableau.
       Weight := Weight + Get_Weight(Game.Stations[Itinerary_Indexes[i - 1]]^, Game.Stations[Itinerary_Indexes[i]]^);
     End;
 
@@ -283,7 +289,7 @@ End;
 
 Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Var Reverse_Itinerary_Indexes : Type_Itinerary_Indexes; Game : Type_Game; Var Station_Is_Isolated : Boolean);
 
-Var a, k, row, column, Step, indexStationToConnect, comingFromStationIndex, lightest_Station_Index, i, Previous_Index, j, Last_Step, lightest_Station_Step : Integer;
+Var i, j, column, Step, Last_Step, lightest_Station_Step, Coming_From_Station_Index, lightest_Station_Index, Previous_Index : Byte;
     minimum_Weight, Validated_Itinerary_Weight : Real;
 
 
@@ -293,10 +299,9 @@ Begin
   SetLength(Itinerary_Indexes, 0);
 
   // - Initialisation de la table de Dijkstra.
-  Validated_Itinerary_Weight := 0;
 
-  // Initialisation de la première ligne du tableau de dijkstra.
-  indexStationToConnect := Starting_Station_Index;
+  // Initialisation du poids total de l'itinéraire calculé par Dijkstra.
+  Validated_Itinerary_Weight := 0;
 
   // Itère parmi les lignes du tableau de dijkstra.
   For Step := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
@@ -309,19 +314,19 @@ Begin
           Game.Dijkstra_Table[Step][j].isConnected := False;
           Game.Dijkstra_Table[Step][j].isValidated := False;
           Game.Dijkstra_Table[Step][j].Weight := 0;
-          Game.Dijkstra_Table[Step][j].comingFromStationIndex := 255;
+          Game.Dijkstra_Table[Step][j].Coming_From_Station_Index := 255;
         End;
 
       Game.Dijkstra_Table[Step][Starting_Station_Index].isAvailable := False;
     End;
 
-  comingFromStationIndex := Starting_Station_Index;
+  Coming_From_Station_Index := Starting_Station_Index;
 
   // Met le poids de la station de départ à l'étape 0 à 0.
   Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].Weight := 0;
 
   // Définit la station de départ de l'étape 0 comme étant la station de départ (itinénaire complet).
-  Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].comingFromStationIndex := comingFromStationIndex;
+  Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].Coming_From_Station_Index := Coming_From_Station_Index;
 
   // Met la station de départ comme étant validée (dans l'itinéraire final).
   Game.Dijkstra_Table[low(Game.Dijkstra_Table)][Starting_Station_Index].isValidated := True;
@@ -333,19 +338,18 @@ Begin
   While ((Step <= (high(Game.Dijkstra_Table))) And (Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)=False)) Do
     Begin
 
-      // On connecte dans la Dijkstra_Table les stations qui sont reliées.
-      Connect_Stations(Step, comingFromStationIndex, Game);
+      // Connecte dans la Dijkstra_Table les stations qui sont reliées.
+      Connect_Stations(Step, Coming_From_Station_Index, Game);
 
       For i := (low(Game.Dijkstra_Table[Step])) To (high(Game.Dijkstra_Table[Step])) Do
         Begin
-          // Si la station est libre, connectée et non validée.
+          // Si la station est libre, connectée et non validée,
           If (Game.Dijkstra_Table[Step][i].isAvailable = True) And (Game.Dijkstra_Table[Step][i].isConnected = True) And (Game.Dijkstra_Table[Step][i].isValidated = False) Then
             Begin
-              // TODO : Je ne suis pas fan de cette méthode, mais je ne vois pas comment faire autrement.
-              // On écrit de quelle station on est parti pour atteindre la station actuelle.
-              Game.Dijkstra_Table[Step][i].comingFromStationIndex := comingFromStationIndex;
-              // On effectue le calcul de poids.
-              Game.Dijkstra_Table[Step][i].Weight := Validated_Itinerary_Weight + Get_Weight(Game.Stations[Game.Dijkstra_Table[Step][i].comingFromStationIndex]^, Game.Stations[i]^);
+              // Définit de quelle station on est parti pour atteindre la station actuelle.
+              Game.Dijkstra_Table[Step][i].Coming_From_Station_Index := Coming_From_Station_Index;
+              // Effectue le calcul de poids.
+              Game.Dijkstra_Table[Step][i].Weight := Validated_Itinerary_Weight + Get_Weight(Game.Stations[Game.Dijkstra_Table[Step][i].Coming_From_Station_Index]^, Game.Stations[i]^);
               //!\\ Attention : Manipule directement la station, pas le pointeur.
             End;
         End;
@@ -361,7 +365,7 @@ Begin
           // Itère parmi les colonnes (stations) de la Dijkstra_Table.
           For column:= (low(Game.Dijkstra_Table[i])) To (high(Game.Dijkstra_Table[i])) Do
             Begin
-              // Si la station est connectée, validée et libre.
+              // Si la station est connectée, validée et libre,
               If (Game.Dijkstra_Table[i][column].isConnected = True) And (Game.Dijkstra_Table[Step][column].isValidated = False) And (Game.Dijkstra_Table[Step][column].isAvailable = True) Then
                 Begin
                   If (minimum_Weight = 0) Then
@@ -377,7 +381,7 @@ Begin
                          Begin
                            minimum_Weight := Game.Dijkstra_Table[i][column].weight;
                            lightest_Station_Index := column;
-                  // On récupère l'indice de la station au plus petit poids.
+                  // Récupère l'indice de la station au plus petit poids.
                            lightest_Station_Step := i;
                          End;
 
@@ -385,7 +389,7 @@ Begin
             End;
         End;
 
-      // Si on a parcouru toute la Dijkstra_Table et que la destination n'est pas atteinte, alors il n'y a pas de trajet. La station est isolée.
+      // Si toute la Dijkstra_Table a été parcourue et que la destination n'est pas atteinte, alors il n'y a pas de trajet. La station est isolée.
       If (Step = high(Game.Dijkstra_Table)) And Not(Destination_Reached(Ending_Station_Index, Game.Dijkstra_Table)) Then
         Begin
           Station_Is_Isolated := True;
@@ -398,16 +402,17 @@ Begin
           Validated_Itinerary_Weight := Game.Dijkstra_Table[lightest_Station_Step][lightest_Station_Index].weight;
         End;
 
-
-
       // - Met à jour les stations disponibles.
 
+      // Itère parmi les lignes de la Dijkstra_Table
       For i:= low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
         Begin
+          // Met toutes les cases de la colonne de la station qu'on vient de valider comme étant indisponibles.
           Game.Dijkstra_Table[i][lightest_Station_Index].isAvailable := False;
         End;
 
-      comingFromStationIndex := lightest_Station_Index;
+      Coming_From_Station_Index := lightest_Station_Index;
+
       // L'étape est finie, on peut passer à l'étape suivante.
       Step := Step + 1;
       If Step-1 = high(Game.Dijkstra_Table) Then
@@ -418,27 +423,27 @@ Begin
 
   //- Effectue une remontée pour récupérer toutes les stations de l'itinéraire.
 
-  // On remplit la première case du tableau de l'itinéraire inversé avec la station de destination (inversé car récupéré avec une remontée).
+  // Remplit la première case du tableau de l'itinéraire inversé avec la station de destination (inversé car récupéré avec une remontée).
   SetLength(Reverse_Itinerary_Indexes, 1);
   Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Ending_Station_Index;
 
- // On parcourt toutes les cases de l'étape afin de déterminer la case validée et de récupérer son comingFromStationIndex.
+ // Parcourt toutes les cases de l'étape afin de déterminer la case validée et de récupérer son Coming_From_Station_Index.
   For j := low(Game.Dijkstra_Table) To high(Game.Dijkstra_Table) Do
     Begin
       If Game.Dijkstra_Table[Last_Step][j].isValidated Then
         Begin
-          Previous_Index := Game.Dijkstra_Table[Last_Step][j].comingFromStationIndex;
+          Previous_Index := Game.Dijkstra_Table[Last_Step][j].Coming_From_Station_Index;
         End;
     End;
 
-   //On remplit le reste du tableau avec les Previous_Index récupérés à l'étape précédente.
+   // Remplit le reste du tableau avec les Previous_Index récupérés à l'étape précédente.
   If (Previous_Index <> Starting_Station_Index) Then
     Begin
       Repeat
-        // Rajoute une case a RII
+        // Rajoute une case a Rverse_Itinerary_Indexes.
         SetLength(Reverse_Itinerary_Indexes, length(Reverse_Itinerary_Indexes) + 1);
         Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] := Previous_Index;
-        // Prévention d'un bug 
+        // Prévention d'un bug.
         If Previous_Index = 255 Then
           Begin
             Previous_Index := Starting_Station_Index;
@@ -447,12 +452,12 @@ Begin
             Break;
           End;
 
-        Previous_Index := Game.Dijkstra_Table[Last_Step - high(Reverse_Itinerary_Indexes)][Previous_Index].comingFromStationIndex;
+        Previous_Index := Game.Dijkstra_Table[Last_Step - high(Reverse_Itinerary_Indexes)][Previous_Index].Coming_From_Station_Index;
 
       Until Reverse_Itinerary_Indexes[high(Reverse_Itinerary_Indexes)] = Starting_Station_Index;
     End;
 
-  //On set la taille du tableau d'itinéraire (tableau stocké dans le passager) à la même taille que le tableau inversé de l'itinéraire.
+  // Set la taille du tableau d'itinéraire (tableau stocké dans le passager) à la même taille que le tableau inversé de l'itinéraire.
   SetLength(Itinerary_Indexes, length(Reverse_Itinerary_Indexes));
 
  //Inverse le tableau inversé pour obtenir l'itinéaire dans le bon sens.
@@ -463,7 +468,7 @@ Begin
 End;
 
 
-// Procédure qui calcule l'itinéaire des stations correspondant à la forme du passager, puis détermine la plus "proche" en prenant l'intéraire le plus court..
+// Procédure qui calcule l'itinéaire des stations correspondant à la forme du passager, puis détermine la plus "proche" en prenant l'itinéraire le plus court.
 Procedure Passengers_Compute_Itinerary(Game : Type_Game);
 
 Var i,j,k,l : Byte;
@@ -475,16 +480,16 @@ Var i,j,k,l : Byte;
 Begin
   // Itère parmi les stations.
   For i:= low(Game.Stations) To high(Game.Stations) Do
-    // Parcourt toutes les stations pour ensuite parcourir les passagers contenus dans ces stations
+    // Parcourt toutes les stations pour ensuite parcourir les passagers contenus dans ces stations.
     Begin
-      // Si la station contient des passagers.
+      // Si la station contient des passagers,
       If (length(Game.Stations[i]^.Passengers) > 0) Then
         Begin
           // Itère parmi les passagers d'une station.
           For j:= low(Game.Stations[i]^.passengers) To high(Game.Stations[i]^.passengers) Do
             // Parcourt les passagers de la station
             Begin
-              // Détermine les stations de destination possible pour un passager (stations ayant la même forme que le passager).
+              // Détermine les stations de destination possibles pour un passager (stations ayant la même forme que le passager).
               Get_Ending_Stations_From_Shape(Game, Game.Stations[i]^.Passengers[j], Index_Table_Of_Same_Shape);
 
               // Parcourt le tableau contenant les destinations possibles pour le passager.
@@ -492,16 +497,18 @@ Begin
                 Begin
                   // Appelle Dijkstra pour calculer le trajet le plus court pour se rendre à la destination sélectionnée dans le tableau.
                   Dijkstra(i, Index_Table_Of_Same_Shape[k], Itinerary_Indexes, Reverse_Itinerary_Indexes, Game, Station_Is_Isolated);
-                  // Si on se trouve à la première case du tableau de destinations
+                 
+                  // Si on se trouve à la première case du tableau de destinations,
                   If k = low(Index_Table_Of_Same_Shape) Then
-                  // Considère par défaut le trajet menant à cette destination comme le trajet le plus court.
+                    // Considère par défaut le trajet menant à cette destination comme le trajet le plus court pour le moment.
                     Begin
                       Lowest_Weight := Itinerary_Get_Weight(Game, Itinerary_Indexes);
                       Shortest_Itinerary_Indexes := copy(Itinerary_Indexes, low(Itinerary_Indexes), length(Itinerary_Indexes));
                     End
+                 
                   // Si on se trouve à une autre case du tableau de destinations.
                   Else If (Itinerary_Get_Weight(Game, Itinerary_Indexes) < Lowest_Weight) Then
-                  // Compare le poids du trajet menant à la destination contenue dans la case où on se trouve au plus petit poids trouvé jusqu'à présent. Si ce poids est plus petit, on le considère comme le plus petit poids.
+                        // Compare le poids du trajet menant à la destination contenue dans la case où on se trouve au plus petit poids trouvé jusqu'à présent. Si ce poids est plus petit, on le considère comme le plus petit poids.
                          Begin
                            Lowest_Weight := Itinerary_Get_Weight(Game, Itinerary_Indexes);
                            // Copie l'itinéraire au plus petit poids dans l'itinéraire le plus court.
@@ -539,6 +546,7 @@ Var i : Byte;
 
 Begin
 Passenger_Get_Off := True;
+
 // Parcourt le tableau contenant l'itinéraire du passager et vérifie si la prochaine station du train correspond à la prochaine station dans l'itinéraire du passager.
 for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
   begin
@@ -551,7 +559,7 @@ end;
 
 // Fonction qui détermine si le passager doit monter dans un train.
 Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station : Type_Station) : Boolean;
-Var i : Byte;
+{Var i : Byte;}
 Begin
       {writeln('====================================');
 
@@ -614,7 +622,7 @@ Begin
   River_Create(Game);
 
 
-  // Défintion de la carte d'occupation des stations..
+  // Défintion de la carte d'occupation des stations.
   SetLength(Game.Stations_Map, Game.Panel_Right.Size.X Div 64);
 
   For i := low(Game.Stations_Map) To high(Game.Stations_Map) Do
@@ -624,7 +632,7 @@ Begin
         Game.Stations_Map[i][j] := false;
     End;
 
-  // Création des 5 premères stations
+  // Création des 5 premères stations.
   For i := 1 To 5 Do
     Begin
       Station_Create(Game);
@@ -632,12 +640,10 @@ Begin
 
  
    
-  // Création de la première ligne
+  // Création de la première ligne.
   Line_Create(Game);
   Line_Create(Game);
    
-
-
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
       Line_Add_Station(Game.Stations[i], Game.Lines[0], Game);
@@ -645,7 +651,6 @@ Begin
 
 
   Game_Refresh_Graph_Table(Game);
-
 
 
 {
@@ -672,12 +677,12 @@ Begin
         End;
     End;
 
-  writeln('!!!!!!!!!!!!!! NB DE PASSAGER A SUCER : ', Total);
+  {writeln('!!!!!!!!!!!!!! NB DE PASSAGER A SUCER : ', Total);}
 
   Passenger_Create(Game.Stations[0]^, Game);
 
 
-  // Calcul des itinéaires des passagers crées.
+  // Calcul des itinéaires des passagers créés.
   Passengers_Compute_Itinerary(Game);
 
   Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
@@ -699,7 +704,7 @@ Begin
 
 
   // Suppresion des passagers des stations.
-  // Itère parmis les stations
+  // Itère parmi les stations
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
 
@@ -711,22 +716,22 @@ Begin
 
   SetLength(Game.Stations, 0);
 
-  // Suppresion des passagers dans les véhicules des trains.
+  // Suppression des passagers dans les véhicules des trains.
   // Vérifie qu'il y a bien des lignes.
   If (length(Game.Lines) > 0) Then
-    // Itère parmis les lignes
+    // Itère parmi les lignes
     For i := low(Game.Lines) To high(Game.Lines) Do
       Begin
         // Vérifie qu'il y a bien des trains sur la ligne.
         If (length(Game.Lines[i].Trains) > 0) Then
           Begin
-            // Itère parmis les trains de la ligne
+            // Itère parmi les trains de la ligne.
             For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
               Begin
-                // Itère parmis les véhicules du train
+                // Itère parmi les véhicules du train.
                 For k := low(Game.Lines[i].Trains[j].Vehicles) To high(Game.Lines[i].Trains[j].Vehicles) Do
                   Begin
-                    // Itère parmis les passagers du véhicule.
+                    // Itère parmi les passagers du véhicule.
                     For l := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
                       Begin
                         If (Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] <> Nil) Then
@@ -747,7 +752,7 @@ Begin
   Panel_Delete(Game.Panel_Bottom);
   Panel_Delete(Game.Window);
 
-  // Pas besoin de supprimer les autres objets, ils seront automatiquements détruit lors de la suppression de l'objet Game.
+  // Pas besoin de supprimer les autres objets, ils seront automatiquement détruits lors de la suppression de l'objet Game.
 
   // Fermeture de la SDL.
   SDL_Quit();
@@ -757,7 +762,7 @@ Procedure Logic_Event_Handler(Var Game : Type_Game);
 
 Var Event : TSDL_Event;
 Begin
-  // Vérifie les évènements.
+  // Vérifie les événements.
   While (SDL_PollEvent(@Event) > 0) Do
     Begin
       // Si l'utilisateur demande la fermeture du programme.
@@ -775,7 +780,7 @@ Begin
     End;
 End;
 
-// Rafraichissement de la logique.
+// Rafraîchissement de la logique.
 Procedure Logic_Refresh(Var Game : Type_Game);
 
 Var i, j : Integer;
@@ -795,7 +800,7 @@ Begin
             Logic_Rewards(Game);
         End;
 
-      // Si le timer de génération de passager à été dépassé.
+      // Si le timer de génération de passagers a été dépassé.
       If (Game.Passengers_Timer < Time_Get_Current()) Then
         Begin
           // Génération aléatoire des passagers.
@@ -806,9 +811,8 @@ Begin
               // Création d'un passager sur une station choisie aléatoirement.
               // Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
 
-              // Calcul des itinéaires des passagers crées.
+              // Calcul des itinéaires des passagers créés.
               //Passengers_Compute_Itinerary(Game);
-
 
               // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
               Game.Passengers_Timer := Time_Get_Current() + round((exp(-1.5 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 2) * 1000));
@@ -816,7 +820,7 @@ Begin
             End;
         End;
 
-      // Si le timer de génération de stations à été dépassé.
+      // Si le timer de génération de stations a été dépassé.
       If (Game.Stations_Timer < Time_Get_Current()) Then
         Begin
           // Génération aléatoire d'une station.
@@ -829,28 +833,28 @@ Begin
 
 
 
-      // - Gestion des trains arrivés à quais.
+      // - Gestion des trains arrivés à quai.
 
-      // Vérifié qu'il existe une ligne.
+      // Vérifie qu'il existe une ligne.
       If (length(Game.Lines) > 0) Then
         Begin
-          // Itère parmis les lignes
+          // Itère parmi les lignes.
           For i := low(Game.Lines) To high(Game.Lines) Do
             Begin
-              // Itère parmis les trains
+              // Itère parmi les trains.
               For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
                 Begin
-                  // Si le train est arrivé à quais.
+                  // Si le train est arrivé à quai.
                   If (Game.Lines[i].Trains[j].Driving = false) Then
                     Begin
-                      // Effectue la correspondance du train arrivé à quais.
+                      // Effectue la correspondance du train arrivé à quai.
                       Train_Connection(Game.Lines[i], Game.Lines[i].Trains[j], Game);
                     End;
                 End;
             End;
         End;
 
-      // - Reconstruction de la graph table.
+      // - Reconstruction de la Graph_Table.
 
       If (Game.Refresh_Graph_Table) Then
         Begin
@@ -860,19 +864,19 @@ Begin
 
       // - Vérification de l'encombrement des stations.
 
-      // Itère parmis les stations.
+      // Itère parmi les stations.
       For i := low(Game.Stations) To high(Game.Stations) Do
         Begin
           // Si la station est surchargée.
           If (length(Game.Stations[i]^.Passengers) > Station_Overfill_Passengers_Number) Then
             Begin
-              // Si la station n'est pas encombré avant la dernière vérification.
+              // Si la station n'est pas encombrée avant la dernière vérification.
               If (Game.Stations[i]^.Overfill_Timer = 0) Then
-                // On démare le timer de la station.
+                // On démarre le timer de la station.
                 Game.Stations[i]^.Overfill_Timer := Time_Get_Current()
-                                                    // Si la station était encombré avant la dernière vérification et que son timer est dépassé.
+              // Si la station était encombrée avant la dernière vérification et que son timer est dépassé.
               Else If (Time_Get_Elapsed(Game.Stations[i]^.Overfill_Timer) > Station_Overfill_Timer * 1000) Then
-                     // La partie est terminée.
+              // La partie est terminée.
               ;
               // TODO : Faire écran de game over.
             End
@@ -881,8 +885,8 @@ Begin
         End;
       Game.Logic_Timer := Time_Get_Current() + 200;
     End
-    // Si tout à été rafraichit.
-    // Si il faut rafraichir les graphismes.
+    // Si tout a été rafraîchi.
+    // Si il faut rafraîchir les graphismes,
   Else If (Game.Graphics_Timer < Time_Get_Current()) Then
          Begin
            Graphics_Refresh(Game);
@@ -895,14 +899,14 @@ Begin
 
 End;
 
-// Fonction qui effectue la correspondance du train arrivé à quais et change les attributs du trains pour sa prochaine destination.
+// Fonction qui effectue la correspondance du train arrivé à quai et change les attributs du train pour sa prochaine destination.
 Procedure Train_Connection(Var Line : Type_Line; Var Train : Type_Train; Var Game : Type_Game);
 
 Var i, j, k : Byte;
   Passengers_Queue : Array Of Type_Passenger_Pointer;
   Maximum_Distance : Integer;
 Begin
-  // Pour faire disparaitre l'avertissement.
+  // Pour faire disparaître l'avertissement.
   SetLength(Passengers_Queue, 0);
 
   // La station d'arrivée devient la station de départ.
@@ -912,7 +916,7 @@ Begin
 
   // - Détermination de la prochaine station du train.
 
-  // Parcourt toute les station de la ligne du train.
+  // Parcourt toutes les stations de la ligne du train.
   For i := low(Line.Stations) To high(Line.Stations) Do
     Begin
       // Cherche la station actuelle du train dans les stations d'une ligne.
@@ -948,10 +952,9 @@ Begin
   Train.Intermediate_Position_Distance := Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position);
 
 
-
   // - Déchargement des passagers du train.
 
-  // Itère parmis les véhicules du train.
+  // Itère parmi les véhicules du train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do
     Begin
       // Déchargement des passagers qui doivent descendre du train dans le tampon.
@@ -972,7 +975,6 @@ Begin
               Else If (Passenger_Get_Off(Train.Vehicles[i].Passengers[j], Train.Next_Station^)) Then
                      Begin
                        // Copie du pointeur du passager dans le tampon.
-                       writeln('Le passager ',Train.Vehicles[i].Passengers[j]^.Shape,' vient de descendre');
                        SetLength(Passengers_Queue, length(Passengers_Queue) + 1);
                        Passengers_Queue[high(Passengers_Queue)] := Train.Vehicles[i].Passengers[j];
                        // Réinitialisation du pointeur du passager dans le train.
@@ -984,10 +986,10 @@ Begin
 
   // - Chargement des passagers de la station dans le train.
 
-  // Itère parmis les véhicules d'un train.
+  // Itère parmi les véhicules d'un train.
   For i := low(Train.Vehicles) To high(Train.Vehicles) Do
     Begin
-      // Itère parmis les places du véhicule.
+      // Itère parmi les places du véhicule.
       For j := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
         Begin
           // Le pointeur (donc la place) est vide.
@@ -1004,7 +1006,7 @@ Begin
                           // Copie du pointeur du passager dans le train.
                           Train.Vehicles[i].Passengers[j] := Train.Last_Station^.Passengers[k];
                           writeln('Le passager ', Train.Last_Station^.Passengers[k]^.Shape, ' est monté dans le train');
-                          // Suppresion du pointeur du passager de la station.
+                          // Suppression du pointeur du passager de la station.
                           delete(Train.Last_Station^.Passengers, k, 1);
                           // On quitte la boucle.
                           Break;
@@ -1035,7 +1037,7 @@ Begin
   Train.Start_Time := Time_Get_Current();
 
 
-  // Calcul de la distance entre la station de départ et d'arrivée.
+  // Calcul de la distance entre la station de départ et la station d'arrivée.
 
   Maximum_Distance := Get_Distance(Train.Last_Station^.Position_Centered, Train.Intermediate_Position) + Get_Distance(Train.Intermediate_Position, Train.Next_Station^.Position_Centered);
 

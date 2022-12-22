@@ -26,7 +26,7 @@ Procedure Graphics_Draw_River(Position_1, Position_2 :
                               Type_Coordinates; Color :
                               Type_Color; Var Panel : Type_Panel);
 
-// - - Objets liées à l'interface graphique.
+// - - Objets liés à l'interface graphique.
 
 // - - - Ressources
 
@@ -84,13 +84,13 @@ Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var 
 
 Implementation
 
-// Procédure qui desinne une lign épaisse entre deux points.
+// Procédure qui dessine une ligne épaisse entre deux points.
 Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Coordinates; Color :
                              Type_Color; Var Panel : Type_Panel);
 
 Var Direction : Integer;
-  i : ShortInt;
+    i : ShortInt;
 Begin
 
   Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
@@ -138,6 +138,7 @@ End;
 
 // - - Station
 
+// Procédure qui trace les lignes parrallèelement les unes aux autres.
 Procedure Graphics_Draw_Lines(Position_1, Position_2 : Type_Coordinates; Colors : Array Of Type_Color; Var Panel : Type_Panel);
 
 Var Direction : Integer;
@@ -272,6 +273,7 @@ Begin
     End;
 End;
 
+// Procédure qui dessine le panneau des récompenses.
 Procedure Panel_Reward_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 Var i : Byte;
@@ -306,16 +308,16 @@ Begin
     End;
 End;
 
-
+// Procédure qui affiche le timer des stations.
 Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
-  Angle : Integer;
+    Angle : Integer;
 Begin
 
   If (Pie.Pre_Render) Then
     Begin
-      // Convertino du pourcentage en angle, Angle en degrés.
+      // Conversion du pourcentage en angle, Angle en degrés.
       Angle := round(360 * (Pie.Percentage / 100) - 90);
 
       // On efface la surface.
@@ -334,7 +336,7 @@ Begin
   SDL_BlitSurface(Pie.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
 
-// Fonction qui rend le panneau de droite dans la fenêtre principale.
+// Procédure qui rend le panneau de droite dans la fenêtre principale.
 Procedure Panel_Right_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 Var i, j, k : Byte;
@@ -493,13 +495,13 @@ Begin
       // Vérifie qu'il y a bien des lignes dans la partie.
       If (length(Game.Lines) > 0) Then
         Begin
-          // Itère parmis les lignes.
+          // Itère parmi les lignes.
           For i := low(Game.Lines) To high(Game.Lines) Do
             Begin
               // Si la ligne contient des trains.
               If (length(Game.Lines[i].Trains) > 0) Then
                 Begin
-                  // Itère parmis les trains d'une ligne.
+                  // Itère parmi les trains d'une ligne.
                   For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
                     Begin
                       // Affichage des trains sur la ligne.
@@ -527,7 +529,7 @@ Begin
       // Vérifie qu'il y a bien des stations dans la partie.
       If (length(Game.Stations) > 0) Then
         Begin
-          // - Affichage les stations.
+          // - Affichage des stations.
           For i := low(Game.Stations) To high(Game.Stations) Do
             Begin
               Station_Render(Game.Stations[i]^, Game.Panel_Right);
@@ -539,6 +541,7 @@ Begin
 
 End;
 
+// Fonction qui charge une image à partir d'un fichier de manière optimisée.
 Function Image_Load(Path : String) : PSDL_Surface;
 
 Var Image : PSDL_Surface;
@@ -557,10 +560,12 @@ Begin
   Image_Load := Optimized_Image;
 End;
 
+// Procédure qui rend le panneau de gauche dans la fenêtre principale.
 Procedure Left_Panel_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 
 Var i : Byte;
 Begin
+  // Nettoyage du panneau de gauche.
   SDL_FillRect(Game.Panel_Left.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
   For i := 2 Downto 0 Do
@@ -588,8 +593,8 @@ End;
 Procedure Ressources_Load(Var Ressources : Type_Ressources);
 
 Var Position : Type_Coordinates;
-  i : Byte;
-  Color : Type_Color_Name;
+    i : Byte;
+    Color : Type_Color_Name;
 Begin
 
   // - - Station
@@ -599,7 +604,7 @@ Begin
   Ressources.Stations[3] := Image_Load(Path_Image_Station_Square);
   Ressources.Stations[4] := Image_Load(Path_Image_Station_Triangle);
 
-  // - - Passenger
+  // - - Passager
   Ressources.Passengers[0] := Image_Load(Path_Image_Passenger_Circle);
   Ressources.Passengers[1] := Image_Load(Path_Image_Passenger_Lozenge);
   Ressources.Passengers[2] := Image_Load(Path_Image_Passenger_Pentagon);
@@ -612,7 +617,7 @@ Begin
   Position.X := 0;
   Position.Y := 0;
 
-  // Itère parmis les couleurs de véhicule.
+  // Itère parmi les couleurs de véhicule.
   For i := 0 To 8 Do
     Begin
 
@@ -628,7 +633,7 @@ Begin
         8 : Color := Color_Black;
       End;
 
-      // Crée la surface de base (orientation 0 degrée).
+      // Crée la surface de base (orientation 0 degré).
       Ressources.Vehicles[i][0] := Graphics_Surface_Create(Vehicle_Size.X, Vehicle_Size.Y);
       // Dessine un rectangle plein de la couleur du véhicule.
       Graphics_Draw_Filled_Rectangle(Ressources.Vehicles[i][0], Position, Vehicle_Size, Color_Get(Color));
@@ -648,7 +653,7 @@ Begin
   Ressources.Fonts[Font_Medium][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 24);
   Ressources.Fonts[Font_Big][Font_Bold] := TTF_OpenFont(Path_Font_Bold, 32);
 
-  // - Chargement des images des bouttons de l'interface.
+  // - Chargement des images des boutons de l'interface.
 
   Ressources.Train_Add := Image_Load(Path_Image_Button_Locomotive);
   Ressources.Wagon_Add := Image_Load(Path_Image_Button_Wagon);
@@ -664,32 +669,23 @@ Begin
 
 End;
 
+// Procédure qui rend le curseur dans le fenêtre principale.
 Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
-
 Var Destination_Rectangle : TSDL_Rect;
   Intermediate_Position : Type_Coordinates;
   Mouse_Position : Type_Coordinates;
 Begin
-  // Si le curseur est en mode ajout de locomotive.
-  If (Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Then
+  // Si le curseur est en mode ajout de locomotives ou de wagons.
+  If (Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Or (Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
     Begin
       Destination_Rectangle.x := Mouse_Get_Position().X - Vehicle_Size.X Div 2;
       Destination_Rectangle.y := Mouse_Get_Position().Y - Vehicle_Size.Y Div 2;
 
       SDL_BlitSurface(Game.Ressources.Vehicles[8][0], Nil, Game.Window.Surface, @Destination_Rectangle);
     End
-    // Si le curseur est en mode ajout de wagon.
-  Else If (Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
-         Begin
-           Destination_Rectangle.x := Mouse_Get_Position().X - Vehicle_Size.X Div 2;
-           Destination_Rectangle.y := Mouse_Get_Position().Y - Vehicle_Size.Y Div 2;
-           SDL_BlitSurface(Game.Ressources.Vehicles[8][0], Nil, Game.Window.Surface, @Destination_Rectangle);
-         End;
-
-
 End;
 
-// Fonction qui rend un button à double état.
+// Procédure qui rend un bouton à double état.
 Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
@@ -712,9 +708,7 @@ Begin
 End;
 
 
-
-
-
+// Procédure qui définit tout les attributs d'un bouton.
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
 Begin
   Button.Surface_Pressed := Surface_Pressed;
@@ -723,6 +717,7 @@ Begin
   Button.Size.Y := Surface_Released^.h;
 End;
 
+// Procédure qui qui définit tout les attributs d'une image.
 Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
 Begin
   Image.Size.X := Surface^.w;
@@ -730,18 +725,19 @@ Begin
   Image.Surface := Surface;
 End;
 
+// Procédure qui supprime un panneau.
 Procedure Panel_Delete(Var Panel : Type_Panel);
 Begin
   SDL_FreeSurface(Panel.Surface);
 End;
 
+// Fonction qui convertit une structure couleur en un nombre.
 Function Color_To_Longword(Color : Type_Color) : Longword;
 Begin
-
   Color_To_Longword := (Color.Red << 16) Or (Color.Green << 8) Or (Color.Blue) Or (Color.Alpha << 24);
 End;
 
-
+// Procédure qui rend un bouton dans un panneau donné.
 Procedure Button_Render(Var Button : Type_Button; Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
@@ -760,6 +756,7 @@ Begin
     End;
 End;
 
+// Procédure qui rend un image dans un panneau donnée.
 Procedure Image_Render(Var Image : Type_Image; Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
@@ -772,6 +769,7 @@ Begin
   SDL_BlitSurface(Image.Surface, Nil, Destination_Panel.Surface, @Destination_Rectangle);
 End;
 
+// Procédure qui crée (alloue la mémoire) et définit les attributs d'un panneau donné.
 Procedure Panel_Create(Var Panel : Type_Panel; X,Y, Width, Height : Integer);
 
 Var Surface : PSDL_Surface;
@@ -793,6 +791,7 @@ Begin
   Panel_Set_Hidden(false, Panel);
 End;
 
+// Procédure qui rend un panneau dans un autre panneau donné.
 Procedure Panel_Render(Var Panel, Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
@@ -808,6 +807,7 @@ Begin
     End;
 End;
 
+// Procédure qui effectue un rendu anticipé d'une étiquette (pré-rendu).
 Procedure Label_Pre_Render(Var Laabel : Type_Label);
 
 Var   Characters : pChar;
@@ -835,7 +835,6 @@ Begin
 
 End;
 
-
 // Procédure qui pré-rend le texte dans une surface lorsqu'un attribut de l'étiquette est modifié (moins lourd pour l'affichage) puis rend dans le panneau de destination.
 Procedure Label_Render(Var Laabel : Type_Label; Var Panel : Type_Panel);
 
@@ -856,6 +855,7 @@ End;
 
 // - - Graphics
 
+// Procédure qui charge les graphismes.
 Procedure Graphics_Load(Var Game : Type_Game);
 
 Var Video_Informations :   PSDL_VideoInfo;
@@ -965,14 +965,12 @@ Begin
   Game.Panel_Reward.Position.X := Get_Centered_Position(Game.Window.Size.X, Game.Panel_Reward.Size.X);
   Game.Panel_Reward.Position.Y := Get_Centered_Position(Game.Window.Size.Y, Game.Panel_Reward.Size.Y);
 
-  // - - Définition des polices et couleur des titres.
+  // - - Définition des polices et couleurs des titres.
 
   Label_Set(Game.Title_Label, '', Game.Ressources.Fonts[Font_Big][Font_Bold], Color_Get(Color_Black));
   Label_Set(Game.Message_Label, '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
   Label_Set(Game.Reward_Labels[0], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
   Label_Set(Game.Reward_Labels[1], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
-
-
 
 
   Panel_Set_Hidden(True, Game.Panel_Reward);
@@ -981,12 +979,12 @@ Begin
 
 End;
 
+// Procédure qui décharge les graphismes de l'écran.
 Procedure Graphics_Unload(Var Game : Type_Game);
 
 Var i, j : Byte;
 Begin
   // Libération de la mémoire des sprites.
-
   For i := 0 To 8 Do
     For j := 0 To 3 Do
       SDL_FreeSurface(Game.Ressources.Vehicles[i][j]);
@@ -1007,10 +1005,10 @@ Begin
   TTF_CloseFont(Game.Ressources.Fonts[Font_Big][Font_Bold]);
 End;
 
-// Procédure rafraissant tout les éléments graphiques de l'écrans.
+// Procédure rafraîchissant tout les éléments graphiques de l'écran.
 Procedure Graphics_Refresh(Var Game : Type_Game);
 
-Var i, j : Byte;
+Var i : Byte;
 Begin
 
   // - Nettoyage des panneaux
@@ -1116,17 +1114,17 @@ End;
 
 
 
-// - Procédure génère le rendu dans la fenêtre des traits entre les stations en utilisant que des angles de 0, 45 et 90 degrés.
+// - Procédure qui génère le rendu dans la fenêtre des traits entre les stations en utilisant que des angles de 0, 45 et 90 degrés.
 Procedure Line_Render(Var Line : Type_Line; Var Panel : Type_Panel; Mouse : Type_Mouse);
 
 Var Intermediate_Position, Mouse_Position :   Type_Coordinates;
-  i, j : Byte;
+  i : Byte;
   Indexes : Array[0 .. 1] Of Byte;
 Begin
   // Si la ligne contient au moins une station.
   If (length(Line.Stations) > 0) Then
     Begin
-      // Itère parmis les stations d'une ligne.
+      // Itère parmi les stations d'une ligne.
       For i := low(Line.Stations) + 1 To high(Line.Stations) Do
         Begin
           If (Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) And (@Line = Mouse.Selected_Line) And (Line.Stations[i] = Mouse.Selected_Next_Station) Then
@@ -1157,13 +1155,14 @@ Begin
     End;
 End;
 
+// Procédure qui rend un train dans un panneau donné.
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
-  Direction, Norme : Integer;
-  i, j, k : Byte;
+    Direction, Norme : Integer;
+  
 Begin
-  // Si le train est en mouvement (évite de refaire les calculs inutillement).
+  // Si le train est en mouvement (évite de refaire les calculs inutilement).
   If (Train.Driving) Then
     Begin
       // Si le train se trouve avant le point intermédiaire.
@@ -1244,7 +1243,7 @@ Begin
              End;
       End;
 
-      // Transformation des coordonnées centrés en coordonnées en haut à gauche.
+      // Transformation des coordonnées centrées en coordonnées en haut à gauche.
       Train.Position.X := round(Train.Position.X - (Train.Size.X*0.5));
       Train.Position.Y := round(Train.Position.Y - (Train.Size.Y*0.5));
 
@@ -1269,6 +1268,7 @@ Begin
   Label_Render(Train.Passengers_Label, Panel);
 End;
 
+// Procédure qui rend une station dans un panneau donné.
 Procedure Station_Render(Var Station : Type_Station; Var Panel : Type_Panel);
 
 Var Destination_Rectangle :   TSDL_Rect;

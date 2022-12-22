@@ -20,12 +20,13 @@ Begin
 
 End;
 
+// Procédure qui initialise l'animation.
 Procedure Animation_Load(Var Animation : Type_Animation);
 Begin
   Animation.Acceleration_Distance := round(0.5 * Train_Speed_Constant * Train_Acceleration_Time * Train_Acceleration_Time);
 End;
 
-// Fonction appelée tout les 1/60 ème de seoncde pour annimer
+// Procédure appelée tout les 1/60 ème de seconde pour animer les entités.
 Procedure Animation_Refresh(Var Game : Type_Game);
 
 Var i, j : Byte;
@@ -51,7 +52,7 @@ Begin
                       If (Game.Lines[i].Trains[j].Driving = True) Then
                         Begin
                           // Fait progresser le train sur la ligne.
-                          // Calcul du temps écouté depuis le départ du train en secondes.
+                          // Calcul du temps écoulé depuis le départ du train en secondes.
 
                           t := Time_Get_Elapsed(Game.Lines[i].Trains[j].Start_Time) / 1000;
                           
@@ -65,8 +66,6 @@ Begin
 
                   
                               Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Distance + round(Test(t - Game.Lines[i].Trains[j].Deceleration_Time));
-
-      
                           End
 
                           Else If (t > Train_Acceleration_Time) Then
