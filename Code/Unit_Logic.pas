@@ -519,7 +519,7 @@ Begin
                   Else If (Itinerary_Get_Weight(Game, Itinerary_Indexes) < Lowest_Weight) Then
 
 
-// Compare le poids du trajet menant à la destination contenue dans la case où on se trouve au plus petit poids trouvé jusqu'à présent. Si ce poids est plus petit, on le considère comme le plus petit poids.
+                        // Compare le poids du trajet menant à la destination contenue dans la case où on se trouve au plus petit poids trouvé jusqu'à présent. Si ce poids est plus petit, on le considère comme le plus petit poids.
                          Begin
                            Lowest_Weight := Itinerary_Get_Weight(Game, Itinerary_Indexes);
                            // Copie l'itinéraire au plus petit poids dans l'itinéraire le plus court.
@@ -557,7 +557,7 @@ Var i : Byte;
 
 Begin
   Passenger_Get_Off := True;
-
+writeln('!!!! Entrée dans Get_Off !!!!');
 writeln('Ma CurrentStation = ', Current_Station.Shape);
 writeln('Ma NextStation = ', Next_Station.Shape);
 // Parcourt le tableau contenant l'itinéraire du passager.
@@ -566,14 +566,19 @@ for i := low(Passenger^.Itinerary) to high(Passenger^.Itinerary) do
     // Se localise dans son propre itinéraire et vérfie si il correspond à la station actuelle ou à la prochaine station (le second cas étant dans le scénario où l'itinéraire ne fait qu'une étape (la prochaine station)).
     if (Passenger^.Itinerary[i] = @Current_Station) or (Passenger^.Itinerary[i] = @Next_Station) then
       begin
-        // Si la prochaine station du train correspond à 
+        // Si la prochaine station du train correspond à la prochaine étape de l'itinéraire du passager.
         if @Next_Station = Passenger^.Itinerary[i+1] then
           begin
+            // Le passager ne descend pas.
             Passenger_Get_Off := False;
+            writeln(' Je ne vais pas descendre car Passenger^.Itinerary[i+1] = ', Passenger^.Itinerary[i+1]^.Shape, ' et Next_Station = ',Next_Station.Shape);
           end
-        else if @Next_Station = Passenger^.Itinerary[i] then
+        //Cas de l'itinéraire à une seule étape. Vérifie si l'unique étape de l'itinéraire correspond à la prochaine station du train,
+        else if (@Next_Station = Passenger^.Itinerary[i]) and (length(Passenger^.Itinerary)< 2) then // le < 2 est pour s'assurer qu'on utilise cette condition uniquement dans le cas d'un itinéraire d'une seule étape.
           begin
+            //Le passager ne descend pas.
             Passenger_Get_Off := False;
+            writeln(' Je ne vais pas descendre car Passenger^.Itinerary[i] = ', Passenger^.Itinerary[i]^.Shape, ' et Next_Station = ', Next_Station.Shape);
           end;
       end;
   end;
@@ -612,12 +617,14 @@ Begin
                 begin
                   // Le passager monte dans le train.
                   Passenger_Get_On := True;
+                  writeln(' Je monte car Passenger^.Itinerary[i+1] = ', Passenger^.Itinerary[i+1]^.Shape, ' et Next_Station = ',Next_Station.Shape);
                 end
               // Cas de l'itinéraire à une seule étape. Vérifie que l'unique étape de l'itinéraire correspond à la prochaine station du train,
-              else if @Next_Station = Passenger^.Itinerary[i] then
+              else if (@Next_Station = Passenger^.Itinerary[i]) and (length(Passenger^.Itinerary)< 2) then
                 begin
                   // Le passager monte dans le train.
                   Passenger_Get_On := True;
+                  writeln(' Je monte car Passenger^.Itinerary[i] = ', Passenger^.Itinerary[i]^.Shape, ' et Next_Station = ',Next_Station.Shape);
                 end;
             end;
         end;
@@ -894,10 +901,7 @@ Begin
             Begin
 
               // Création d'un passager sur une station choisie aléatoirement.
-              // Passenger_Create(Game.Stations[Random(high(Game.Stations) + 1)], Game);
-
-              // Calcul des itinéaires des passagers créés.
-              //Passengers_Compute_Itinerary(Game);
+              Passenger_Create(Game.Stations[Random(high(Game.Stations)) + 1]^, Game);
 
               // Détermination du prochain intervalle de temps avant la génération d'un nouveau passager.
               Game.Passengers_Timer := Time_Get_Current() + round((exp(-2 * (Time_Get_Elapsed(Game.Start_Time) / (1000 * 60 * 60)) + 1) * 1000));
@@ -921,7 +925,6 @@ Begin
 
       If Game.Refresh_Graph_Table Then
         Begin
-          writeln('Refresh graph table');
           Game_Refresh_Graph_Table(Game);
           Game.Refresh_Graph_Table := false;
         End;
@@ -930,7 +933,6 @@ Begin
 
       If Game.Itinerary_Refresh Then
         Begin
-          writeln('Refresh itinerary');
           // Calcul des itinéraires des passagers.
           Passengers_Compute_Itinerary(Game);
           Game.Itinerary_Refresh := False;
