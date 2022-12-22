@@ -92,17 +92,17 @@ Const Path_Ressources =  'Resources/';
       Path_Image_Passenger_Triangle =   Path_Images + 'Passenger_Triangle.png';
       Path_Image_Passenger_Pentagon =   Path_Images + 'Passenger_Pentagon.png';
       Path_Image_Passenger_Lozenge =   Path_Images + 'Passenger_Lozenge.png';
-      Path_Image_Vehicle =   Path_Images + 'Vehicle.png';
       Path_Image_People = Path_Images + 'People.png';
       Path_Image_Clock = Path_Images + 'Clock.png';
-      Path_Image_Play = Path_Images + 'Play.png';
-      Path_Image_Pause = Path_Images + 'Pause.png';
+      Path_Image_Button_Play = Path_Images + 'Play.png';
+      Path_Image_Button_Pause = Path_Images + 'Pause.png';
       Path_Image_Button_Locomotive = Path_Images + 'Locomotive.png';
       Path_Image_Button_Wagon = Path_Images + 'Wagon.png';
       Path_Image_Button_Tunnel = Path_Images + 'Tunnel.png';
       Path_Image_Button_Restart = Path_Images + 'Restart.png';
       Path_Image_Button_Sound_Off = Path_Images + 'Sound_Off.png';
       Path_Image_Button_Sound_On = Path_Images + 'Sound_On.png';
+      Path_Image_Button_Quit = Path_Images + 'Quit.png';
 
   // - - - Polices
 

@@ -27,6 +27,7 @@ Implementation
 
 // Procédure qui rend le curseur dans le fenêtre principale.
 Procedure Cursor_Render(Mouse : Type_Mouse; Var Destination_Panel : Type_Panel; Var Game : Type_Game);
+
 Var Destination_Rectangle : TSDL_Rect;
 Begin
   // Si le curseur est en mode ajout de locomotives ou de wagons.
@@ -41,6 +42,7 @@ End;
 
 // Procédure qui rend un bouton à double état.
 Procedure Dual_State_Button_Render(Var Button : Type_Dual_State_Button; Destination_Panel : Type_Panel);
+
 Var Destination_Rectangle : TSDL_Rect;
 Begin
   Destination_Rectangle.x := Button.Position.X;
@@ -173,7 +175,7 @@ Procedure Graphics_Draw_Line(Position_1, Position_2 :
                              Type_Color; Var Panel : Type_Panel);
 
 Var Direction : Integer;
-    i : ShortInt;
+  i : ShortInt;
 Begin
 
   Direction := Graphics_Get_Direction(Get_Angle(Position_1, Position_2));
@@ -343,7 +345,7 @@ Begin
       SDL_FillRect(Game.Panel_Reward.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
       // - Rendu des bordures.
-      For i := 0 To 5 Do
+      For i := 0 To 4 Do
         Begin
 
           hlineRGBA(Game.Panel_Reward.Surface, 0, Game.Panel_Reward.Size.X, i, 0, 0, 0, 255);
@@ -429,7 +431,7 @@ End;
 Procedure Pie_Render(Pie : Type_Pie; Var Destination_Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
-    Angle : Integer;
+  Angle : Integer;
 Begin
 
   If (Pie.Pre_Render) Then
@@ -457,8 +459,8 @@ End;
 Procedure Train_Render(Var Train : Type_Train; Var Line : Type_Line; Ressources : Type_Ressources; Var Panel : Type_Panel);
 
 Var Destination_Rectangle : TSDL_Rect;
-    Direction, Norme : Integer;
-  
+  Direction, Norme : Integer;
+
 Begin
   // Si le train est en mouvement (évite de refaire les calculs inutilement).
   If (Train.Driving) Then
@@ -896,6 +898,7 @@ Begin
 End;
 
 Procedure Ressources_Unload(Var Ressources : Type_Ressources);
+
 Var i, j : Byte;
 Begin
 
@@ -918,6 +921,7 @@ Begin
   SDL_FreeSurface(Ressources.Clock);
   SDL_FreeSurface(Ressources.Play);
   SDL_FreeSurface(Ressources.Pause);
+  SDL_FreeSurface(Ressources.Quit);
 
   // Libération des polices de caractères.
   TTF_CloseFont(Ressources.Fonts[Font_Small][Font_Normal]);
@@ -933,8 +937,8 @@ End;
 Procedure Ressources_Load(Var Ressources : Type_Ressources);
 
 Var Position : Type_Coordinates;
-    i : Byte;
-    Color : Type_Color_Name;
+  i : Byte;
+  Color : Type_Color_Name;
 Begin
 
   // - - Station
@@ -993,9 +997,10 @@ Begin
   Ressources.Train_Add := Image_Load(Path_Image_Button_Locomotive);
   Ressources.Wagon_Add := Image_Load(Path_Image_Button_Wagon);
   Ressources.Tunnel_Add := Image_Load(Path_Image_Button_Tunnel);
-  Ressources.Play := Image_Load (Path_Image_Play);
-  Ressources.Pause := Image_Load(Path_Image_Pause);
+  Ressources.Play := Image_Load (Path_Image_Button_Play);
+  Ressources.Pause := Image_Load(Path_Image_Button_Pause);
   Ressources.Clock := Image_Load(Path_Image_Clock);
+  Ressources.Quit := Image_Load(Path_Image_Button_Quit);
 
   Position.X := 16;
   Position.Y := 16;
@@ -1015,6 +1020,7 @@ Begin
 
 End;
 
+
 // - - Graphics
 
 // Procédure qui charge les graphismes.
@@ -1027,6 +1033,7 @@ Begin
   SDL_Init(SDL_INIT_EVERYTHING);
   TTF_INIT();
 
+
   // - Création du panneau fenêtre.
   Game.Window.Surface := SDL_SetVideoMode(Screen_Width, Screen_Height, Color_Depth, SDL_HWSURFACE);
 
@@ -1037,14 +1044,16 @@ Begin
   Game.Window.Position.X := 0;
   Game.Window.Position.Y := 0;
 
+  // - Chargement des ressources.
+  Ressources_Load(Game.Ressources);
+
   // - Création des sous-panneaux.
   Panel_Create(Game.Panel_Top, 0, 0, Game.Window.Size.X, 64);
   Panel_Create(Game.Panel_Bottom, 0, Game.Window.Size.Y - 64, Game.Window.Size.X, 64);
   Panel_Create(Game.Panel_Left, 0, Game.Panel_Top.Size.Y, 64, Game.Window.Size.Y - Game.Panel_Top.Size.Y - Game.Panel_Bottom.Size.Y);
   Panel_Create(Game.Panel_Right, Game.Panel_Left.Size.X, Game.Panel_Top.Size.Y, Game.Window.Size.X - Game.Panel_Left.Size.X, Game.Window.Size.Y - Game.Panel_Top.Size.Y - Game.Panel_Bottom.Size.Y);
 
-  // - Chargement des ressources.
-  Ressources_Load(Game.Ressources);
+
 
   // - Panneau de droite.
 
@@ -1086,11 +1095,17 @@ Begin
   Game.Restart_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Restart_Button.Size.Y);
   Game.Restart_Button.Position.X := Game.Play_Pause_Button.Position.X - 16 - Game.Restart_Button.Size.X;
 
+  // - - Bouton pour quitter.
+
+  Button_Set(Game.Quit_Button, Game.Ressources.Quit, Game.Ressources.Quit);
+   Game.Quit_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Quit_Button.Size.Y);
+  Game.Quit_Button.Position.X := 16;
+
   // - - Boutton de son.
 
   Dual_State_Button_Set(Game.Sound_Button, Game.Ressources.Sound[0], Game.Ressources.Sound[1], Game.Ressources.Sound[0], Game.Ressources.Sound[1]);
   Game.Sound_Button.Position.Y := Get_Centered_Position(Game.Panel_Top.Size.Y, Game.Sound_Button.Size.Y);
-  Game.Sound_Button.Position.X := 16;
+  Game.Sound_Button.Position.X := Game.Quit_Button.Position.X + Game.Quit_Button.Size.X + 16;
 
   // Panneau de gauche
 
@@ -1139,8 +1154,23 @@ Begin
   Label_Set(Game.Reward_Labels[0], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
   Label_Set(Game.Reward_Labels[1], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
 
+  // - Panneau de fin de partie.
+  Panel_Create(Game.Panel_Game_Over, 0, 0, 400, 240);
 
+  Game.Panel_Game_Over.Position.X := Get_Centered_Position(Game.Window.Size.X, Game.Panel_Game_Over.Size.X);
+  Game.Panel_Game_Over.Position.Y := Get_Centered_Position(Game.Window.Size.Y, Game.Panel_Game_Over.Size.Y);
 
+  Label_Set(Game.Game_Over_Title_Label, '', Game.Ressources.Fonts[Font_Big][Font_Bold], Color_Get(Color_Black));
+  Label_Set(Game.Game_Over_Message_Label, '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+  Label_Set(Game.Game_Over_Score_Label, '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
+
+  Button_Set(Game.Game_Over_Quit_Button, Game.Ressources.Quit, Game.Ressources.Quit);
+  Game.Game_Over_Quit_Button.Position.X := Get_Centered_Position(Game.Panel_Game_Over.Size.X Div 2, Game.Game_Over_Quit_Button.Size.X);
+  Game.Game_Over_Quit_Button.Position.Y := Game.Panel_Game_Over.Size.Y - 16 - Game.Game_Over_Quit_Button.Size.Y;
+
+  Button_Set(Game.Game_Over_Restart_Button, Game.Ressources.Restart, Game.Ressources.Restart);
+  Game.Game_Over_Restart_Button.Position.X := Get_Centered_Position(Game.Panel_Game_Over.Size.X Div 2, Game.Game_Over_Restart_Button.Size.X) + Game.Panel_Reward.Size.X Div 2;
+  Game.Game_Over_Restart_Button.Position.Y := Game.Game_Over_Quit_Button.Position.Y;
 
   Animation_Load(Game.Animation);
 
@@ -1149,36 +1179,74 @@ End;
 // Procédure qui rend le panneau du haut.
 Procedure Panel_Top_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
 Begin
-  // Nettoyage du panneau.
-  SDL_FillRect(Game.Panel_Top.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+  If Not(Game.Panel_Top.Hidden) Then
+    Begin
+      // Nettoyage du panneau.
+      SDL_FillRect(Game.Panel_Top.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
-  Label_Render(Game.Score_Label, Game.Panel_Top);
-  Image_Render(Game.Score_Image, Game.Panel_Top);
-  Label_Render(Game.Clock_Label, Game.Panel_Top);
-  Image_Render(Game.Clock_Image, Game.Panel_Top);
-  Dual_State_Button_Render(Game.Play_Pause_Button, Game.Panel_Top);
-  Button_Render(Game.Restart_Button, Game.Panel_Top);
-  Dual_State_Button_Render(Game.Sound_Button, Game.Panel_Top);
+      Label_Render(Game.Score_Label, Game.Panel_Top);
+      Image_Render(Game.Score_Image, Game.Panel_Top);
+      Label_Render(Game.Clock_Label, Game.Panel_Top);
+      Image_Render(Game.Clock_Image, Game.Panel_Top);
+      Dual_State_Button_Render(Game.Play_Pause_Button, Game.Panel_Top);
+      Button_Render(Game.Restart_Button, Game.Panel_Top);
+      Button_Render(Game.Quit_Button, Game.Panel_Top);
+      Dual_State_Button_Render(Game.Sound_Button, Game.Panel_Top);
 
-  Panel_Render(Game.Panel_Top, Destination_Panel);
+      Panel_Render(Game.Panel_Top, Destination_Panel);
+    End;
 End;
 
 // Procédure qui rend le panneau du bas.
 Procedure Panel_Bottom_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+
 Var i : Byte;
 Begin
+  If Not(Game.Panel_Bottom.Hidden) Then
+    Begin
+      // Nettoyage du panneau.
+      SDL_FillRect(Game.Panel_Bottom.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
 
-  SDL_FillRect(Game.Panel_Bottom.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+      // Rendu des boutons.
+      For i := low(Game.Lines) To high(Game.Lines) Do
+        Dual_State_Button_Render(Game.Lines[i].Button, Game.Panel_Bottom);
 
-  For i := low(Game.Lines) To high(Game.Lines) Do
-    Dual_State_Button_Render(Game.Lines[i].Button, Game.Panel_Bottom);
-
-  Panel_Render(Game.Panel_Bottom, Destination_Panel);
+      Panel_Render(Game.Panel_Bottom, Destination_Panel);
+    End;
 End;
 
 Procedure Panel_Game_Over_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+Var i : Byte;
 Begin
 
+  If Not(Game.Panel_Game_Over.Hidden) Then
+    Begin
+
+      // Nettoyage du panneau.
+      SDL_FillRect(Game.Panel_Game_Over.Surface, Nil, Color_To_Longword(Color_Get(255, 255, 255, 255)));
+
+      // - Rendu des bordures.
+      For i := 0 To 4 Do
+        Begin
+
+          hlineRGBA(Game.Panel_Game_Over.Surface, 0, Game.Panel_Game_Over.Size.X, i, 0, 0, 0, 255);
+          hlineRGBA(Game.Panel_Game_Over.Surface, 0, Game.Panel_Game_Over.Size.X, Game.Panel_Game_Over.Size.Y - i, 0, 0, 0, 255);
+          vlineRGBA(Game.Panel_Game_Over.Surface, i, 0, Game.Panel_Game_Over.Size.Y, 0, 0, 0, 255);
+          vlineRGBA(Game.Panel_Game_Over.Surface, Game.Panel_Game_Over.Size.X - i, 0, Game.Panel_Game_Over.Size.Y, 0, 0, 0, 255);
+
+        End;
+
+
+      Label_Render(Game.Game_Over_Title_Label, Game.Panel_Game_Over);
+      Label_Render(Game.Game_Over_Message_Label, Game.Panel_Game_Over);
+      Label_Render(Game.Game_Over_Score_Label, Game.Panel_Game_Over);
+
+      Button_Render(Game.Game_Over_Quit_Button, Game.Panel_Game_Over);
+      Button_Render(Game.Game_Over_Restart_Button, Game.Panel_Game_Over);
+
+
+      Panel_Render(Game.Panel_Game_Over, Destination_Panel);
+    End
 End;
 
 // Procédure rafraîchissant tout les éléments graphiques de l'écran.
@@ -1262,7 +1330,7 @@ Begin
 
   Label_Delete(Game.Reward_Labels[0]);
   Label_Delete(Game.Reward_Labels[1]);
-  
+
 
   Label_Delete(Game.Score_Label);
   Label_Delete(Game.Clock_Label);

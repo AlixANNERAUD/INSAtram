@@ -11,15 +11,6 @@ Procedure Animation_Load(Var Animation : Type_Animation);
 
 Implementation
 
-Function Test(t : Real) : Real;
-Begin
-  
-  //Test := ((sqr(a) * Train_Maximum_Speed) - (2 * a * Train_Acceleration_Time * Train_Maximum_Speed)) / (2 * Train_Acceleration_Time);
-
-  Test := t * Train_Maximum_Speed - (((Train_Maximum_Speed * t * t)) / (2 * Train_Acceleration_Time));
-
-End;
-
 // Procédure qui initialise l'animation.
 Procedure Animation_Load(Var Animation : Type_Animation);
 Begin
@@ -64,8 +55,9 @@ Begin
                           Begin
                               Game.Lines[i].Trains[j].Distance := round(Game.Animation.Acceleration_Distance + ((Game.Lines[i].Trains[j].Deceleration_Time - Train_Acceleration_Time) * Train_Maximum_Speed));
 
-                  
-                              Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Distance + round(Test(t - Game.Lines[i].Trains[j].Deceleration_Time));
+                              t := t - Game.Lines[i].Trains[j].Deceleration_Time;
+
+                              Game.Lines[i].Trains[j].Distance := Game.Lines[i].Trains[j].Distance + round(t * Train_Maximum_Speed - (((Train_Maximum_Speed * t * t)) / (2 * Train_Acceleration_Time)));
                           End
 
                           Else If (t > Train_Acceleration_Time) Then

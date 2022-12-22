@@ -265,7 +265,7 @@ Type Type_Ressources = Record
   // Vehicules (locomotives et wagons), la première dimension est pour les couleurs et la deuxième pour l'orientation (0, 45, 90 et 135 degrés).
   Vehicles : Array [0 .. 8, 0 .. 3] Of PSDL_Surface;
   // Boutons
-  Train_Add, Wagon_Add, Tunnel_Add, Line_Add, Restart, Clock, Play, Pause : PSDL_Surface;
+  Train_Add, Wagon_Add, Tunnel_Add, Line_Add, Restart, Clock, Play, Pause, Quit : PSDL_Surface;
   Sound : Array [0 .. 1] of PSDL_Surface; 
   
   // Sons
@@ -278,15 +278,18 @@ End;
 // Structure de type jeu
 Type Type_Game = Record
 
+  // - Panneau de fin de jeu.
   Panel_Game_Over : Type_Panel;
   Game_Over_Title_Label : Type_Label;
   Game_Over_Message_Label : Type_Label;
-  Game_Over_Retry_Label : Type_Label;
-  Game_Over_Quit_Label : Type_Label;
+  Game_Over_Score_Label : Type_Label;
+  Game_Over_Restart_Button : Type_Button;
+  Game_Over_Quit_Button : Type_Button;
   
   Panel_Start : Type_Panel;
   Start_Play_Label : Type_Label;
 
+  Quit_Button : Type_Button;
 
   Itinerary_Refresh : Boolean;
 

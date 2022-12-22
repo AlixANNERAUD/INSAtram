@@ -542,23 +542,7 @@ Langage : l'écriture du code en anglais nous semblais assez naturel, car
  Cependant, afin de faciliter le compréhension du code pour les correcteurs,
  nous avons utilisé du français pour les commentaires.
  Ces dernier par ailleurs suivent une certaines structure.
- Pour un commentaire faisant office de titre, 
-\begin_inset Quotes fld
-\end_inset
-
-//
-\begin_inset Quotes frd
-\end_inset
-
- de 
-\begin_inset Quotes fld
-\end_inset
-
--
-\begin_inset Quotes frd
-\end_inset
-
-.
+ Pour un commentaire faisant office de titre.
 \end_layout
 
 \begin_layout Standard
@@ -765,7 +749,7 @@ Structure générale
 \end_layout
 
 \begin_layout Standard
-Le projet était structuré en plusieurs fichiers de la manière suivante :
+Le projet est structuré en plusieurs fichiers de la manière suivante :
 \end_layout
 
 \begin_layout Standard
@@ -773,10 +757,6 @@ Le projet était structuré en plusieurs fichiers de la manière suivante :
 wide false
 sideways false
 status open
-
-\begin_layout Plain Layout
-
-\end_layout
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -806,15 +786,27 @@ Arbre des dépendances
 \end_layout
 
 \begin_layout Itemize
-Unit_Types : Unité contenant tout les types
+
+\series bold
+Unit_Types :
+\series default
+ Unité contenant tout les types
 \end_layout
 
 \begin_layout Itemize
-Unit_Constants : Unité contenant toutes les constantes du jeu.
+
+\series bold
+Unit_Constants :
+\series default
+ Unité contenant toutes les constantes du jeu.
 \end_layout
 
 \begin_layout Itemize
-Unit_Common : Unité contenant toutes les fonctions 
+
+\series bold
+Unit_Common :
+\series default
+ Unité contenant toutes les fonctions 
 \begin_inset Quotes fld
 \end_inset
 
@@ -826,21 +818,37 @@ Unit_Common : Unité contenant toutes les fonctions
 \end_layout
 
 \begin_layout Itemize
-Unit_Mouse : Unité regroupant toutes les fonctions responsable de la prise
- en charge de la souris.
+
+\series bold
+Unit_Mouse :
+\series default
+ Unité regroupant toutes les fonctions responsable de la prise en charge
+ de la souris.
 \end_layout
 
 \begin_layout Itemize
-Unit_Animation : Unité regroupant toutes les fonctions responsable des animation
-s (déplacement des trains, ).
+
+\series bold
+Unit_Animation :
+\series default
+ Unité regroupant toutes les fonctions responsable des animations (déplacement
+ des trains, ).
 \end_layout
 
 \begin_layout Itemize
-Unit_Graphics : Unité regroupant toutes les fonctions relatives aux graphismes.
+
+\series bold
+Unit_Graphics :
+\series default
+ Unité regroupant toutes les fonctions relatives aux graphismes.
 \end_layout
 
 \begin_layout Itemize
-Unit_Logic : Unité regroupant toute la logique du jeu.
+
+\series bold
+Unit_Logic :
+\series default
+ Unité regroupant toute la logique du jeu.
  C'est l'unité 
 \begin_inset Quotes fld
 \end_inset
@@ -1478,18 +1486,28 @@ Animation réaliste des trains
 Afin que le mouvement des trains soit réaliste, au lieu d'une vitesse constante,
  nous avons opté pour une vitesse variable dépendant du temps.
  Le but étant de mimer le déplacement d'un véhicule réel.
-\end_layout
-
-\begin_layout Standard
-Ainsi, pour le déplacement du véhicule, on peu définir trois périodes :
-\end_layout
-
-\begin_layout Itemize
-L'accélération : le temps 
+ On définit alors deux constante : 
 \begin_inset Formula $t_{a}$
 \end_inset
 
- que le train atteigne sa vitesse maximale 
+ qui est le temps prit par le train pour accélérer, et 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+ la vitesse maximale du train.
+ Ainsi, pour le déplacement du véhicule, on peu définir trois périodes :
+\end_layout
+
+\begin_layout Itemize
+L'accélération : entre 
+\begin_inset Formula $0$
+\end_inset
+
+ et 
+\begin_inset Formula $t_{a}$
+\end_inset
+
+, la vitesse du train augmente linéairement jusqu'à atteindre : 
 \begin_inset Formula $v_{m}$
 \end_inset
 
@@ -1497,96 +1515,55 @@ L'accélération : le temps
 \end_layout
 
 \begin_layout Itemize
-Croisière : le temps où le train est à sa vitesse maximale : 
-\begin_inset Formula $v_{m}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Itemize
-Décélération : le temps 
-\begin_inset Formula $t_{d}$
-\end_inset
-
- que le train train met pour atteindre une vitesse nulle.
-\end_layout
-
-\begin_layout Standard
-Pour des questions de simplicité, nous considérons que le train prend autant
- de temps à accélérer, qu'a décélérer (
-\begin_inset Formula $t_{a}=t_{d}$
-\end_inset
-
-).
- Nous avons alors utilisé 
-\begin_inset Quotes fld
-\end_inset
-
-Geogebra
-\begin_inset Quotes frd
-\end_inset
-
- et tâtonné un peu afin de trouver une fonction qui décrit au mieux la vitesse
- d'un véhicule 
-\begin_inset Quotes fld
-\end_inset
-
-réel
-\begin_inset Quotes frd
-\end_inset
-
- lors de son accélération (
-\begin_inset Formula $a\left(x\right)=\frac{\cos\left(x\right)+1}{2}$
-\end_inset
-
-) et de sa décélération (
-\begin_inset Formula $d\left(x\right)=\frac{-\cos\left(x\right)+1}{2}$
-\end_inset
-
-).
- 
-\end_layout
-
-\begin_layout Standard
-Avec ces 3 périodes et fonctions, on peut alors définir la vitesse comme
- une fonction par morceaux dépendant du temps :
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-v(t)\begin{cases}
-v_{1}\left(t\right)=v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2} & \text{si }0\leqslant t\leqslant t_{a}\\
-v_{2}\left(t\right)=v_{m} & \text{si }t_{a}<t<t_{f}-t_{a}\\
-v_{3}\left(t\right)=v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
-\end{cases},\forall t\in\left[0,t_{f}\right],\forall k\in
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $k$
-\end_inset
-
- étant une constante permetant de module le cosinus en fonction de 
+Croisière : entre 
 \begin_inset Formula $t_{a}$
 \end_inset
 
  et 
-\begin_inset Formula $v_{max}$
+\begin_inset Formula $t_{d}$
 \end_inset
 
-, en effet :
+, la vitesse du train est constante et maximale : 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Décélération : entre 
+\begin_inset Formula $t_{d}$
+\end_inset
+
+ et 
+\begin_inset Formula $t_{d}+t_{a}$
+\end_inset
+
+, la vitesse du train diminue linéairement jusqu'à atteindre : 
+\begin_inset Formula $v_{m}$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Standard
+Soit 
+\begin_inset Formula $t\in\left[0,t_{d}+t_{a}\right]$
+\end_inset
+
+ le temps écoulé depuis le départ du train.
+ Avec ces 3 périodes on peut définir la fonction vitesse définie par morceau
+ :
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-v\left(t_{a}\right)=v_{m}
+v(t)=\begin{cases}
+v_{1}\left(t\right)=t\times\frac{v_{m}}{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
+v_{2}\left(t\right)=v_{m} & \text{si }t_{a}<t\leqslant t_{d}\\
+v_{3}\left(t\right)=\left(t-t_{d}\right)\times\frac{-v_{m}}{t_{a}}+v_{m} & \text{si }t_{d}<t\leqslant t_{d}+t_{a}
+\end{cases},\forall t\in\left[0,t_{d}+t_{a}\right]
 \]
 
 \end_inset
@@ -1595,83 +1572,32 @@ v\left(t_{a}\right)=v_{m}
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula 
-\[
-\Rightarrow v_{m}\cdot\frac{-\cos\left(k\cdot t_{a}\right)+1}{2}=v_{m}
-\]
-
-\end_inset
-
-
+Ce qui nous intéresse, c'est d'obtenir la position du train en fonction
+ de t.
+ D'après nos cours de mécanique du point, la vitesse est la dérivée de la
+ distance par le temps.
+ On a donc : 
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\Rightarrow\cos\left(k\cdot t_{a}\right)=-1
+v\left(t\right)=\frac{d}{dt}d\left(t\right)\Leftrightarrow d\left(t\right)=\int v\left(t\right)dt
 \]
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\Rightarrow k=\frac{\arccos\left(-1\right)}{t_{a}}=\frac{\pi}{t_{a}}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Une fois les équations horraires de la vitesse obtenus, nous pouvons en
- déduire la distance du train parcouru depuis la dernière station.
- En effet, d'après les cours de mécanique du point (P2), nous savons que
- la vitesse est la dérivée de la distance parcourue : 
-\begin_inset Formula $v\left(t\right)=\frac{d}{dt}d\left(t\right)$
-\end_inset
-
-, on a donc :
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-d\left(t\right)=\int v\left(t\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $v\left(t\right)$
-\end_inset
-
- étant définie par morceaux, 
-\begin_inset Formula $d$
-\end_inset
-
-
-\begin_inset Formula $\left(t\right)$
-\end_inset
-
- est également définie par morceaux :
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
 d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=\int_{0}^{t}v_{1}\left(t\right) & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\left(t\right) & \text{si }t_{a}<t<t_{f}-t_{a}\\
-\int v\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t_{f}-t_{a}}v_{2}\left(t\right)+\int_{0}^{t-\left(t_{f}-t_{a}\right)}v_{3}\left(t\right) & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
-\end{cases}
+d_{1}\left(t\right)=\int_{0}^{t}v_{1}\left(t\right)=\frac{t²}{2}*v_{m} & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}v_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left(t-t_{a}\right)*v_{m} & \text{si }t_{a}<t\leqslant t_{d}\\
+d_{3}\left(t\right)=d_{2}\left(t_{2}\right)+\int_{t_{d}}^{t}v_{3}\left(t\right)=d_{2}\left(t_{2}\right)+\frac{}{} & \text{si }t_{d}<t\leqslant t_{d}+t_{a}
+\end{cases},\forall t\in\left[0,t_{d}+t_{a}\right]
 \]
 
 \end_inset
@@ -1680,59 +1606,21 @@ d_{2}\left(t\right)=\int_{0}^{t_{a}}v_{1}\left(t\right)+\int_{t_{a}}^{t}v_{2}\le
 \end_layout
 
 \begin_layout Standard
-
-\family typewriter
-\begin_inset Formula 
-\[
-\Rightarrow d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=\int_{0}^{t_{a}}\left(v_{m}\cdot\frac{-\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}\left(v_{m}\right)dt & \text{si }t_{a}<t<t_{f}-t_{a}\\
-d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\int_{0}^{t-\left(t_{f}-t_{a}\right)}\left(v_{m}\cdot\frac{\cos\left(k\cdot t\right)+1}{2}\right)dt & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
-\end{cases}
-\]
-
+Maintenant, nous avons distance en fonction du temps.
+ Il suffit maintenant d'implémenter 
+\begin_inset Formula $d_{1}$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-
-\family typewriter
-\begin_inset Formula 
-\[
-\Rightarrow d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=\left[v_{m}\cdot\left(\frac{-\sin\left(k\cdot t\right)+kt}{k*2}\right)\right]_{0}^{t_{a}} & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left[v_{m}\cdot t\right]_{t_{a}}^{t} & \text{si }t_{a}<t<t_{f}-t_{a}\\
-d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
-\end{cases}
-\]
-
+, 
+\begin_inset Formula $d_{2}$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-
-\family typewriter
-\begin_inset Formula 
-\[
-\Rightarrow d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=v_{m}\cdot\left(\frac{-\sin\left(k\cdot t\right)+kt}{k*2}\right) & \text{si }0\leqslant t\leqslant t_{a}\\
-d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+v_{m}\times\left(t-t_{a}\right) & \text{si }t_{a}<t<t_{f}-t_{a}\\
-d_{3}\left(t\right)=d_{1}\left(t\right)+d_{2}\left(t_{f}-t_{a}\right)-d_{2}\left(t_{a}\right)+\left[\frac{1}{2}\left(\frac{\sin\left(k\cdot t\right)}{k}+t\right)\right]_{0}^{t-\left(t_{f}-t_{a}\right)} & \text{si }t_{f}-t_{a}\leqslant t\leqslant t_{f}
-\end{cases}
-\]
-
+ et 
+\begin_inset Formula $d_{3}$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-Nous avons maintenant la position en fonction du temps, ce qui est suffisant
- pour réaliser l'implémentation.
+ et d'utiliser des instructions conditionnelles déterminer laquelle utiliser
+ en fonction du temps et des domaines de définition de chacune.
 \end_layout
 
 \begin_layout Subsection

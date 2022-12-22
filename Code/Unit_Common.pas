@@ -48,17 +48,14 @@ operator = (x, y: Type_Color) b : Boolean;
 // - - - - Bouton
 
 Procedure Button_Set(Var Button : Type_Button; Surface_Pressed, Surface_Released : PSDL_Surface);
-Procedure Button_Delete(Var Button : Type_Button);
 
 // - - - - Boutton à double état
 
 Procedure Dual_State_Button_Set(Var Dual_State_Button : Type_Dual_State_Button; Surface_Pressed_Enabled, Surface_Pressed_Disabled, Surface_Released_Enable, Surface_Released_Disabled : PSDL_Surface);
-Procedure Dual_State_Button_Delete(Var Dual_State_Button : Type_Dual_State_Button);
 
 // - - - - Image
 
 Procedure Image_Set(Var Image : Type_Image; Surface : PSDL_Surface);
-Procedure Image_Delete(Var Image : Type_Image);
 
 // - - - - Etiquette
 
@@ -270,31 +267,13 @@ Begin
 
 End;
 
-
-Procedure Button_Delete(Var Button : Type_Button);
-Begin
-  SDL_FreeSurface(Button.Surface_Pressed);
-  SDL_FreeSurface(Button.Surface_Released);
-End;
-
-Procedure Dual_State_Button_Delete(Var Dual_State_Button : Type_Dual_State_Button);
-Begin
-  SDL_FreeSurface(Dual_State_Button.Surface_Pressed[0]);
-  SDL_FreeSurface(Dual_State_Button.Surface_Pressed[1]);
-  SDL_FreeSurface(Dual_State_Button.Surface_Released[0]);
-  SDL_FreeSurface(Dual_State_Button.Surface_Released[1]);
-End;
-
-Procedure Image_Delete(Var Image : Type_Image);
-Begin
-  SDL_FreeSurface(Image.Surface);
-End;
-
+// Procédure qui supprime une étiquette.
 Procedure Label_Delete(Var Laabel : Type_Label);
 Begin
   SDL_FreeSurface(Laabel.Surface);
 End;
 
+// Procédure qui supprime un chronomètre.
 Procedure Pie_Delete(Var Pie : Type_Pie);
 Begin
   SDL_FreeSurface(Pie.Surface);

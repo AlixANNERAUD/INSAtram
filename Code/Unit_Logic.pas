@@ -17,6 +17,7 @@ Procedure Logic_Refresh(Var Game : Type_Game);
 Implementation
 
 
+
 // - Définition des fonctions et procédures.
 
 // Fonction qui renvoie l'index absolu (dans le tableau de stations du jeu) d'une station à partir de son pointeur.
@@ -35,6 +36,36 @@ Begin
         End;
     End;
 End;
+
+// Procédure qui renvoie l'index absolu (dans le tableau de lignes du jeu) d'une ligne à partir de son pointeur.
+Procedure Panel_Game_Over_Load(Var Game : Type_Game);
+Begin
+
+  Panel_Set_Hidden(False, Game.Panel_Game_Over);
+
+  Game_Pause(Game);
+
+  // - Etiquette de titre.
+  Label_Set_Text(Game.Game_Over_Title_Label, 'Game Over !');
+  Label_Pre_Render(Game.Game_Over_Title_Label);
+  Game.Game_Over_Title_Label.Position.X := Get_Centered_Position(Game.Panel_Game_Over.Size.X, Game.Game_Over_Title_Label.Size.X);
+  Game.Game_Over_Title_Label.Position.Y := 16;
+
+
+  // - Ettiquette de message.
+  Label_Set_Text(Game.Game_Over_Message_Label, 'You have lost the game !');
+  Label_Pre_Render(Game.Game_Over_Message_Label);
+  Game.Game_Over_Message_Label.Position.X := Get_Centered_Position(Game.Panel_Game_Over.Size.X, Game.Game_Over_Message_Label.Size.X);
+  Game.Game_Over_Message_Label.Position.Y := Game.Game_Over_Title_Label.Position.Y + Game.Game_Over_Title_Label.Size.Y + 16;
+
+
+  // - Etiquette de score
+  Label_Set_Text(Game.Game_Over_Score_Label, 'Score : ' + IntToStr(Game.Player.Score));
+  Label_Pre_Render(Game.Game_Over_Score_Label);
+  Game.Game_Over_Score_Label.Position.X := Get_Centered_Position(Game.Panel_Game_Over.Size.X, Game.Game_Over_Score_Label.Size.X);
+  Game.Game_Over_Score_Label.Position.Y := Game.Game_Over_Message_Label.Position.Y + Game.Game_Over_Message_Label.Size.Y + 16;
+End;
+
 
 // - - Fonctions et procédures relatives au passagers 
 
@@ -975,7 +1006,7 @@ Begin
                                                     // Si la station était encombrée avant la dernière vérification et que son timer est dépassé.
               Else If (Time_Get_Elapsed(Game.Stations[i]^.Overfill_Timer) > Station_Overfill_Timer * 1000) Then
                      // La partie est terminée.
-              ;
+                    Panel_Game_Over_Load(Game);
               // TODO : Faire écran de game over.
             End
           Else

@@ -290,6 +290,30 @@ Begin
     End;
 End;
 
+// Procédure qui prend en charge les appuis de la souris sur le panneau de game over.
+Procedure Panel_Game_Over_Pressed(Var Game : Type_Game);
+
+Var i : Byte;
+Begin
+  // Vérifie si le panneau des récompenses n'est pas dissimulé.
+  If Not(Game.Panel_Game_Over.Hidden) Then
+    Begin
+      // Vérifie si la souris est sur le panneau des récompenses.
+      If (Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Game_Over)) Then
+        Begin
+          If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Game_Over_Quit_Button.Position, Game.Game_Over_Quit_Button.Size, Game.Panel_Game_Over)) Then
+            Begin
+              SDL_Quit();
+            End
+          Else If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Game_Over_Restart_Button.Position, Game.Game_Over_Restart_Button.Size, Game.Panel_Game_Over)) Then
+                 Begin
+                    Game_Unload(Game);
+                    Game_Load(Game);
+                 End;
+        End;
+    End;
+End;
+
 
 // Fonction qui vérifie que la souris est sur une station et l'ajoute à la ligne actuellement maintenue par la souris.
 Procedure Mouse_Line_Add_Station(Var Game : Type_Game);
@@ -427,6 +451,11 @@ Begin
               Sounds_Set_Volume(Sounds_Maximum_Volume)
            Else
              Sounds_Set_Volume(0);
+         End
+    // Vérifie si le clic est sur le bouton pour quitter.
+  Else If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Quit_Button.Position, Game.Quit_Button.Size, Game.Panel_Top) Then
+         Begin
+            SDL_Quit();
          End;
 End;
 
@@ -489,7 +518,13 @@ Begin
       Game.Mouse.Mode := Type_Mouse_Mode.Normal;
 
       // Si le panneau de récompenses n'est pas caché (on obstrue les appuis sur les autres panneaux).
-      If Not(Game.Panel_Reward.Hidden) Then
+
+      If Not(Game.Panel_Game_Over.Hidden) Then
+        Begin
+          If (Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Game_Over)) Then
+            Panel_Game_Over_Pressed(Game);
+        End
+      Else If Not(Game.Panel_Reward.Hidden) Then
         Begin
           // Si la pression de la souris se trouve dans le panneau de récompenses.
           If Mouse_On_Panel(Mouse_Get_Press_Position(Game), Game.Panel_Reward) Then
