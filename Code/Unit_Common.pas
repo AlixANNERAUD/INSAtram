@@ -18,6 +18,8 @@ Function String_To_Characters(String_To_Convert : String) : pChar;
 
 Procedure Game_Resume(Var Game : Type_Game);
 Procedure Game_Pause(Var Game : Type_Game);
+Procedure Game_Load(Var Game : Type_Game);
+Procedure Game_Unload(Var Game : Type_Game);
 
 // - - Graphismes
 
@@ -85,7 +87,6 @@ Procedure Pie_Delete(Var Pie : Type_Pie);
 // - - - Lignes
 
 Function Line_Create(Var Game : Type_Game) : Boolean;
-Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
 Function Line_Add_Station(Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
 Function Line_Add_Station(Last_Station_Pointer, Station_Pointer : Type_Station_Pointer; Var Line : Type_Line; Var Game : Type_Game) : Boolean;
@@ -132,6 +133,143 @@ Function Time_Index_To_Day(Day_Index : Byte) : Type_Day;
 // - Définition des fonctions et procédures
 
 Implementation
+
+
+// Procédure qui supprime les données d'une partie.
+Procedure Game_Unload(Var Game : Type_Game);
+
+Var i,j,k,l : Byte;
+Begin
+
+  // - Suppresion des stations et de ses passagers.
+
+  // Itère parmi les stations
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
+      // Itère parmis les passagers d'une station.
+      For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
+        Begin
+          // Suppression du passager.
+          Passenger_Delete(Game.Stations[i]^.Passengers[j]);
+        End;
+
+      SetLength(Game.Stations[i]^.Passengers, 0);
+      // Suppression de la station.
+      Dispose(Game.Stations[i]);
+    End;
+  SetLength(Game.Stations, 0);
+
+  // - Suppression des lignes et des passagers dans les trains de la ligne.
+
+  // Vérifie qu'il y a bien des lignes.
+  If (length(Game.Lines) > 0) Then
+    // Itère parmi les lignes
+    For i := low(Game.Lines) To high(Game.Lines) Do
+      Begin
+        // Vérifie qu'il y a bien des trains sur la ligne.
+        If (length(Game.Lines[i].Trains) > 0) Then
+          Begin
+            // Itère parmi les trains de la ligne.
+            For j := low(Game.Lines[i].Trains) To high(Game.Lines[i].Trains) Do
+              Begin
+                // Itère parmi les véhicules du train.
+                For k := low(Game.Lines[i].Trains[j].Vehicles) To high(Game.Lines[i].Trains[j].Vehicles) Do
+                  Begin
+                    // Itère parmi les passagers du véhicule.
+                    For l := 0 To Vehicle_Maximum_Passengers_Number - 1 Do
+                      Begin
+                        If (Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] <> Nil) Then
+                          Begin
+                            Passenger_Delete(Game.Lines[i].Trains[j].Vehicles[k].Passengers[l]);
+                            Game.Lines[i].Trains[j].Vehicles[k].Passengers[l] := Nil;
+                          End;
+                      End;
+                  End;
+              End;
+          End;
+      End;
+      SetLength(Game.Lines, 0);
+
+End;
+
+// Fonction qui charge (initialize les attributs) la partie.
+Procedure Game_Load(Var Game : Type_Game);
+Var i,j : Byte;
+Begin
+
+  Game.Start_Time := Time_Get_Current();
+  Game.Day := Day_Monday;
+  Game.Stations_Timer := Time_Get_Current() + 25000;
+
+  Game.Sound_Button.State := True;
+  Game.Play_Pause_Button.State := True;
+
+    Panel_Set_Hidden(True, Game.Panel_Reward);
+    Panel_Set_Hidden(True, Game.Panel_Game_Over);
+    Panel_Set_Hidden(False, Game.Panel_Right);
+    Panel_Set_Hidden(False, Game.Panel_Left);
+    Panel_Set_Hidden(False, Game.Panel_Top);
+    Panel_Set_Hidden(False, Game.Panel_Bottom);
+
+  Game.Player.Locomotive_Token := 1;
+  Game.Player.Tunnel_Token := 1;
+  Game.Player.Wagon_Token := 1;
+  Game.Player.Score := 0;
+
+  River_Create(Game);
+
+  // Défintion de la carte d'occupation des stations.
+  SetLength(Game.Stations_Map, Game.Panel_Right.Size.X Div 64);
+
+  For i := low(Game.Stations_Map) To high(Game.Stations_Map) Do
+    Begin
+      SetLength(Game.Stations_Map[i], Game.Panel_Right.Size.Y Div 64);
+      For j := low(Game.Stations_Map[i]) To high(Game.Stations_Map[i]) Do
+        Game.Stations_Map[i][j] := false;
+    End;
+
+  // Création des 5 premères stations.
+  For i := 1 To 5 Do
+    Begin
+      Station_Create(Game);
+    End;
+
+
+  // Création de la première ligne.
+  Line_Create(Game);
+  Line_Create(Game);
+
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
+      Line_Add_Station(Game.Stations[i], Game.Lines[0], Game);
+    End;
+
+
+{
+  For i := high(Game.Stations) - 2 To high(Game.Stations) Do
+    Begin
+      Line_Add_Station(@Game.Stations[i], Game.Lines[1]);
+    End;
+
+  For i := high(Game.Stations) - 6 To high(Game.Stations) - 3 Do
+    Begin
+      Line_Add_Station(@Game.Stations[i], Game.Lines[2]);
+    End;
+}
+
+  For i := low(Game.Stations) To high(Game.Stations) Do
+      For j := 0 To Random(6) Do
+          Passenger_Create(Game.Stations[i]^, Game);
+
+  Passenger_Create(Game.Stations[0]^, Game);
+
+
+  Train_Create(Game.Lines[0].Stations[0], true, Game.Lines[0], Game);
+  //Train_Create(Game.Lines[0].Stations[3], false, Game.Lines[0], Game);
+  //Train_Create(Game.Lines[1].Stations[low(Game.Lines[1].Stations)], true, Game.Lines[1], Game);
+
+End;
+
 
 Procedure Button_Delete(Var Button : Type_Button);
 Begin
@@ -1352,30 +1490,6 @@ Begin
     End
   Else
     Vehicle_Create := False;
-End;
-
-// - - Object deletion.
-
-// Fonction qui supprime une ligne.
-Function Line_Delete(Var Line : Type_Line; Var Game : Type_Game) : Boolean;
-
-Var i : Byte;
-Begin
-  If (length(Line.Trains) > 0) Then
-    Begin
-      For i := low(Game.Lines) To high(Game.Lines) Do
-        Begin
-          If (@Game.Lines[i] = @Line) Then
-            Begin
-              Game.Lines[i] := Game.Lines[high(Game.Lines)];
-              SetLength(Game.Lines, length(Game.Lines) - 1);
-              Line_Delete := True;
-              Break;
-            End;
-        End;
-    End
-  Else
-    Line_Delete := False;
 End;
 
 // Fonction qui supprime un passager.

@@ -4,7 +4,8 @@ Unit Unit_Mouse;
 Interface
 
 // - Dépendances
-Uses Unit_Types, Unit_Common, Unit_Constants, sdl, crt;
+
+Uses Unit_Types, Unit_Common, Unit_Constants, Unit_Sounds, sdl, crt;
 
 
 // - Chargement
@@ -402,7 +403,60 @@ Begin
     End;
 End;
 
+Procedure Panel_Top_Released(Var Game : Type_Game);
+Begin
+  // Vérifie si le clic est sur le bouton play/pause.
+  If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Play_Pause_Button.Position, Game.Play_Pause_Button.Size, Game.Panel_Top) Then
+    Begin
+      If (Game.Play_Pause_Button.State) Then
+        Game_Pause(Game)
+      Else
+        Game_Resume(Game);
+    End
+  // Vérifie si le clic est sur le bouton de restart.
+  Else If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Restart_Button.Position, Game.Restart_Button.Size, Game.Panel_Top) Then
+         Begin
+           Game_Unload(Game);
+           Game_Load(Game);
+         End
+  // Vérifie si le clic est sur le boutton de son.
+  Else If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Sound_Button.Position, Game.Sound_Button.Size, Game.Panel_Top) Then
+         Begin
+            Game.Sound_Button.State := Not(Game.Sound_Button.State);
+           If (Game.Sound_Button.State) Then
+              Sounds_Set_Volume(Sounds_Maximum_Volume)
+           Else
+             Sounds_Set_Volume(0);
+         End;
+End;
 
+Procedure Panel_Right_Released(Var Game : Type_Game);
+Begin
+  // Si le curseur est en mode ajout de locomotives.
+  If (Game.Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Then
+    Mouse_Line_Add_Train(Game)
+    // Si le curseur est en mode ajout de wagons.
+  Else If (Game.Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
+         Mouse_Train_Add_Wagon(Game)
+         // Si le curseur est en mode ajout de stations.
+  Else If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Or (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
+         Mouse_Line_Add_Station(Game);
+End;
+
+Procedure Panel_Bottom_Released(Var Game : Type_Game);
+
+Var i : Byte;
+Begin
+  For i := 0 To Game_Maximum_Lines_Number - 1 Do
+    Begin
+      If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Lines[i].Button.Position, Game.Lines[i].Button.Size, Game.Panel_Bottom)) Then
+        Game.Lines[i].Button.State := Not(Game.Lines[i].Button.State)
+      Else
+        Game.Lines[i].Button.State := False;
+
+    End;
+
+End;
 
 // Procédure qui gère les interractions avec la souris.
 Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game : Type_Game);
@@ -458,46 +512,19 @@ Begin
       // Vérifie si le panneau des récompenses n'est pas dissimulé.
       If Not(Game.Panel_Reward.Hidden) Then
         Begin
+
         End
         // Si il y a un clic dans le panneau du haut.
       Else If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Top)) Then
-             Begin
-               // Vérifie si le clic est sur le bouton play/pause.
-               If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Play_Pause_Button.Position, Game.Play_Pause_Button.Size, Game.Panel_Top)) Then
-                 Begin
-                   If (Game.Play_Pause_Button.State) Then
-                     Game_Pause(Game)
-                   Else
-                     Game_Resume(Game);
-                 End;
-             End
+             Panel_Top_Released(Game)
 
              // Si la souris se trouve sur le panneau de droite.
       Else If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Right)) Then
-             Begin
-               // Si le curseur est en mode ajout de locomotives.
-               If (Game.Mouse.Mode = Type_Mouse_Mode.Add_Locomotive) Then
-                 Mouse_Line_Add_Train(Game)
-                 // Si le curseur est en mode ajout de wagons.
-               Else If (Game.Mouse.Mode = Type_Mouse_Mode.Add_Wagon) Then
-                      Mouse_Train_Add_Wagon(Game)
-                      // Si le curseur est en mode ajout de stations.
-               Else If (Game.Mouse.Mode = Type_Mouse_Mode.Line_Add_Station) Or (Game.Mouse.Mode = Type_Mouse_Mode.Line_Insert_Station) Then
-                      Mouse_Line_Add_Station(Game);
-             End
+             Panel_Right_Released(Game)
 
              // Si la souris se trouve dans le panneau du bas.
       Else If (Mouse_On_Panel(Mouse_Get_Release_Position(Game), Game.Panel_Bottom)) Then
-             Begin
-               For i := 0 To Game_Maximum_Lines_Number - 1 Do
-                 Begin
-                   If (Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Lines[i].Button.Position, Game.Lines[i].Button.Size, Game.Panel_Bottom)) Then
-                     Game.Lines[i].Button.State := Not(Game.Lines[i].Button.State)
-                   Else
-                     Game.Lines[i].Button.State := False;
-
-                 End;
-             End;
+             Panel_Bottom_Released(Game);
 
       Game.Mouse.Mode := Type_Mouse_Mode.Normal;
 

@@ -1140,7 +1140,7 @@ Begin
   Label_Set(Game.Reward_Labels[1], '', Game.Ressources.Fonts[Font_Medium][Font_Normal], Color_Get(Color_Black));
 
 
-  Panel_Set_Hidden(True, Game.Panel_Reward);
+
 
   Animation_Load(Game.Animation);
 
@@ -1176,6 +1176,11 @@ Begin
   Panel_Render(Game.Panel_Bottom, Destination_Panel);
 End;
 
+Procedure Panel_Game_Over_Render(Var Game : Type_Game; Var Destination_Panel : Type_Panel);
+Begin
+
+End;
+
 // Procédure rafraîchissant tout les éléments graphiques de l'écran.
 Procedure Graphics_Refresh(Var Game : Type_Game);
 Begin
@@ -1191,6 +1196,7 @@ Begin
   Panel_Left_Render(Game, Game.Window);
   Panel_Right_Render(Game, Game.Window);
   Panel_Reward_Render(Game, Game.Window);
+  Panel_Game_Over_Render(Game, Game.Window);
 
   // - Rendu du curseur
 

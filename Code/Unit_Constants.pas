@@ -29,12 +29,11 @@ Const Color_Depth =   32;
 
   // - - Son
 
-Const Sounds_Sampling_Rate = 22050;
+Const Sounds_Sampling_Rate = 44100;
       Sounds_Format : Word = AUDIO_S16;
       Sounds_Channels : INTEGER = 2;
       Sounds_Chunck_Size : INTEGER = 4096;
-      Sounds_Maximum_Volume = 128;
-
+      Sounds_Maximum_Volume = 64;
 
   // - - Souris
 
