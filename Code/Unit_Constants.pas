@@ -59,7 +59,7 @@ Const River_Width = 32;
 
   // - - - Stations
 
-Const Station_Overfill_Timer = 20;
+Const Station_Overfill_Timer = 40;
       Station_Overfill_Passengers_Number = 6;
 
   // - - - Lignes

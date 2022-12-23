@@ -20,6 +20,7 @@ Procedure Game_Resume(Var Game : Type_Game);
 Procedure Game_Pause(Var Game : Type_Game);
 Procedure Game_Load(Var Game : Type_Game);
 Procedure Game_Unload(Var Game : Type_Game);
+Procedure Game_Refresh_Graph_Table(Var Game : Type_Game);
 
 // - - Graphismes
 
@@ -141,20 +142,23 @@ Begin
   // - Suppresion des stations et de ses passagers.
 
   // Itère parmi les stations
+  If (length(Game.Stations) > 0) Then
+  Begin
   For i := low(Game.Stations) To high(Game.Stations) Do
     Begin
-      // Itère parmis les passagers d'une station.
-      For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
+      If (length(Game.Stations[i]^.Passengers) > 0) Then
         Begin
-          // Suppression du passager.
-          Passenger_Delete(Game.Stations[i]^.Passengers[j]);
+          // Itère parmis les passagers d'une station.
+          For j := low(Game.Stations[i]^.Passengers) To high(Game.Stations[i]^.Passengers) Do
+            // Suppression du passager.
+            Passenger_Delete(Game.Stations[i]^.Passengers[j]);
+          SetLength(Game.Stations[i]^.Passengers, 0);
         End;
-
-      SetLength(Game.Stations[i]^.Passengers, 0);
       // Suppression de la station.
       Dispose(Game.Stations[i]);
     End;
   SetLength(Game.Stations, 0);
+  End;
 
   // - Suppression des lignes et des passagers dans les trains de la ligne.
 
@@ -185,12 +189,13 @@ Begin
               End;
           End;
       End;
-      SetLength(Game.Lines, 0);
+  SetLength(Game.Lines, 0);
 
 End;
 
 // Fonction qui charge (initialize les attributs) la partie.
 Procedure Game_Load(Var Game : Type_Game);
+
 Var i,j : Byte;
 Begin
 
@@ -202,12 +207,12 @@ Begin
   Game.Play_Pause_Button.State := True;
 
   Panel_Set_Hidden(True, Game.Panel_Start);
-    Panel_Set_Hidden(True, Game.Panel_Reward);
-    Panel_Set_Hidden(True, Game.Panel_Game_Over);
-    Panel_Set_Hidden(False, Game.Panel_Right);
-    Panel_Set_Hidden(False, Game.Panel_Left);
-    Panel_Set_Hidden(False, Game.Panel_Top);
-    Panel_Set_Hidden(False, Game.Panel_Bottom);
+  Panel_Set_Hidden(True, Game.Panel_Reward);
+  Panel_Set_Hidden(True, Game.Panel_Game_Over);
+  Panel_Set_Hidden(False, Game.Panel_Right);
+  Panel_Set_Hidden(False, Game.Panel_Left);
+  Panel_Set_Hidden(False, Game.Panel_Top);
+  Panel_Set_Hidden(False, Game.Panel_Bottom);
 
   Game.Player.Locomotive_Token := 1;
   Game.Player.Tunnel_Token := 1;
@@ -243,8 +248,8 @@ Begin
     End;
 
   For i := low(Game.Stations) To high(Game.Stations) Do
-      For j := 0 To Random(6) Do
-          Passenger_Create(Game.Stations[i]^, Game);
+    For j := 0 To Random(2) Do
+      Passenger_Create(Game.Stations[i]^, Game);
 
   Passenger_Create(Game.Stations[0]^, Game);
 
@@ -783,6 +788,7 @@ End;
 
 // Procédure qui calcule les positions intermédiaires séparant les stations d'une ligne.
 Procedure Line_Compute_Intermediate_Positions(Var Line : Type_Line);
+
 Var i : Byte;
 Begin
   // Vérifie qu'il y a bien au moins une stations dans la ligne.
@@ -795,6 +801,74 @@ Begin
         Begin
           // Calcule la position intermédiaire.
           Line.Intermediate_Positions[i + low(Line.Intermediate_Positions)] := Station_Get_Intermediate_Position(Line.Stations[i]^.Position_Centered, Line.Stations[i + 1]^.Position_Centered);
+        End;
+    End;
+
+End;
+
+
+// Fonction qui renvoie l'index absolu (dans le tableau de stations du jeu) d'une station à partir de son pointeur.
+Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var Game : Type_Game) : Byte;
+
+Var i : Byte;
+Begin
+  Station_Get_Absolute_Index := 255;
+
+  For i := low(Game.Stations) To high(Game.Stations) Do
+    Begin
+      If Station_Pointer = Game.Stations[i] Then
+        Begin
+          Station_Get_Absolute_Index := i;
+          break;
+        End;
+    End;
+End;
+
+// Procédure qui génére le tableau du graph des lignes.
+Procedure Game_Refresh_Graph_Table(Var Game : Type_Game);
+
+Var i, j : Byte;
+  Indexes : Array[0 .. 1] Of Byte;
+Begin
+
+  // - Définit les dimensions de la Graph_Table
+  SetLength(Game.Graph_Table, length(Game.Stations));
+
+  For i := low(Game.Graph_Table) To high(Game.Graph_Table) Do
+    Begin
+      SetLength(Game.Graph_Table[i], length(Game.Stations));
+      For j := low(Game.Graph_Table[i]) To high(Game.Graph_Table[i]) Do
+        SetLength(Game.Graph_Table[i][j], 0);
+    End;
+
+  // - Remplissage la Graph_Table par rapport aux lignes du jeu.
+
+  For i := low(Game.Lines) To high(Game.Lines) Do
+    // Pour chacune des lignes :
+    Begin
+      // Vérifie que la ligne contient bien des stations.
+      If (length(Game.Lines[i].Stations) > 1) Then
+        Begin
+          // Itère parmi les stations de la ligne.
+          For j:= low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
+            // Pour chacune des stations consécutivement connectées contenues dans le tableau :
+            Begin
+              // Obtient les indexes des stations dans le tableau de stations du jeu.
+              Indexes[0] := Station_Get_Absolute_Index(Game.Lines[i].Stations[j], Game);
+              Indexes[1] := Station_Get_Absolute_Index(Game.Lines[i].Stations[j + 1], Game);
+
+              // Ajoute une case au tableau de pointeurs des lignes des stations concernées.
+
+              SetLength(Game.Graph_Table[Indexes[0]][Indexes[1]], length(Game.Graph_Table[Indexes[0]][Indexes[1]]) + 1);
+
+              SetLength(Game.Graph_Table[Indexes[1]][Indexes[0]], length(Game.Graph_Table[Indexes[1]][Indexes[0]]) + 1);
+
+              // A partir des indexes, on remplit la Graph_Table de manière symétrique en ajoutant les pointeur des lignes correspondantes.
+
+              Game.Graph_Table[Indexes[0]][Indexes[1]][high(Game.Graph_Table[Indexes[0]][Indexes[1]])] := @Game.Lines[i];
+              Game.Graph_Table[Indexes[1]][Indexes[0]][high(Game.Graph_Table[Indexes[1]][Indexes[0]])] := @Game.Lines[i];
+
+            End;
         End;
     End;
 
@@ -900,6 +974,7 @@ End;
 
 // Fonction qui convertit une chaîne de caractères (dyanmique) en un tableau de caractères (statique).
 Function String_To_Characters(String_To_Convert : String) : pChar;
+
 Var Characters : pChar;
 Begin
   Characters := StrAlloc(length(String_To_Convert) + 1);
@@ -1018,6 +1093,8 @@ Begin
 
   Count := 0;
 
+  Game_Refresh_Graph_Table(Game);
+
   For i := low(Game.Graph_Table) To high(Game.Graph_Table) - 1 Do
     For j := low(Game.Graph_Table[i]) + i + 1 To high(Game.Graph_Table[i]) Do
       If (length(Game.Graph_Table[i][j]) > 0) Then
@@ -1035,8 +1112,6 @@ Begin
             End;
 
         End;
-
-  writeln('Count : ', Count);
 
   Lines_Count_Necessary_Tunnel := Count;
 
@@ -1159,10 +1234,31 @@ Begin
       // Recalcule les positions intermédiaires de la ligne.
       Line_Compute_Intermediate_Positions(Line);
 
+
+      If (length(Line.Stations) > 1) Then
+        Begin
+          If (Lines_Count_Necessary_Tunnel(Game) > Game.Player.Tunnel_Token) Then
+            Begin
+              // Supprime la dernière station ajoutée.
+              SetLength(Line.Stations, length(Line.Stations) - 1);
+
+               Line_Compute_Intermediate_Positions(Line);
+
+              Line_Add_Station := False;
+            End
+          Else
+            Begin
+
+              Game.Player.Tunnels_Used := Lines_Count_Necessary_Tunnel(Game);
+
+              Line_Add_Station := True;
+            End;
+        End;
+
       Game.Refresh_Graph_Table := True;
       Game.Itinerary_Refresh := True;
 
-      Line_Add_Station := True;
+
     End
   Else
     Line_Add_Station := False;
@@ -1206,10 +1302,30 @@ Begin
                       // Recalcule les positions intermédiaires de la ligne.
                       Line_Compute_Intermediate_Positions(Line);
 
+
+                      If (length(Line.Stations) > 1) Then
+                        Begin
+                          If (Lines_Count_Necessary_Tunnel(Game) > Game.Player.Tunnel_Token) Then
+                            Begin
+                              // Supprime la dernière station ajoutée.
+                              Delete(Line.Stations, i + 1, 1);
+
+                              Line_Compute_Intermediate_Positions(Line);
+
+                              Line_Add_Station := False;
+                            End
+                          Else
+                            Begin
+
+                              Game.Player.Tunnels_Used := Lines_Count_Necessary_Tunnel(Game);
+
+                              Line_Add_Station := True;
+                            End;
+                        End;
+
                       Game.Refresh_Graph_Table := True;
                       Game.Itinerary_Refresh := True;
 
-                      Line_Add_Station := true;
                       Break;
                     End;
                 End;
@@ -1259,6 +1375,11 @@ Begin
                   SetLength(Line.Stations, 0);
 
                 Line_Compute_Intermediate_Positions(Line);
+
+                If (length(Line.Stations) > 1) Then
+                  Begin
+                    Game.Player.Tunnels_Used := Lines_Count_Necessary_Tunnel(Game);
+                  End;
 
                 Game.Refresh_Graph_Table := True;
                 Game.Itinerary_Refresh := True;
@@ -1331,14 +1452,16 @@ Begin
 
                       Line.Trains[high(Line.Trains)].Next_Station := Line.Stations[i + 1];
                       // Calcul du point intermédiaire.
-                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered);
+                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.
+                                                                              Trains)].Next_Station^.Position_Centered);
                     End
                   Else
                     Begin
                       Line.Trains[high(Line.Trains)].Next_Station := Line.Stations[i - 1];
 
                       // Calcul du point intermédiaire.
-                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered);
+                      Line.Trains[high(Line.Trains)].Intermediate_Position := Station_Get_Intermediate_Position(Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered, Line.Trains[high(Line.
+                                                                              Trains)].Last_Station^.Position_Centered);
                     End;
                   Break;
                 End;
@@ -1346,7 +1469,8 @@ Begin
         End;
 
       // Calcul de la distance du point intermédiaire.
-      Line.Trains[high(Line.Trains)].Intermediate_Position_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position);
+      Line.Trains[high(Line.Trains)].Intermediate_Position_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position
+                                                                       );
 
       If (Line.Color = Color_Get(Color_Red)) Then
         Line.Trains[high(Line.Trains)].Color_Index := 0
@@ -1373,7 +1497,8 @@ Begin
 
       // Calcul de la distance maximale du train.
 
-      Maximum_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position) +  Get_Distance(Line.Trains[high(Line.Trains)].Intermediate_Position, Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered);
+      Maximum_Distance := Get_Distance(Line.Trains[high(Line.Trains)].Last_Station^.Position_Centered, Line.Trains[high(Line.Trains)].Intermediate_Position) +  Get_Distance(Line.Trains[high(Line.
+                          Trains)].Intermediate_Position, Line.Trains[high(Line.Trains)].Next_Station^.Position_Centered);
 
       Line.Trains[high(Line.Trains)].Deceleration_Time := ((Maximum_Distance - (Train_Acceleration_Time * Train_Maximum_Speed)) / Train_Maximum_Speed) + Train_Acceleration_Time;
 

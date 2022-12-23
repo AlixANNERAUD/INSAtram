@@ -298,6 +298,7 @@ End;
 Procedure Panel_Start_Pressed(Var Game : Type_Game);
 
 Var i : Byte;
+  Quit_Event : TSDL_Event;
 Begin
   // Vérifie si le panneau des récompenses n'est pas dissimulé.
   If Not(Game.Panel_Start.Hidden) Then
@@ -309,7 +310,11 @@ Begin
             // Démarre le jeu.
             Game_Load(Game)
           Else If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Start_Quit_Button.Position, Game.Start_Quit_Button.Size, Game.Panel_Start)) Then
-                 SDL_Quit();
+                Begin
+                Quit_Event.type_ := SDL_QUITEV;
+                SDL_PushEvent(@Quit_Event);
+              End
+                 
 
         End;
     End;
@@ -320,6 +325,7 @@ End;
 Procedure Panel_Game_Over_Pressed(Var Game : Type_Game);
 
 Var i : Byte;
+  Quit_Event : TSDL_Event;
 Begin
   // Vérifie si le panneau des récompenses n'est pas dissimulé.
   If Not(Game.Panel_Game_Over.Hidden) Then
@@ -329,7 +335,8 @@ Begin
         Begin
           If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Game_Over_Quit_Button.Position, Game.Game_Over_Quit_Button.Size, Game.Panel_Game_Over)) Then
             Begin
-              SDL_Quit();
+              Quit_Event.type_ := SDL_QUITEV;
+              SDL_PushEvent(@Quit_Event);
             End
           Else If (Mouse_On_Object(Mouse_Get_Press_Position(Game), Game.Game_Over_Restart_Button.Position, Game.Game_Over_Restart_Button.Size, Game.Panel_Game_Over)) Then
                  Begin
@@ -454,6 +461,7 @@ Begin
 End;
 
 Procedure Panel_Top_Released(Var Game : Type_Game);
+Var Quit_Event : TSDL_Event;
 Begin
   // Vérifie si le clic est sur le bouton play/pause.
   If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Play_Pause_Button.Position, Game.Play_Pause_Button.Size, Game.Panel_Top) Then
@@ -481,7 +489,8 @@ Begin
          // Vérifie si le clic est sur le bouton pour quitter.
   Else If Mouse_On_Object(Mouse_Get_Release_Position(Game), Game.Quit_Button.Position, Game.Quit_Button.Size, Game.Panel_Top) Then
          Begin
-           SDL_Quit();
+           Quit_Event.type_ := SDL_QUITEV;
+            SDL_PushEvent(@Quit_Event);
          End;
 End;
 

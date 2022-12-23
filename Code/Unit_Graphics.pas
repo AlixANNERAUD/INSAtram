@@ -663,7 +663,7 @@ Begin
 
       If (length(Game.Graph_Table) > 0) Then
         Begin
-
+          SetLength(Mouse_Colors, 1);
           For i := low(Game.Graph_Table) To high(Game.Graph_Table) - 1 Do
             Begin
               For j := low(Game.Graph_Table[i]) + i + 1 To high(Game.Graph_Table[i]) Do
@@ -679,18 +679,12 @@ Begin
                              And (Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
                             Begin
 
-
+                              Mouse_Colors[low(Mouse_Colors)] := Game.Mouse.Selected_Line^.Color;
                               Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
 
-                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
-
-                              Graphics_Draw_Line(Game.Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-
-                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
-
-                              Graphics_Draw_Line(Game.Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                              Graphics_Draw_Lines(Game.Stations[i]^.Position_Centered, Mouse_Position, Mouse_Colors, Game.Panel_Right);
+                              Graphics_Draw_Lines(Mouse_Position, Game.Stations[j]^.Position_Centered, Mouse_Colors, Game.Panel_Right);
+                       
                             End
                           Else
                             Begin
@@ -721,17 +715,12 @@ Begin
                              And (Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Or ((Game.Stations[j] = Game.Mouse.Selected_Last_Station)
                              And (Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
                             Begin
+                             
+                              Mouse_Colors[low(Mouse_Colors)] := Game.Mouse.Selected_Line^.Color;
                               Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
 
-                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
-
-                              Graphics_Draw_Line(Game.Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-
-                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
-
-                              Graphics_Draw_Line(Game.Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                              Graphics_Draw_Lines(Game.Stations[i]^.Position_Centered, Mouse_Position, Mouse_Colors, Game.Panel_Right);
+                              Graphics_Draw_Lines(Mouse_Position, Game.Stations[j]^.Position_Centered, Mouse_Colors, Game.Panel_Right);
                             End
                           Else
                             Begin
@@ -762,17 +751,12 @@ Begin
                              And (Game.Stations[j] = Game.Mouse.Selected_Next_Station)) Or ((Game.Stations[j] = Game.Mouse.Selected_Last_Station)
                              And (Game.Stations[i] = Game.Mouse.Selected_Next_Station))) Then
                             Begin
+                            
+                              Mouse_Colors[low(Mouse_Colors)] := Game.Mouse.Selected_Line^.Color;
                               Mouse_Position := Panel_Get_Relative_Position(Mouse_Get_Position(), Game.Panel_Right);
 
-                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Last_Station^.Position_Centered, Mouse_Position);
-
-                              Graphics_Draw_Line(Game.Mouse.Selected_Last_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-
-                              Intermediate_Position := Station_Get_Intermediate_Position(Game.Mouse.Selected_Next_Station^.Position_Centered, Mouse_Position);
-
-                              Graphics_Draw_Line(Game.Mouse.Selected_Next_Station^.Position_Centered, Intermediate_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
-                              Graphics_Draw_Line(Intermediate_Position, Mouse_Position, Game.Mouse.Selected_Line^.Color, Game.Panel_Right);
+                              Graphics_Draw_Lines(Game.Stations[i]^.Position_Centered, Mouse_Position, Mouse_Colors, Game.Panel_Right);
+                              Graphics_Draw_Lines(Mouse_Position, Game.Stations[j]^.Position_Centered, Mouse_Colors, Game.Panel_Right);
                             End
                           Else
                             Begin
@@ -887,7 +871,7 @@ Begin
         Begin
           Button_Render(Game.Wagon_Button[i], Game.Panel_Left);
         End;
-      If (i < Game.Player.Tunnel_Token) Then
+      If (i < (Game.Player.Tunnel_Token - Game.Player.Tunnels_Used)) Then
         Begin
           Button_Render(Game.Tunnel_Button[i], Game.Panel_Left);
 

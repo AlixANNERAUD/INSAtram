@@ -125,7 +125,9 @@ Présentation
 \end_layout
 
 \begin_layout Standard
-Le nom du projet est 
+Dans le cadre du projet informatique que nous réalisons suite aux cours
+ de I1 et I2, nous avons décidé de développer un jeu en Pascal.
+ Le nom du projet est 
 \begin_inset Quotes fld
 \end_inset
 
@@ -133,8 +135,7 @@ INSAtram
 \begin_inset Quotes frd
 \end_inset
 
-.
- Cela fait référence au mot 
+ où 
 \begin_inset Quotes fld
 \end_inset
 
@@ -142,11 +143,12 @@ Tram
 \begin_inset Quotes frd
 \end_inset
 
- désignant un moyen de transport urbain.
- Ainsi, le jeu consiste en la construction et gestion d’un réseau de transport
+ fait référence au moyen de transport urbain.
+ Le jeu consiste en la construction et gestion d'un réseau de transport
  ferroviaire.
- Le concept n'est pas original.
- En effet, il à été inspiré du jeu 
+ C'est pourquoi l'identité graphique du jeu s'apparente aux cartes de réseau
+ disponibles dans les transports en commun.
+ Le concept n'est pas original puisqu'il est inspiré du jeu 
 \begin_inset Quotes fld
 \end_inset
 
@@ -154,43 +156,30 @@ Mini Metro
 \begin_inset Quotes frd
 \end_inset
 
- de l'éditeur <>.
-\end_layout
+ de l'éditeur 
+\begin_inset Quotes fld
+\end_inset
 
-\begin_layout Standard
-L’objectif du joueur est que l’acheminement des passagers vers leurs destination
-s soit optimal.
- Plusieurs stations qu’il faudra relier entre elles apparaissent au fil
+Dinosaur Polo Club
+\begin_inset Quotes frd
+\end_inset
+
+.
+ L'objectif du joueur est d'acheminer des passagers vers leur destination,
+ et ce, de manière optimale.
+ Plusieurs stations, qu'il faudra relier entre elles, apparaissent au cours
  de la partie.
- Les passagers apparaîtront à côté de leur station de départ et emprunteront
- la ou les lignes qui desservent leur station afin d’atteindre leur destination.
- Certaines cartes pourront contenir des fleuves dès le début de la partie.
- L’identité graphique du jeu s’apparentera aux cartes de réseaux disponibles
- dans les transports en commun.
-\end_layout
-
-\begin_layout Standard
-Les lignes reliant les stations seront de différentes couleurs, elles sont
- semblables à celles que l'on voit sur les vraies cartes de transport en
- commun.
- Lorsqu’une ligne est créée, un véhicule apparaîtra sur cette dernière et
- y fera des allers-retours.
- Il est possible de librement supprimer ou réorganiser les lignes à tout
- moment de la partie.
-\end_layout
-
-\begin_layout Standard
-Les réseaux deviennent de plus en plus complexes au fur et à mesure de la
- partie, le joueur pourra recevoir des objets (items cités dans les fonctionnali
-tés) à différents moments de la partie afin de l’aider dans la gestion des
- réseaux.
- 
-\end_layout
-
-\begin_layout Standard
-Enfin, le joueur perd lorsque son réseau n’est plus efficace.
- C’est-à-dire lorsqu’une station accueille un nombre de passagers supérieur
- à sa capacité pendant un certain temps.
+ Les passagers apparaissent à côté de leur station de départ et empruntent
+ la ou les lignes qui desservent leur station an d'atteindre leur destination.
+ Ce projet était à réaliser en groupe, le nôtre était composé de 3 membres.
+ Par conséquent, en plus de la mobilisation des connaissances acquises en
+ informatique, il était nécessaire de prendre en compte le travail de groupe
+ et donc la communication ainsi que la répartition des tâches.
+ Cette dimension, bien qu'indispensable, a rajouté une difficulté à la plannicat
+ion du projet.
+ En effet, jusqu'ici, nous étions habitués à travailler de manière individuelle
+ et sans trop se soucier d'établir un plan de projet de A à Z.
+ Nous présentons dans ce rapport notre façon d'appréhender ce nouvel exercice.
 \end_layout
 
 \begin_layout Subsection
@@ -198,13 +187,13 @@ Cahier des charges initial
 \end_layout
 
 \begin_layout Standard
-Voici le cahier des charges initial.
+Voici un rappel du cahier des charges.
  Les 
 \bar under
 parties soulignées
 \bar default
- sont les fonctionnalités optionnelles et seront réalisées si l’avancement
- du projet le permet.
+ sont les fonctionnalités optionnelles et leur réalisation est faite suivant
+ l'avancement du projet :
 \end_layout
 
 \begin_layout Itemize
@@ -217,61 +206,20 @@ L’interface graphique comportera les éléments suivants :
 
 \begin_deeper
 \begin_layout Itemize
-
-\series bold
-Menu de démarrage :
-\series default
- Il permettra de commencer une partie, de sélectionner un niveau de difficulté,
- de choisir une carte, de paramétrer l'échelle de l'interface graphique,
- de charger une partie à partir d’un fichier et également de changer le
- niveau du son.
- Il comprendra également un onglet “à propos” comprenant des crédits ainsi
- que des explications sur le jeu etc.
+Un menu de démarrage permettant de démarrer une partie.
 \end_layout
 
 \begin_layout Itemize
-
-\series bold
-Terrain de jeu :
-\series default
- Une fois que le joueur a lancé une partie, un terrain de jeu occupant tout
- l’écran sera présenté au joueur.
- C’est ici que les différentes entités apparaîtront au fur et à mesure.
- Un inventaire (interactif) et des indicateurs (statistiques de partie)
- sont affichés par superposition.
+Un terrain de jeu contenant tous les éléments de la partie (score, temps,
+ inventaire).
 \end_layout
 
 \begin_layout Itemize
-
-\series bold
-Echelle :
-\series default
- Les coordonnées ainsi que la taille des différents objets graphiques seront
- relatives à la taille de l’écran (la proportion de l’écran occupée par
- l’objet).
- Cela permettra de rendre automatique la mise à l’échelle des éléments graphique
-s pour différentes configurations d’écran.
+Un bilan à la fin de la partie (au game over) affichant le score du joueur.
 \end_layout
 
 \begin_layout Itemize
-
-\series bold
-Bilan :
-\series default
- A la fin de la partie, un écran de fin s’affiche présentant le score du
- joueur (calculé sur la base du nombre de semaines où le réseau était efficace
- et de voyageurs transportés).
-\end_layout
-
-\begin_layout Itemize
-
-\series bold
-Couleurs :
-\series default
- L’interface graphique sera le plus épuré possible avec des couleurs simples
- et contrastées et le minimum de couleurs possibles.
- L’interface graphique disposera d’un mode sombre où les gammes de couleurs
- claires sont remplacées par des nuances plus sombres.
+La présence de couleurs tout en gardant une interface épurée.
 \end_layout
 
 \end_deeper
@@ -280,19 +228,9 @@ Couleurs :
 \series bold
 Temps :
 \series default
- Le temps sera organisé en jours et semaines (jour : ~20 secondes, 1 semaine
- : ~140 secondes).
- Ce système servira à déterminer en partie le score final du joueur.
- Il sera possible de stopper, d'accélérer ou de reprendre le temps.
-\end_layout
-
-\begin_layout Itemize
-
-\series bold
-Bilan :
-\series default
- Un bilan sera aussi proposé au joueur (comprenant des graphiques, cartes
- de fréquentation...) pour que le joueur puisse analyser ses performances.
+ Organisé en jours et semaines (jour : ~20 secondes, 1 semaine : ~140 secondes).
+ Il détermine en partie le score final du joueur.
+ Il est possible de mettre en pause et de reprendre le temps.
 \end_layout
 
 \begin_layout Itemize
@@ -302,8 +240,9 @@ Bilan :
 Son :
 \series default
 \bar default
- Le jeu comprendra une musique de fond apaisante ainsi que des effets sonores
- pour mettre le joueur dans l’ambiance du jeu.
+ Le jeu comprend une musique de fond apaisante pour mettre le joueur dans
+ l'ambiance du jeu.
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -311,13 +250,10 @@ Son :
 \series bold
 Objets :
 \series default
- Les objets sont les éléments que le joueur pourra disposer librement sur
- le terrain de jeu.
- Tous les objets seront présents en début de partie en quantité limitée
- et stockés dans un inventaire.
- A chaque semaine passée, le joueur obtiendra des récompenses qu'il pourra
- choisir entre 2 ou 3 objets proposés aléatoirement.
- Les objets seront les suivants : 
+ Ce sont les éléments avec lesquels le joueur peut intéragir.
+ Tous les objets sont présents en début de partie en quantité limitée et
+ peuvent être obtenus à la fin de chaque semaine.
+ Les objets seront les suivants :
 \end_layout
 
 \begin_deeper
@@ -326,10 +262,8 @@ Objets :
 \series bold
 Locomotives :
 \series default
- Les locomotives sont les véhicules permettant aux voyageurs de se déplacer
- entre les différentes stations.
- Elles seront affectées par le joueur à une ligne en particulier et effectueront
- des allers-retours sur cette dernière.
+ Elles effectuent des allers-retours sur les lignes afin d'acheminer les
+ voyageurs de station en station.
 \end_layout
 
 \begin_layout Itemize
@@ -337,13 +271,9 @@ Locomotives :
 \series bold
 Lignes : 
 \series default
-Les lignes seront les infrastructures permettant aux locomotives de circuler
- de station en station.
- Elles seront dessinées par le joueur et pourront être modifiées au fur
- et à mesure de la partie.
- Les lignes seront représentées à la manière d’un plan de métro, c’est-à-dire
- en utilisant des lignes horizontales et verticales ainsi que des angles
- à 45° pour les virages.
+Ce sont les infrastructures permettant aux véhicules de circuler de station
+ en station.
+ Le joueur les dessine et peut les modifier au cours de la partie.
 \end_layout
 
 \begin_layout Itemize
@@ -351,42 +281,16 @@ Les lignes seront les infrastructures permettant aux locomotives de circuler
 \series bold
 Wagons :
 \series default
- Les wagons sont des véhicules pouvant être ajoutés à une locomotive afin
- d’augmenter le nombre de passagers qu’elle peut transporter en une seule
- fois.
+ Ce sont des véhicules pouvant être ajoutés à une locomotive afin d'augmenter
+ le nombre de passagers qu'elle peut transporter en une seule fois.
 \end_layout
 
 \begin_layout Itemize
 
 \series bold
-Ponts :
+Tunnels :
 \series default
- En cas d’implémentation de topologie (ex : cours d’eau) sur la carte, ils
- seront utiles pour les franchissements d’obstacle.
-\end_layout
-
-\begin_layout Itemize
-
-\series bold
-\bar under
-Technicien :
-\series default
-\bar default
- Si implémentation d’une fonctionnalité de détérioration des lignes, le
- technicien permet de restaurer l'état de la ligne.
-\end_layout
-
-\begin_layout Itemize
-
-\series bold
-\bar under
-Surdimensionnement de la gare :
-\series default
-\bar default
- Les rames passant par une gare surdimensionnée passeront moins de temps
- à quai.
- Ces gares ont également une plus grande capacité d’accueil des passagers
- (peut accueillir 12 passagers au lieu de 6).
+ Ce sont les objets permettant à une ligne de traverser une rivière.
 \end_layout
 
 \end_deeper
@@ -395,10 +299,7 @@ Surdimensionnement de la gare :
 \series bold
 Entités :
 \series default
- Les entités sont les éléments qui seront disposés sur le terrain de jeu
- par le programme.
- Le joueur ne pourra pas interagir de manière directe avec les entités,
- c’est-à-dire qu’elles ne seront pas modifiables par le joueur.
+ Ce sont les éléments qui sont disposés sur le terrain de jeu par le programme.
  Les entités seront les suivantes : 
 \end_layout
 
@@ -408,14 +309,9 @@ Entités :
 \series bold
 Stations :
 \series default
- Les stations sont de différentes formes géométriques et sont générées de
- manière aléatoire.
- Elles apparaîtront à des instants t déterminés par une fonction (linéaire
- puis éventuellement logarithmique/polynomiale).
- Elles seront disposées sur le terrain de jeu de manière homogène, c'est-à-dire
- en évitant les stations superposées ou trop proches et de même type (utilisatio
-n d'une carte de fréquentation).
- 
+ Elles sont de différentes formes géométriques et sont générées de manière
+ aléatoire.
+ Elles apparraissent à des instants t déterminés par une fonction.
 \end_layout
 
 \begin_layout Itemize
@@ -423,27 +319,22 @@ n d'une carte de fréquentation).
 \series bold
 Passagers :
 \series default
- Les passagers seront également de différentes formes géométriques (correspondan
-t à leur station d'arrivée) à côté des stations à des instants t déterminés
- par une fonction (linéaire puis éventuellement logarithmique/polynomiale).
+ Ils sont également de différentes formes géométriques (correspondant à
+ leur station d'arrivée) et ils apparaissent à côté des stations à des instants
+ t déterminés par une fonction.
  Ces passagers disparaissent une fois arrivés à destination.
- Un algorithme de résolution des graphes (pondéré en fonction de l’occupation
- des lignes et du temps de transit entre les stations) sera utilisé afin
- de calculer l’itinéraire des passagers.
+ L'algorithme de Dijkstra est utilisé afin de calculer les itinéraires des
+ passagers.
 \end_layout
 
 \begin_layout Itemize
 
 \series bold
-Fleuves :
+Rivières :
 \series default
- Les différentes cartes comprendront un ou plusieurs fleuves qui feront
- office d’obstacle naturel et devront être contournés par le joueur en utilisant
- les objets qu’il a à sa disposition.
- -Animation : Les entités ainsi que les objets seront animés de manière
- à attirer l’attention du joueur sur les différents éléments (déplacement
- des rames, signalement d’une gare encombrée) affichés.
- Le niveau de détail de ces animations dépendra de l’avancement du projet.
+ Les différentes cartes comprennent une ou plusieurs rivières qui font office
+ d'obstacles naturels.
+ Elles doivent être contournées à l'aide d'un tunnel.
 \end_layout
 
 \end_deeper
@@ -452,78 +343,53 @@ Fleuves :
 \series bold
 Difficulté :
 \series default
- La difficulté du jeu se trouvera dans le fait de devoir fluidifier au maximum
- le trafic et d’adapter le réseau en fonction des nouvelles stations qui
- apparaissent, le flux de passagers ainsi que des différents aléas.
+ La difficulté du jeu réside dans le fait de devoir fluidifier au maximum
+ le traffic et d'adapter le réseau en fonction des nouvelles stations qui
+ apparaissent, le flux de passagers ainsi que des différents aléas
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 
 \series bold
-\bar under
-Niveaux de difficulté :
-\series default
-\bar default
- Le joueur aura le choix entre 3 niveaux de difficulté (facile, moyen, difficile
-).
-\end_layout
-
-\begin_layout Itemize
-
-\series bold
-\bar under
-Détérioration des lignes :
-\series default
-\bar default
- Les lignes auront une durée de vie limitée (en fonction du nombre de rames
- les parcourant) et pourront être sous la contrainte d’aléas naturels (feu,
- inondation etc.).
- Le joueur pourra alors les restaurer à l’aide de l’objet “Technicien”.
-\end_layout
-
-\begin_layout Itemize
-
-\series bold
 Fin de partie :
 \series default
- La partie prend fin une fois qu’une station est engorgée (quand plus de
- 6 passagers s’y trouvent) pendant un temps qui dépendra de la difficulté
- choisie.
- Un chronomètre apparaitra à côté de la/des stations surchargée(s) pour
- indiquer le temps restant au joueur.
- Si ce temps est dépassé (environ 30 secondes ; varie selon la difficulté)
- alors que la station est encore encombrée, le joueur perd.
- 
+ La partie prend fin une fois qu'une station est engorgée (quand plus de
+ 6 passagers s'y trouvent) pendant 40 secondes.
+ Un chronomètre apparaît à côté de la/des stations surchargée(s) pour indiquer
+ le temps restant au joueur.
+ Si ce temps est dépassé alors que la station est encore encombrée, le joueur
+ perd.
 \end_layout
 
 \end_deeper
-\begin_layout Itemize
-
-\series bold
-\bar under
-Enregistrement et chargement de parties :
-\series default
-\bar default
- Le joueur pourra enregistrer ses parties dans des fichiers de sauvegarde
- ainsi que les charger.
- Cela contribuera également à la démonstration finale du jeu afin de charger
- une partie en cours et de faire la démonstration.
-\end_layout
-
-\begin_layout Itemize
-
-\series bold
-\bar under
-Fonctionnalités cachées :
-\series default
-\bar default
- Dans ce jeu, cela pourrait être une gare qui n’apparait que dans certaines
- circonstances, une blague accessible à certains joueurs chanceux...
-\end_layout
-
 \begin_layout Section
 Structure
+\end_layout
+
+\begin_layout Standard
+Au début du projet, nous avons essayé d'être le plus rigoureux possible
+ lorsque l'on a déterminé sa structure.
+ Cependant, certaines parties ne pouvaient être prédites lorsque le projet
+ était encore au stade de simple idée.
+ Nous avons donc dû apporter des modifications à notre analyse descendante
+ initiale, la version qui a été mise à jour se trouve en annexe du rapport.
+ Les fonctions et procédures étant nombreuses dans notre programme, notre
+ analyse descendante ne les englobe pas toutes et montre seulement les fontions
+ les plus importantes.
+ Nous avons également veillé à séparer le code en plusieurs unités et à
+ laisser des commentaires dans le but d'avoir un code lisible et compréhensible.
+ Certains 
+\begin_inset Quotes fld
+\end_inset
+
+writeln
+\begin_inset Quotes frd
+\end_inset
+
+ qui ne sont pas utiles à l'exécution du code ont été ajoutés afin d'afficher
+ du texte dans le terminal pour faciliter la compréhension du déroulement
+ de la partie.
 \end_layout
 
 \begin_layout Subsection
@@ -531,38 +397,22 @@ Nommage
 \end_layout
 
 \begin_layout Standard
-Afin que le code soit structure et facile à comprendre, nous avons adopté
+Afin que le code soit structuré et facile à comprendre, nous avons adopté
  une convention d'écriture qui suit les règles suivantes :
 \end_layout
 
 \begin_layout Itemize
-Langage : l'écriture du code en anglais nous semblais assez naturel, car
- cela est plus homogène avec le langage de programation lui-meme (écrit
- en anglais).
- Cependant, afin de faciliter le compréhension du code pour les correcteurs,
+Langue : l'écriture du code en anglais nous semble assez naturelle, pour
+ des raisons d'homogénéité avec le langage de programmation lui-même.
+ Cependant, afin de faciliter la compréhension du code lors de la correction,
  nous avons utilisé du français pour les commentaires.
- Ces dernier par ailleurs suivent une certaines structure.
- Pour un commentaire faisant office de titre, 
-\begin_inset Quotes fld
-\end_inset
-
-//
-\begin_inset Quotes frd
-\end_inset
-
- de 
-\begin_inset Quotes fld
-\end_inset
-
--
-\begin_inset Quotes frd
-\end_inset
-
-.
+ Ces derniers suivent une certaine structure.
+ Pour un commentaire faisant office de titre :
 \end_layout
 
 \begin_layout Standard
 \begin_inset listings
+lstparams "language=Pascal,numbers=left,breaklines=true,tabsize=4"
 inline false
 status open
 
@@ -605,6 +455,7 @@ Constantes : Les constantes sont nommées
 
 \begin_layout Standard
 \begin_inset listings
+lstparams "language=Pascal,numbers=left,breaklines=true,tabsize=4"
 inline false
 status open
 
@@ -619,38 +470,18 @@ Const Station_Maximum
 \end_layout
 
 \begin_layout Itemize
-Types : Tout types porte d'abord comme identifiant 
-\begin_inset Quotes fld
-\end_inset
-
-Type_
-\begin_inset Quotes frd
-\end_inset
-
- suivit de l'identifiant du type.
- Cet identifiant doit le plus court et le plus explicite possible.
- Par exemple la structure contenant une station s'appelle 
-\begin_inset Quotes fld
-\end_inset
-
-Type_Station
-\begin_inset Quotes frd
-\end_inset
-
-.
- Dans le cas d'un type pointeur, il suffit de rajouter 
-\begin_inset Quotes fld
-\end_inset
-
-_Pointer
-\begin_inset Quotes frd
-\end_inset
-
- au nom du type de base.
+Types : Tout type porte d'abord comme identifiant Type_ suivi de l'identifiant
+ du type.
+ Cet identifiant doit être le plus court et le plus explicite possible.
+ Par exemple, la structure contenant une station s'appelle Type_Station
+ .
+ Dans le cas d'un type pointeur, il suffit de rajouter _Pointer au nom du
+ type de base :
 \end_layout
 
 \begin_layout Standard
 \begin_inset listings
+lstparams "language=Pascal,numbers=left,breaklines=true,tabsize=4"
 inline false
 status open
 
@@ -685,45 +516,14 @@ Type Type_Station_Pointer = ^Type_Station;
 
 \begin_layout Itemize
 Fonctions et procédures : Les fonctions et procédures portent généralement
- le nom de l'objet sur lequel elles agissent où de l'unité concerné, suivi
- d'un verbe (en général : 
-\begin_inset Quotes fld
-\end_inset
-
-Get
-\begin_inset Quotes frd
-\end_inset
-
-, 
-\begin_inset Quotes fld
-\end_inset
-
-Set
-\begin_inset Quotes frd
-\end_inset
-
-, 
-\begin_inset Quotes fld
-\end_inset
-
-Refresh
-\begin_inset Quotes frd
-\end_inset
-
-, 
-\begin_inset Quotes fld
-\end_inset
-
-Render
-\begin_inset Quotes frd
-\end_inset
-
- ...) indiquant l'action effectuée et suivi éventuellement plus de précision
- sur l'action.
+ le nom de l'objet sur lequel elles agissent ou de l'unité concernée, suivi
+ d'un verbe (en général : Get , Set , Refresh , Render ...) indiquant l'action
+ effectuée et est éventuellement suivi de précisions sur l'action :
 \end_layout
 
 \begin_layout Standard
 \begin_inset listings
+lstparams "language=Pascal,numbers=left,breaklines=true,tabsize=4"
 inline false
 status open
 
@@ -765,40 +565,8 @@ Structure générale
 \end_layout
 
 \begin_layout Standard
-Le projet est structuré en plusieurs fichiers de la manière suivante :
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Arbre des dépendances
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename Graphiques/Dépendances.png
-	width 50page%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
+Le projet est structuré en plusieurs fichiers de la manière suivante (voir
+ annexes) :
 \end_layout
 
 \begin_layout Itemize
@@ -830,7 +598,7 @@ Unit_Common :
 \begin_inset Quotes frd
 \end_inset
 
- permettants de simplifier le développement dans les autres unités.
+ permettant de simplifier le développement dans les autres unités.
 \end_layout
 
 \begin_layout Itemize
@@ -838,7 +606,7 @@ Unit_Common :
 \series bold
 Unit_Mouse :
 \series default
- Unité regroupant toutes les fonctions responsable de la prise en charge
+ Unité regroupant toutes les fonctions responsables de la prise en charge
  de la souris.
 \end_layout
 
@@ -847,8 +615,8 @@ Unit_Mouse :
 \series bold
 Unit_Animation :
 \series default
- Unité regroupant toutes les fonctions responsable des animations (déplacement
- des trains, ).
+ Unité regroupant toutes les fonctions responsables des animations (déplacement
+ des trains...).
 \end_layout
 
 \begin_layout Itemize
@@ -873,7 +641,8 @@ mère
 \begin_inset Quotes frd
 \end_inset
 
- du jeu, celle qui est directement inclu dans le programme principal : 
+ du jeu, celle qui est directement inclue dans le programme principal :
+ 
 \begin_inset Quotes fld
 \end_inset
 
@@ -882,18 +651,6 @@ INSAtram.pas
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Subsection
-Unité
-\end_layout
-
-\begin_layout Subsection
-Conclusion
-\end_layout
-
-\begin_layout Standard
-Ainsi
 \end_layout
 
 \begin_layout Standard
@@ -912,16 +669,19 @@ Outils utilisés
 \end_layout
 
 \begin_layout Standard
-Voici la liste des outils utilisés pour le développement du jeu :
+Ce projet étant un projet plus complexe que ce que nous avons eu à programmer
+ jusqu'ici, nous avons fait appel à plusieurs outils afin de répondre au
+ mieux aux besoins du projet.
+ Voici la liste des outils utilisés pour le développement du jeu :
 \end_layout
 
 \begin_layout Itemize
-Visual Studio Code : Un editeur de code open source et grauit, très extensible
+Visual Studio Code : Un éditeur de code, open source et gratuit, très extensible
  et personnalisable.
 \end_layout
 
 \begin_layout Itemize
-Git : Logiciel de gestion de répertoire de code open source et performant.
+Git : Logiciel de gestion de répertoire de code, open source et performant.
 \end_layout
 
 \begin_layout Itemize
@@ -942,13 +702,23 @@ Inkscape : Logiciel de dessin vectoriel utilisé pour la création des ressource
  graphiques du jeu.
 \end_layout
 
+\begin_layout Itemize
+Mermaid : Outil de création dynamique de diagrammes et de graphiques utilisé
+ pour la création de l'analyse descendante.
+\end_layout
+
+\begin_layout Itemize
+LyX : Logiciel libre d’édition de documents techniques.
+ Nous l'avons utilisé pour la rédaction du présent rapport.
+\end_layout
+
 \begin_layout Subsection
 Répartition
 \end_layout
 
 \begin_layout Standard
-Afin d'avoir une répartition du travail homogène.
- Nous avons adopté une méthode similaire à la méthode 
+Afin d'avoir une répartition du travail la plus homogène possible, nous
+ avons adopté une méthode similaire à la méthode 
 \begin_inset Quotes fld
 \end_inset
 
@@ -957,50 +727,32 @@ Agile
 \end_inset
 
 .
- C'est à dire que nous avons essayé de diviser le cahier des charges en
+ C'est-à-dire que nous avons essayé de diviser le cahier des charges en
+ tâches élémentaires.
+ Ces tâches étaient disposées sur un tableau virtuel dans le but de les
+ rendre accessibles à chaque membre du groupe.
+ Puis, chaque personne pouvait récupérer une tâche dès que la précédente
+ était implémentée, testée et validée par les autres.
+ Cette méthode permettait alors à chacun d'explorer différentes parties
+ du développement et d'avoir une vision d'ensemble quant à l'avancement
+ du projet.
+ Cependant, certaines tâches nécessitaient des calculs et raisonnements
+ complexes, dans ces cas-là, nous étions au moins deux à travailler dessus.
+ De ce fait, il serait difficile d'établir une liste exhaustive des tâches
+ effectuées par chaque membre du groupe.
  
-\begin_inset Quotes fld
-\end_inset
+\end_layout
 
-tâches élémentaires
-\begin_inset Quotes frd
-\end_inset
-
- le plus équitablement possible en temps de travail.
- Ces tâches étaient disposés sur un dashboard.
- Puis, chaques personnes vient récupérer une tâche sur un tableau dès que
- la précédente est implémenté, testée et validée par les autres.
- Afin de ne pas avoir à être systématiquement en présentiel pour pouvoir
- travailler ensemble sur le projet.
- Nous avons utilisé des outils tels 
-\begin_inset Quotes fld
-\end_inset
-
-Git
-\begin_inset Quotes frd
-\end_inset
-
- et 
-\begin_inset Quotes fld
-\end_inset
-
-GitHub
-\begin_inset Quotes frd
-\end_inset
-
- pour la gestion du répertoire de code et 
-\begin_inset Quotes fld
-\end_inset
-
-Live Share
-\begin_inset Quotes frd
-\end_inset
-
- afin de collaborer le plus facilement possible.
- C'est pour cela que nous avons utilisé l'éditeur de code Visual Studio
- Code du fait de sa modularité.
- Biensur, en cas de soucis où de problème difficile à résoudre (voir section
- 4), nous nous concertions et élaborions une solution ensemble.
+\begin_layout Standard
+Il était parfois difficile de faire correspondre nos emplois du temps respectifs.
+ Alors, pour ne pas avoir à être systématiquement en présentiel pour pouvoir
+ travailler ensemble sur le projet, nous avons utilisé des outils tels que
+ Git et GitHub pour la gestion du répertoire de code et LiveShare afin de
+ collaborer le plus facilement possible.
+ C'est pour cette raison que nous avons utilisé l'éditeur de code Visual
+ Studio Code.
+ Bien sûr, en cas de problème difficile à résoudre (voir section 4), nous
+ nous concertions et élaborions une solution ensemble.
 \end_layout
 
 \begin_layout Standard
@@ -1011,7 +763,7 @@ Live Share
 \end_layout
 
 \begin_layout Section
-Difficultés rencontrés
+Difficultés rencontrées
 \end_layout
 
 \begin_layout Subsection
@@ -1023,365 +775,15 @@ Géométrie des lignes
 \end_layout
 
 \begin_layout Standard
-Afin de donner un aspect de 
-\begin_inset Quotes fld
-\end_inset
-
-plan de métro
-\begin_inset Quotes frd
-\end_inset
-
- aux lignes de tram.
- L'affichage des lignes doit se faire uniquement avec des droites horizontales,
- verticales et obliques (45°).
- Ce problème, qui nous semblait assez abstrait et abitraire au premiers
- abords, étaient finalement relativement simple à résoudre avec l'étude
- d'un des cas possible.
- Voici notre démarche :
-\end_layout
-
-\begin_layout Itemize
-Deux stations, représentées par les points 
-\begin_inset Formula $S_{N}=\left(S_{N,x},S_{N,y}\right)$
-\end_inset
-
- et 
-\begin_inset Formula $S_{N+1}=\left(S_{N+1,x},S_{N+1,y}\right)$
-\end_inset
-
- (coordonnées centrés des stations), sont séparé par les distances 
-\begin_inset Formula $\Delta_{x}=S_{N+1,x}-S_{N,x}$
-\end_inset
-
- et 
-\begin_inset Formula $\Delta_{y}=S_{N+1,y}-S_{N,y}$
-\end_inset
-
-.
- Les indices 
-\begin_inset Formula $N$
-\end_inset
-
- et 
-\begin_inset Formula $N+1$
-\end_inset
-
- font référence aux position relatives des stations dans les tableaux de
- pointeurs de station stoqués dans les objets de type 
-\begin_inset Quotes fld
-\end_inset
-
-Type_Line
-\begin_inset Quotes frd
-\end_inset
-
-.
- Les deux stations forment un angle 
-\begin_inset Formula $\alpha=arctan\left(\frac{\Delta_{y}}{\Delta_{x}}\right)$
-\end_inset
-
- par rapport à l'axe des abscisses.
- Soit 
-\begin_inset Formula $s_{1}$
-\end_inset
-
- le segment passant par 
-\begin_inset Formula $S_{N}$
-\end_inset
-
- et 
-\begin_inset Formula $s_{2}$
-\end_inset
-
- le segment passant par 
-\begin_inset Formula $S_{N+1}$
-\end_inset
-
-.
- Dans le cas où 
-\begin_inset Formula $-135°<a<-45°$
-\end_inset
-
-, pour relier les deux stations avec un segment vertical/horizontal et un
- obliques, il existe plusieurs possibilités : 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-\begin_inset Formula $s_{1}$
-\end_inset
-
- oblique et 
-\begin_inset Formula $s_{2}$
-\end_inset
-
- vertical
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $s_{1}$
-\end_inset
-
- vertical et 
-\begin_inset Formula $s_{2}$
-\end_inset
-
- oblique
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Il est important de noter que nous avons choisi comme convention que 
-\begin_inset Formula $s_{1}$
-\end_inset
-
- serait toujours vertical où horizontal et 
-\begin_inset Formula $s_{2}$
-\end_inset
-
- oblique.
+Afin de donner un aspect de plan de métro aux lignes de tram, l'affichage
+ des lignes doit se faire uniquement avec des droites horizontales, verticales
+ et obliques (45°).
+ Ce problème, qui nous semblait assez abstrait au premier abord, était finalemen
+t relativement simple à résoudre avec une disjonction des cas possibles
+ (en fonction des angles entre deux stations données).
+ Ainsi, nous avons pu déterminer la position intermédiaire à partir des
+ coordonnées centrées des stations et en utilisant de la trigonométrie.
  
-\end_layout
-
-\begin_layout Itemize
-Ainsi, le sens et la direction de 
-\begin_inset Formula $s_{1}$
-\end_inset
-
- et de 
-\begin_inset Formula $s_{2}$
-\end_inset
-
- sera alors déterminé avec 
-\begin_inset Formula $\alpha$
-\end_inset
-
-.
- Dans notre exemple, 
-\begin_inset Formula $s_{1}$
-\end_inset
-
- est horizontal et donc part à gauche de 
-\begin_inset Formula $S_{N}$
-\end_inset
-
-.
- Alors que 
-\begin_inset Formula $s_{2}$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-Afin de dessiner ces segments, la SDL à besoin des coordonnées de départ
- et d'arrivé pour tracer un segment (donc de 
-\begin_inset Formula $S_{N}$
-\end_inset
-
- et 
-\begin_inset Formula $I$
-\end_inset
-
- pour 
-\begin_inset Formula $s_{1}$
-\end_inset
-
- et de 
-\begin_inset Formula $I$
-\end_inset
-
- et 
-\begin_inset Formula $S_{N+1}$
-\end_inset
-
- pour 
-\begin_inset Formula $s_{2}$
-\end_inset
-
-).
- Notre objectif est alors de déterminer les coordonnées du point 
-\begin_inset Formula $I$
-\end_inset
-
- tel que 
-\begin_inset Formula $I=\left(I_{x},I_{y}\right)$
-\end_inset
-
- en fonction des coordonnées des stations 
-\begin_inset Formula $S_{N}$
-\end_inset
-
- et 
-\begin_inset Formula $S_{N+1}$
-\end_inset
-
-.
- Par la suite, nous appelleront 
-\begin_inset Formula $I$
-\end_inset
-
-, la position intermédiaire.
- 
-\end_layout
-
-\begin_layout Itemize
-Tout d'abord, 
-\begin_inset Formula $s_{1}$
-\end_inset
-
- étant vertical, on a 
-\begin_inset Formula $I_{x}=A_{x}$
-\end_inset
-
-.
- On place maintenant le point 
-\begin_inset Formula $E$
-\end_inset
-
-, l'intersection de la droite 
-\begin_inset Formula $(IB)$
-\end_inset
-
- et de la droite horizontale passant par 
-\begin_inset Formula $B$
-\end_inset
-
-.
- On a alors 
-\begin_inset Formula $E=\left(A_{x},B_{y}\right)$
-\end_inset
-
-.
- Or, 
-\begin_inset Formula $s_{2}$
-\end_inset
-
- possède un angle de 
-\begin_inset Formula $\widehat{EIB}=45°$
-\end_inset
-
- par rapport à l'axe des ordonnées (par définition).
- De plus, l'angle 
-\begin_inset Formula $\widehat{IEB}=90°$
-\end_inset
-
- il s'agit de l'intersection droite verticale et horizontale (donc perpendiculai
-res).
- Le triangle 
-\begin_inset Formula $IBE$
-\end_inset
-
- étant rectangle en 
-\begin_inset Formula $E$
-\end_inset
-
- et possédant un angles à 
-\begin_inset Formula $45°$
-\end_inset
-
-, il est donc rectangle isocèle en 
-\begin_inset Formula $E$
-\end_inset
-
-.
- Cela permet d'en déduire que 
-\begin_inset Formula $\overline{IE}=-\overline{EB}$
-\end_inset
-
-, or 
-\begin_inset Formula $E=\left(A_{x},B_{y}\right)$
-\end_inset
-
- on a donc :
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\overline{IE}=-\overline{EB}\Rightarrow E_{y}-I_{y}=-\left(B_{x}-E_{x}\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\Rightarrow I_{y}=-B_{x}+E_{x}-E_{y}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\Rightarrow I_{y}=-B_{x}+A_{x}-B_{y}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\Rightarrow I_{y}=B_{y}-\Delta_{x}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-On a donc 
-\begin_inset Formula $I=\left(A_{x},B_{y}-\Delta_{x}\right)$
-\end_inset
-
-.
- Il suffit
-\end_layout
-
-\begin_layout Standard
-Pour les autres configuration de 
-\begin_inset Formula $\alpha$
-\end_inset
-
-, le même raisonnement peut être appliqué.
- Il faut cependant faire attention aux signes des différentes composantes
- qui change Ce même raisonnement peut s'appliquer aisément à différents
- 
-\begin_inset Formula $\alpha$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-Ainsi, pour les autres cas
-\end_layout
-
-\begin_layout Itemize
-.
- On remarque assez vite que le triangle formé en bas.
- 
-\end_layout
-
-\begin_layout Standard
-peut être simplifié par l'utilisation de ce qu'on à appelé un point intermédiair
-e.
- En effets, sur un plan de métro, on constate que les lignes.
-\end_layout
-
-\begin_layout Standard
-Un autre aspect à été celui de la cohabitation de plusieurs lignes
 \end_layout
 
 \begin_layout Subsubsection
@@ -1389,7 +791,7 @@ Un autre aspect à été celui de la cohabitation de plusieurs lignes
 \end_layout
 
 \begin_layout Standard
-Plus tard dans le développement, nous nous somme rendu compte que le traçage
+Plus tard dans le développement, nous nous sommes rendu compte que le traçage
  de lignes sans épaisseur (fonction 
 \begin_inset Quotes fld
 \end_inset
@@ -1398,8 +800,15 @@ aadrawlineRGBA
 \begin_inset Quotes frd
 \end_inset
 
- de l'unité SDL GFX) rendait le repérage des lignes peu distinguables du
- reste.
+ de l'unité 
+\begin_inset Quotes fld
+\end_inset
+
+SDL GFX
+\begin_inset Quotes frd
+\end_inset
+
+) rendait les lignes peu distinguables du reste.
  Or la SDL ne supporte pas nativement le traçage des lignes d'une épaisseur
  donnée.
  Nous nous sommes penchés sur l'unité 
@@ -1418,12 +827,12 @@ thickLineRGBA
 \begin_inset Quotes frd
 \end_inset
 
- permetant de dessiner des lignes avec une épaisseur.
+ permettant de dessiner des lignes avec une épaisseur.
  Malheureusement, les liens entre l'implémentation C de la SDL et le Free
  Pascal Compiler étant incomplets, la fonction n'était pas accessible en
  Free Pascal.
- Cet soucis n'ayant pas été anticipé, nous avons donc dû réfléchir à une
- solution simple pour contourner le soucis.
+ Ce souci n'ayant pas été anticipé, nous avons donc dû réfléchir à une solution
+ simple pour contourner le problème.
  Ainsi, à partir de la fonction 
 \begin_inset Quotes fld
 \end_inset
@@ -1432,24 +841,20 @@ aadrawlineRGBA
 \begin_inset Quotes frd
 \end_inset
 
- et de l'angle de la ligne.
- Nous avons dessiné des lignes superposé les unes par rapport aux autres.
- Permetant ainsi de créer une ligne épaisse.
- Dans le cas de ligne verticales et horizontales, il est assez aisé de dessiner
- une ligne épaisse en incrémentant et décrémentant 
+ et de l'angle de la ligne, nous avons dessiné des lignes superposées les
+ unes par rapport aux autres.
+ Il est ainsi possible de créer une ligne épaisse.
+ Dans le cas de lignes verticales et horizontales, il est assez aisé de
+ dessiner une ligne épaisse en incrémentant et décrémentant 
 \begin_inset Formula $x$
 \end_inset
 
- où 
+ ou 
 \begin_inset Formula $y$
 \end_inset
 
- autour du centre de la ligne :
-\end_layout
-
-\begin_layout Standard
-Cependant, dans le cas de lignes obliques, ce raisonnement n'est pas valide.
- 
+ autour du centre de la ligne.
+ Cependant, dans le cas de lignes obliques, ce raisonnement n'est pas valide.
 \end_layout
 
 \begin_layout Subsection
@@ -1460,38 +865,44 @@ Résolution des itinéraires des passagers
 Toute la difficulté du jeu reposant sur la performance du réseau créé, il
  était impératif pour nous que les passagers fassent preuve d'intelligence
  dans leur choix d'itinéraire.
- Dans le cas contraire, il n'y aurait aucune incitation à construire un
- plan de réseau efficace.
+ Dans le cas contraire, il n'y a aucune incitation à construire un plan
+ de réseau efficace.
  La recherche du plus court chemin est un problème informatique classique,
  et de nombreux algorithmes existent pour sa résolution.
  Nous ne sommes pas mathématiciens ni chercheurs, alors nous avons décidé
- d'en adopter un assez connu, l'algorithme de Dijkstra.
+ d'en adopter un assez connu : l'algorithme de Dijkstra.
  Cet algorithme est supposé être de complexité 
-\begin_inset Formula $\text{O}\left(\left(n+a\right)\text{log}\left(n\right)\right)$
+\begin_inset Formula $\text{O}\left(\left(n+a\right)log\left(n\right)\right)$
 \end_inset
 
 .
  Cependant, étant donné que nous avons fait l'implémentation de cet algorithme
- assez théorique de nous même, en s'inspirant seulement de son fonctionnement
- quand exécuté 
+ assez théorique nous-même, en s'inspirant seulement de son fonctionnement
+ quand il est exécuté à la main, il serait très peu surprenant d'apprendre
+ que sa complexité s'en soit trouvée agrandie.
+ L'écriture des fonctions et procédures liées à la résolution d'itinéraire
+ en elle-même n'a pas présenté de difficulté majeure, l'algorithme n'étant
+ pas excessivement compliqué à appréhender.
+ En revanche, toutes les subtilités d'allocation mémoire, les tableaux sur
+ plusieurs dimensions, la rigueur dans le choix des indexes, ou bien la
+ fragmentation des différentes tâches prérequises à l'exécution de Dijkstra
+ dans de nombreuses fonctions, eux, ont été sources de bugs ayant nécessité
+ de longues heures de débogage.
+ A l'heure d'écrire ce rapport, à de rares occasions, des bugs subsistent
+ toujours et produisent parfois des itinéraires incohérents.
+ Le taux d'occurence de ces derniers étant faible, la jouabilité est faiblement
+ impactée.
+ Aucune solution n'a été trouvée pour l'heure.
+ De la même manière, lorsqu'elle est confrontée à une correspondance, il
+ arrive que la fonction responsable de la montée des passagers, 
 \begin_inset Quotes fld
 \end_inset
 
-à la main
+Passengers_Get_On
 \begin_inset Quotes frd
 \end_inset
 
-, il serait très peu surprenant d'apprendre que sa complexité s'en soit
- trouvée agrandie.
- L'écriture des fonctions et procédures liées à la résolution d'itinéraire
- en elle même n'a pas présenté de difficulté majeure, l'algorithme n'étant
- pas excessivement compliqué à appréhender.
- En revanche, toutes les subtilités d'allocation de mémoire, les tableaux
- sur plusieurs dimensions, la rigueur dans le choix des indexes, ou bien
- la fragmentation des différentes tâches prérequises à l'exécution de Dijkstra
- dans de nombreuses fonctions, eux, ont été source de bugs ayant nécessité
- de longues heures de débogage.
- 
+, ne fasse pas monter le passager dans le nouveau wagon.
 \end_layout
 
 \begin_layout Subsection
@@ -1506,7 +917,7 @@ Afin que le mouvement des trains soit réaliste, au lieu d'une vitesse constante
 \begin_inset Formula $t_{a}$
 \end_inset
 
- qui est le temps prit par le train pour accélérer, et 
+ qui est le temps pris par le train pour accélérer, et 
 \begin_inset Formula $v_{m}$
 \end_inset
 
@@ -1589,7 +1000,11 @@ v_{3}\left(t\right)=\left(t-t_{d}\right)\times\frac{-v_{m}}{t_{a}}+v_{m} & \text
 
 \begin_layout Standard
 Ce qui nous intéresse, c'est d'obtenir la position du train en fonction
- de t.
+ de 
+\begin_inset Formula $t$
+\end_inset
+
+.
  D'après nos cours de mécanique du point, la vitesse est la dérivée de la
  distance par le temps.
  On a donc : 
@@ -1610,9 +1025,9 @@ v\left(t\right)=\frac{d}{dt}d\left(t\right)\Leftrightarrow d\left(t\right)=\int 
 \begin_inset Formula 
 \[
 d\left(t\right)=\begin{cases}
-d_{1}\left(t\right)=\int_{0}^{t}v_{1}\left(t\right)=\frac{t²}{2}*v_{m} & \text{si }0\leqslant t\leqslant t_{a}\\
+d_{1}\left(t\right)=\int_{0}^{t}v_{1}\left(t\right)=\frac{t²}{2t_{a}}*v_{m} & \text{si }0\leqslant t\leqslant t_{a}\\
 d_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\int_{t_{a}}^{t}v_{2}\left(t\right)=d_{1}\left(t_{a}\right)+\left(t-t_{a}\right)*v_{m} & \text{si }t_{a}<t\leqslant t_{d}\\
-d_{3}\left(t\right)=d_{2}\left(t_{2}\right)+\int_{t_{d}}^{t}v_{3}\left(t\right)=d_{2}\left(t_{2}\right)+\frac{}{} & \text{si }t_{d}<t\leqslant t_{d}+t_{a}
+d_{3}\left(t\right)=d_{2}\left(t_{2}\right)+\int_{t_{d}}^{t}v_{3}\left(t\right)=d_{2}\left(t_{2}\right)+\left(t-t_{d}\right)v_{m}-\frac{v_{m}t²}{2t_{a}} & \text{si }t_{d}<t\leqslant t_{d}+t_{a}
 \end{cases},\forall t\in\left[0,t_{d}+t_{a}\right]
 \]
 
@@ -1622,8 +1037,8 @@ d_{3}\left(t\right)=d_{2}\left(t_{2}\right)+\int_{t_{d}}^{t}v_{3}\left(t\right)=
 \end_layout
 
 \begin_layout Standard
-Maintenant, nous avons distance en fonction du temps.
- Il suffit maintenant d'implémenter 
+Maintenant que nous avons la distance en fonction du temps, il suffit d'implémen
+ter 
 \begin_inset Formula $d_{1}$
 \end_inset
 
@@ -1635,7 +1050,8 @@ Maintenant, nous avons distance en fonction du temps.
 \begin_inset Formula $d_{3}$
 \end_inset
 
- et d'utiliser des instructions conditionnelles déterminer laquelle utiliser
+.
+ On utilise des instructions conditionnelles pour déterminer laquelle utiliser
  en fonction du temps et des domaines de définition de chacune.
 \end_layout
 
@@ -1646,67 +1062,106 @@ Optimisations
 \begin_layout Standard
 Au fur et à mesure que le projet avançait et que les ressources graphiques
  se multipliaient.
- Nous nous somme heurté à un problème de performance qui affectait la fluidité
- du jeu.
- Ainsi, après quelques recherches, nous avons procédé à quelques optimisations
- relativement simples :
+ Nous nous sommes heurtés à un problème de performance qui affectait la
+ fluidité du jeu.
+ Ainsi, après quelques recherches, nous avons procédé à des optimisations
+ : 
 \end_layout
 
 \begin_layout Itemize
-Tout d'abord, lorsque la SDL créer des surface à partir d'images importés,
- cette dernière ont une format de pixel (profondeur de couleur, masques,
- cannal alpha ...) qui n'est pas forcément le même que celui de l'affichage.
- Or, lors du rendu (fonction 
+Tout d'abord, lorsque la SDL crée des surfaces à partir d'images importées,
+ ces dernières ont un format de pixel (profondeur de couleur, masques, canal
+ alpha ...) qui n’est pas forcément le même que celui de l'affichage.
+ Or, lors du rendu avec « SDL_BlitSurface », la SDL doit effectuer une conversio
+n à la volée pour rendre la surface sur l'écran.
+ Cette conversion nécessite beaucoup de temps de calcul.
+ Cependant, il est possible de s'affranchir de cette conversion en convertissant
+ dès l'importation les ressources graphiques.
+ Cette conversion est alors effectuée avec la fonction « SDL_DisplayFormat »
+ qui prend pour paramètre la surface à convertir, et renvoie une nouvelle
+ surface, qui est la surface convertie.
+\end_layout
+
+\begin_layout Itemize
+Ensuite, il est possible d'utiliser l'accélération matérielle graphique
+ pour certains calculs graphiques (anti-crénelage, les calculs géométriques,
+ la copie de mémoire...).
+ Pour activer cette fonctionnalité, il faut remplacer l'option « SDL_SWSURFACE »
+ par « SDL_HWSURFACE » dans la fonction qui instancie la fenêtre : « SDL_SetVide
+oMode ».
+ Cependant, cette optimisation est conditionnée au support de certaines
+ interfaces de programmation (API) graphiques spécifiques au matériel et
+ aux pilotes d'une machine.
+ Ainsi, sur des configurations plus 
 \begin_inset Quotes fld
 \end_inset
 
-SDL_BlitSurface
+exotiques
 \begin_inset Quotes frd
 \end_inset
 
-), la SDL doit effectuer une convertion à la volée pour rendre la surface
- sur l'écran.
- Cette conversion nécéssite beaucoup de temps de calculs.
- Cependant, il est possible de s'affranchir de cette conversion à la volée
- en en effectuant la convertion dès l'importation de la ressource graphique.
- Cette convertion est alors effectué, avec la fonction SDL_VideoFormat qui
- prend pour paramètre la surface à convertir, et renvoi une nouvelle surface,
- qui est la conversion de la première.
- Enfin, pour que cette convertion soit réellement effective, il faut également
- modifier les clée ??? .
- Dans le cas d'utilisation surface avec un canal Alpha (RGBA), il plutot
- utiliser la fonction SDL_Format afin qu
+ ou anciennes, il se peut que des problèmes de compatibilité empêchent le
+ lancement du jeu.
 \end_layout
 
 \begin_layout Itemize
-Ensuite, il est possible d'utiliser l'accélération graphique matériel pour
- certains calculs graphiques (notamment pour l'anti-crénelage, les calculs
- géométrique pour le dessin des formes, la copie de mémoire massive etc.).
- Il faut remplaceavec l'option SDL_SWSURFACE par SDL_HWSURFACE dans la fonction
- qui instancie la fenêtre (SDL_SetVideoMode) pour activer cette fonctionnalité.
- Cependant, cette optimisation est conditionnée au support d'interfaces
- de programmation (API) graphiques spécifiques au matériel et aux pilotes
- d'une machine (OpenGL).
- Ainsi, sur des configurations plus exotiques ou anciennes, il se peut que
- des problèmes de compatibilités empêchent le lancement du jeu.
+Enfin, nous avons minimisé le nombre de calculs graphiques en ne les effectuant
+ que lorsque c’était nécessaire.
+ Par exemple, les étiquettes et chronomètres sont pré-rendus lorsqu’ils
+ sont modifiés ou encore les positions intermédiaires sont pré-calculées
+ lors des modifications des lignes.
+ Le rafraîchissement des graphismes étant appelé très souvent (toutes les
+ 1/60 secondes), il fallait diminuer au maximum les calculs nécessaires
+ à l’affichage.
 \end_layout
 
 \begin_layout Subsection
-Interface graphiques
+Interface graphique
 \end_layout
 
 \begin_layout Standard
-Une interface graphique est nécéssaire pour que l'utilisateur puisse interragir
- avec notre jeu.
- Or la SDL est une librairie très rudimentaire en terme de fonctionnalité.
- Cependant, la création d'une interface graphique pour .
- Nous avons donc créer une petite abstraction pour les différents éléments
- de l'interface pour permetre.
- Cette abstraction est constitués de :
+Une interface graphique est nécessaire pour que l'utilisateur puisse interagir
+ avec le jeu.
+ Or, la SDL est une librairie très rudimentaire en termes de fonctionnalités.
+ Ainsi, nous avons créé une abstraction pour les différents éléments de
+ l'interface graphique (boutons, étiquettes, panneau etc) afin d'améliorer
+ la lisibilité du code.
 \end_layout
 
-\begin_layout Itemize
-Type : 
+\begin_layout Subsection
+Manque de temps
+\end_layout
+
+\begin_layout Standard
+Les fonctionnalités obligatoires que nous souhaitions implémenter au début
+ du projet ont pu être réalisées.
+ Cependant, par manque de temps, beaucoup de fonctionnalités optionnelles
+ n'ont pas pu être développées.
+ Par exemple, la fonctionnalité 
+\begin_inset Quotes fld
+\end_inset
+
+Chargement/Sauvegarde Partie
+\begin_inset Quotes frd
+\end_inset
+
+ présente dans la première analyse descendante a été abandonnée.
+ En effet, la gestion de la mémoire pour ce projet étant surtout dynamique,
+ nous avons estimé que se lancer dans l'implémentation d'un système de sauvegard
+e de la partie ne serait pas une idée très sage.
+ Le type 
+\begin_inset Quotes fld
+\end_inset
+
+arcade
+\begin_inset Quotes frd
+\end_inset
+
+ du jeu ne s'y prête de toute manière pas vraiment.
+ Ce manque de temps nous a également empêché de réaliser certaines optimisations
+ dans le code, notamment pour garder en mémoire les itinéraires afin de
+ réduire le nombre de fois où l'on calcule les itinéraires.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1721,7 +1176,198 @@ Conclusion
 \end_layout
 
 \begin_layout Standard
-j
+La réalisation de ce projet nous semblait compliquée voire impossible lorsque
+ le concept nous a été expliqué.
+ Néanmoins, cela nous a poussé à faire preuve d'autonomie et à avoir une
+ bonne organisation afin de respecter notre cahier des charges.
+ C'était une introduction efficace et parfois perilleuse à la gestion de
+ projet mais également un moyen de développer nos compétences en algorithmie
+ et de découvrir certains concepts que nous n'avions pas eu l'occasion d'explore
+r en cours l'année dernière.
+ Nous avons également rencontré plusieurs difficultés au cours de la réalisation
+ du projet ce qui nous a poussé à faire preuve d'ingéniosité et à faire
+ des recherches pour trouver des solutions adaptées aux problèmes qui sont
+ survenus.
+\end_layout
+
+\begin_layout Section
+Annexe
+\end_layout
+
+\begin_layout Subsection
+Guide d'utilisation
+\end_layout
+
+\begin_layout Standard
+Au lancement du jeu, un menu de démarrage vous est présenté, vous pouvez
+ choisir de quitter ou bien de jouer.
+ Si vous choisissez de jouer, une partie est lancée et des stations et passagers
+ apparaissent.
+ Les passagers sont de la forme de leur station de destination.
+ Chaque station est supposée accueillir 6 passagers, au-delà de ce seuil,
+ un chronomètre est lancé et vous avez alors 40 secondes pour désengorger
+ la station, sans quoi la partie se termine.
+ Pour mener à bien cet objectif, vous disposez d’une ligne sélectionnable
+ par un clic gauche, celle-ci se situe en bas de votre écran et se repère
+ à sa couleur.
+ Pour relier vos stations, sélectionnez la ligne de votre choix, puis, cliquez
+ et déplacez la ligne d’un point de départ à un point d’arrivée.
+ Si vous souhaitez changer le tracé de la ligne sélectionnée, vous n’avez
+ qu’à cliquer sur ce dernier et à le faire glisser sur une station à desservir.
+ Pour supprimer une station d’un tracé, sélectionnez la ligne, puis, cliquez
+ sur la station en question.
+ Vous ne pouvez pas supprimer la première station d'une ligne.
+ Une fois votre tracé effectué, vous pouvez le peupler de trains et de wagons.
+ Au début de la partie, sur la partie gauche de votre écran, vous remarquerez
+ la présence de jetons échangeables contre des locomotives, des wagons ou
+ des tunnels.
+ Le jeton 
+\begin_inset Quotes fld
+\end_inset
+
+tunnel
+\begin_inset Quotes frd
+\end_inset
+
+ sera directement déduit de votre inventaire lorsque votre ligne traversera
+ une rivière.
+ Pour finaliser la rame, vous devrez vous saisir à l’aide d’un clic gauche
+ du jeton 
+\begin_inset Quotes fld
+\end_inset
+
+locomotive
+\begin_inset Quotes frd
+\end_inset
+
+ et le glisser-déposer sur le tracé précédemment créé.
+ Cette locomotive dispose d’une capacité de 6 passagers.
+ Si vous souhaitez augmenter ce nombre, vous pouvez glisser-déposer un jeton
+ 
+\begin_inset Quotes fld
+\end_inset
+
+wagon
+\begin_inset Quotes frd
+\end_inset
+
+ sur cette locomotive, ceci aura pour effet d’ajouter 6 places au train.
+ Au fur et à mesure que le temps s’écoule, à intervalles réguliers, des
+ bonus de fin de semaine vous seront distribués, vous devrez alors choisir
+ lequel vous convient le mieux parmi différents choix (nouvelle ligne, wagon
+ supplémentaire, …).
+ Enfin, tout au long de la partie, il est possible de mettre le jeu en pause,
+ ou bien de recommencer la partie (en haut à droite de votre écran).
+\end_layout
+
+\begin_layout Subsection
+Analyse descendante
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Graphiques/Functions.png
+	width 70page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Analyse descendante simplifiée
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Graphiques/AnalyseDescendanteGestionItineraires.png
+	width 70page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Gestion des itinéraires
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Graphiques/Dépendances.png
+	width 70page%
+	BoundingBox 0bp 0bp 1116bp 859bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Interdépendances des unités
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body

@@ -20,22 +20,6 @@ Implementation
 
 // - Définition des fonctions et procédures.
 
-// Fonction qui renvoie l'index absolu (dans le tableau de stations du jeu) d'une station à partir de son pointeur.
-Function Station_Get_Absolute_Index(Station_Pointer : Type_Station_Pointer; Var Game : Type_Game) : Byte;
-
-Var i : Byte;
-Begin
-  Station_Get_Absolute_Index := 255;
-
-  For i := low(Game.Stations) To high(Game.Stations) Do
-    Begin
-      If Station_Pointer = Game.Stations[i] Then
-        Begin
-          Station_Get_Absolute_Index := i;
-          break;
-        End;
-    End;
-End;
 
 // Procédure qui renvoie l'index absolu (dans le tableau de lignes du jeu) d'une ligne à partir de son pointeur.
 Procedure Panel_Game_Over_Load(Var Game : Type_Game);
@@ -177,55 +161,7 @@ Begin
 
 End;
 
-// Procédure qui construit le tableau des liens entres les stations.
-Procedure Game_Refresh_Graph_Table(Var Game : Type_Game);
 
-Var i, j : Byte;
-  Indexes : Array[0 .. 1] Of Byte;
-Begin
-
-  // - Définit les dimensions de la Graph_Table
-  SetLength(Game.Graph_Table, length(Game.Stations));
-
-  For i := low(Game.Graph_Table) To high(Game.Graph_Table) Do
-    Begin
-      SetLength(Game.Graph_Table[i], length(Game.Stations));
-      For j := low(Game.Graph_Table[i]) To high(Game.Graph_Table[i]) Do
-        SetLength(Game.Graph_Table[i][j], 0);
-    End;
-
-  // - Remplissage la Graph_Table par rapport aux lignes du jeu.
-
-  For i := low(Game.Lines) To high(Game.Lines) Do
-    // Pour chacune des lignes :
-    Begin
-      // Vérifie que la ligne contient bien des stations.
-      If (length(Game.Lines[i].Stations) > 0) Then
-        Begin
-          // Itère parmi les stations de la ligne.
-          For j:= low(Game.Lines[i].Stations) To high(Game.Lines[i].Stations) - 1 Do
-            // Pour chacune des stations consécutivement connectées contenues dans le tableau :
-            Begin
-              // Obtient les indexes des stations dans le tableau de stations du jeu.
-              Indexes[0] := Station_Get_Absolute_Index(Game.Lines[i].Stations[j], Game);
-              Indexes[1] := Station_Get_Absolute_Index(Game.Lines[i].Stations[j + 1], Game);
-
-              // Ajoute une case au tableau de pointeurs des lignes des stations concernées.
-
-              SetLength(Game.Graph_Table[Indexes[0]][Indexes[1]], length(Game.Graph_Table[Indexes[0]][Indexes[1]]) + 1);
-
-              SetLength(Game.Graph_Table[Indexes[1]][Indexes[0]], length(Game.Graph_Table[Indexes[1]][Indexes[0]]) + 1);
-
-              // A partir des indexes, on remplit la Graph_Table de manière symétrique en ajoutant les pointeur des lignes correspondantes.
-
-              Game.Graph_Table[Indexes[0]][Indexes[1]][high(Game.Graph_Table[Indexes[0]][Indexes[1]])] := @Game.Lines[i];
-              Game.Graph_Table[Indexes[1]][Indexes[0]][high(Game.Graph_Table[Indexes[1]][Indexes[0]])] := @Game.Lines[i];
-
-            End;
-        End;
-    End;
-
-End;
 
 // Procédure qui inscrit dans le tableau de Dijkstra avec quelles stations une station donnée peut se connecter.
 Procedure Connect_Stations(Step : Byte; indexStationToConnect : Byte; Game : Type_Game);
@@ -661,7 +597,6 @@ Begin
 
   Randomize();
 
-
   Graphics_Load(Game);
 
   Sounds_Load(Game);
@@ -675,8 +610,6 @@ Begin
     Panel_Set_Hidden(True, Game.Panel_Left);
     Panel_Set_Hidden(True, Game.Panel_Top);
     Panel_Set_Hidden(True, Game.Panel_Bottom);
-    
- // Game_Load(Game);
 
   Mouse_Load(Game.Mouse);
 
@@ -696,6 +629,8 @@ Begin
 
   // Fermeture de la SDL.
   SDL_Quit();
+
+  HALT();
 End;
 
 Procedure Logic_Event_Handler(Var Game : Type_Game);
@@ -708,13 +643,8 @@ Begin
       // Si l'utilisateur demande la fermeture du programme.
       Case Event.type_ Of 
         // Si la fenêtre est fermée.
-        SDL_QUITEV :
-                     Begin
-                       Logic_Unload(Game);
-                       HALT();
-                     End;
-        SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP :
-                                                 Mouse_Event_Handler(Event.button, Game);
+        SDL_QUITEV : Logic_Unload(Game);
+        SDL_MOUSEBUTTONDOWN, SDL_MOUSEBUTTONUP : Mouse_Event_Handler(Event.button, Game);
       End;
 
     End;
