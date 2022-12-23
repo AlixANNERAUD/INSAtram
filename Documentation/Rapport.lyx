@@ -82,15 +82,22 @@
 \begin_body
 
 \begin_layout Title
-Rapport de projet informatique
-\end_layout
-
-\begin_layout Title
-INSAtram
+Rapport de projet informatique : INSAtram
 \end_layout
 
 \begin_layout Author
 Alix ANNERAUD - Myriem ABID - Hugo LASCOUTS
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename /home/alix_anneraud/Git/INSAtram/Resources/Images/Logo.png
+	width 20page%
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -175,11 +182,13 @@ Dinosaur Polo Club
  Par conséquent, en plus de la mobilisation des connaissances acquises en
  informatique, il était nécessaire de prendre en compte le travail de groupe
  et donc la communication ainsi que la répartition des tâches.
- Cette dimension, bien qu'indispensable, a rajouté une difficulté à la plannicat
-ion du projet.
+ Cette dimension, bien qu'indispensable, a rajouté une difficulté à la planifica
+tion du projet.
  En effet, jusqu'ici, nous étions habitués à travailler de manière individuelle
  et sans trop se soucier d'établir un plan de projet de A à Z.
  Nous présentons dans ce rapport notre façon d'appréhender ce nouvel exercice.
+ Le répertoire du projet est disponible à l'adresse : https://github.com/AlixANNE
+RAUD/INSAtram.
 \end_layout
 
 \begin_layout Subsection
@@ -250,7 +259,7 @@ Son :
 \series bold
 Objets :
 \series default
- Ce sont les éléments avec lesquels le joueur peut intéragir.
+ Ce sont les éléments avec lesquels le joueur peut interagir.
  Tous les objets sont présents en début de partie en quantité limitée et
  peuvent être obtenus à la fin de chaque semaine.
  Les objets seront les suivants :
@@ -311,7 +320,7 @@ Stations :
 \series default
  Elles sont de différentes formes géométriques et sont générées de manière
  aléatoire.
- Elles apparraissent à des instants t déterminés par une fonction.
+ Elles apparaissent à des instants t déterminés par une fonction.
 \end_layout
 
 \begin_layout Itemize
@@ -344,7 +353,7 @@ Rivières :
 Difficulté :
 \series default
  La difficulté du jeu réside dans le fait de devoir fluidifier au maximum
- le traffic et d'adapter le réseau en fonction des nouvelles stations qui
+ le trafic et d'adapter le réseau en fonction des nouvelles stations qui
  apparaissent, le flux de passagers ainsi que des différents aléas
 \end_layout
 
@@ -375,7 +384,7 @@ Au début du projet, nous avons essayé d'être le plus rigoureux possible
  Nous avons donc dû apporter des modifications à notre analyse descendante
  initiale, la version qui a été mise à jour se trouve en annexe du rapport.
  Les fonctions et procédures étant nombreuses dans notre programme, notre
- analyse descendante ne les englobe pas toutes et montre seulement les fontions
+ analyse descendante ne les englobe pas toutes et montre seulement les fonctions
  les plus importantes.
  Nous avons également veillé à séparer le code en plusieurs unités et à
  laisser des commentaires dans le but d'avoir un code lisible et compréhensible.
@@ -450,7 +459,18 @@ Procedure Station_Render();
 \end_layout
 
 \begin_layout Itemize
-Constantes : Les constantes sont nommées 
+Constantes : Les constantes ont en général leur nom qui commence par l'identifia
+nt de l'élément concerné.
+ Cependant, dans le cas des chemins des fichiers, les constantes commencent
+ par 
+\begin_inset Quotes fld
+\end_inset
+
+Path_
+\begin_inset Quotes frd
+\end_inset
+
+ suivi du type de l’élément concerné (Image, Police, Musique).
 \end_layout
 
 \begin_layout Standard
@@ -461,7 +481,16 @@ status open
 
 \begin_layout Plain Layout
 
-Const Station_Maximum
+Const Station_Overfill_Timer = 20;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Const Path_Image_Station_Circle = '/Resources/Images/Station_Circle.png'
 \end_layout
 
 \end_inset
@@ -549,10 +578,6 @@ Procedure Graphics_Refresh();
 \begin_layout Plain Layout
 
 Procedure Station_Render();
-\end_layout
-
-\begin_layout Plain Layout
-
 \end_layout
 
 \end_inset
@@ -671,7 +696,7 @@ Outils utilisés
 \begin_layout Standard
 Ce projet étant un projet plus complexe que ce que nous avons eu à programmer
  jusqu'ici, nous avons fait appel à plusieurs outils afin de répondre au
- mieux aux besoins du projet.
+ mieux à ses besoins.
  Voici la liste des outils utilisés pour le développement du jeu :
 \end_layout
 
@@ -782,7 +807,8 @@ Afin de donner un aspect de plan de métro aux lignes de tram, l'affichage
 t relativement simple à résoudre avec une disjonction des cas possibles
  (en fonction des angles entre deux stations données).
  Ainsi, nous avons pu déterminer la position intermédiaire à partir des
- coordonnées centrées des stations et en utilisant de la trigonométrie.
+ coordonnées centrées des stations et en utilisant de la trigonométrie de
+ base.
  
 \end_layout
 
@@ -796,7 +822,7 @@ Plus tard dans le développement, nous nous sommes rendu compte que le traçage
 \begin_inset Quotes fld
 \end_inset
 
-aadrawlineRGBA
+lineRGBA
 \begin_inset Quotes frd
 \end_inset
 
@@ -804,7 +830,7 @@ aadrawlineRGBA
 \begin_inset Quotes fld
 \end_inset
 
-SDL GFX
+SDL_GFX
 \begin_inset Quotes frd
 \end_inset
 
@@ -815,7 +841,7 @@ SDL GFX
 \begin_inset Quotes fld
 \end_inset
 
-SDL GFX
+SDL_GFX
 \begin_inset Quotes frd
 \end_inset
 
@@ -837,7 +863,7 @@ thickLineRGBA
 \begin_inset Quotes fld
 \end_inset
 
-aadrawlineRGBA
+lineRGBA
 \begin_inset Quotes frd
 \end_inset
 
@@ -885,12 +911,12 @@ Toute la difficulté du jeu reposant sur la performance du réseau créé, il
  pas excessivement compliqué à appréhender.
  En revanche, toutes les subtilités d'allocation mémoire, les tableaux sur
  plusieurs dimensions, la rigueur dans le choix des indexes, ou bien la
- fragmentation des différentes tâches prérequises à l'exécution de Dijkstra
+ fragmentation des différentes tâches pré-requises à l'exécution de Dijkstra
  dans de nombreuses fonctions, eux, ont été sources de bugs ayant nécessité
  de longues heures de débogage.
  A l'heure d'écrire ce rapport, à de rares occasions, des bugs subsistent
  toujours et produisent parfois des itinéraires incohérents.
- Le taux d'occurence de ces derniers étant faible, la jouabilité est faiblement
+ Le taux d’occurrence de ces derniers étant faible, la jouabilité est faiblement
  impactée.
  Aucune solution n'a été trouvée pour l'heure.
  De la même manière, lorsqu'elle est confrontée à une correspondance, il
@@ -1076,7 +1102,7 @@ Tout d'abord, lorsque la SDL crée des surfaces à partir d'images importées,
 n à la volée pour rendre la surface sur l'écran.
  Cette conversion nécessite beaucoup de temps de calcul.
  Cependant, il est possible de s'affranchir de cette conversion en convertissant
- dès l'importation les ressources graphiques.
+ dès l'import des ressources graphiques.
  Cette conversion est alors effectuée avec la fonction « SDL_DisplayFormat »
  qui prend pour paramètre la surface à convertir, et renvoie une nouvelle
  surface, qui est la surface convertie.
@@ -1180,7 +1206,7 @@ La réalisation de ce projet nous semblait compliquée voire impossible lorsque
  le concept nous a été expliqué.
  Néanmoins, cela nous a poussé à faire preuve d'autonomie et à avoir une
  bonne organisation afin de respecter notre cahier des charges.
- C'était une introduction efficace et parfois perilleuse à la gestion de
+ C'était une introduction efficace et parfois périlleuse à la gestion de
  projet mais également un moyen de développer nos compétences en algorithmie
  et de découvrir certains concepts que nous n'avions pas eu l'occasion d'explore
 r en cours l'année dernière.
@@ -1190,8 +1216,15 @@ r en cours l'année dernière.
  survenus.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
-Annexe
+Annexes
 \end_layout
 
 \begin_layout Subsection
@@ -1300,6 +1333,95 @@ Analyse descendante simplifiée
 \end_layout
 
 \begin_layout Standard
+\begin_inset listings
+lstparams "language=Pascal,numbers=left,breaklines=true,showstringspaces=false,tabsize=4"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Procedure Logic_Load(Var Game : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Logic_Refresh(Var Game : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Animation_Load(Var Animation : Type_Animation);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Animation_Refresh(Var Game : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Mouse_Load(Var Mouse : Type_Mouse);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Mouse_Event_Handler(Mouse_Event : TSDL_MouseButtonEvent; Var Game
+ : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Sounds_Load(Var Game : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Graphics_Unload(Var Game : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Graphics_Refresh(Var Game : Type_Game);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 placement H
 wide false
@@ -1335,6 +1457,165 @@ Gestion des itinéraires
 \end_layout
 
 \begin_layout Standard
+\begin_inset listings
+lstparams "language=Pascal,numbers=left,breaklines=true,showstringspaces=false,tabsize=4"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+// Fonction qui détermine si le passager doit descendre du train (autrement
+ dit, si il a atteint sa destination).
+\end_layout
+
+\begin_layout Plain Layout
+
+Function Passenger_Get_Off(Passenger : Type_Passenger_Pointer; Var Next_Station
+ : Type_Station; Var Current_Station : Type_Station) : Boolean;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Fonction qui détermine si le passager doit monter dans un train.
+\end_layout
+
+\begin_layout Plain Layout
+
+Function Passenger_Get_On(Passenger : Type_Passenger_Pointer; Var Next_Station
+ : Type_Station; Var Current_Station : Type_Station) : Boolean;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Procédure qui construit le tableau des liens entres les stations.
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Game_Refresh_Graph_Table(Var Game : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Procédure qui calcule l'itinéaire des stations correspondant à la forme
+ du passager, puis détermine la plus "proche" en prenant l'itinéraire le
+ plus court.
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Passengers_Compute_Itinerary(Game : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Procedure déterminant le plus court chemin entre deux stations données.
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Dijkstra(Starting_Station_Index : Integer; Ending_Station_Index
+ : Integer; Var Itinerary_Indexes : Type_Itinerary_Indexes; Var Reverse_Itinerar
+y_Indexes : Type_Itinerary_Indexes; Game : Type_Game; Var Station_Is_Isolated
+ : Boolean);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Fonction qui signale à l'algorithme de Dijkstra que le calcul d'itinéraire
+ est arrivé à destination.
+\end_layout
+
+\begin_layout Plain Layout
+
+Function Destination_Reached(Index_Ending_Station : Byte; Dijkstra_Table
+ : Type_Dijkstra_Table): Boolean;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Procédure qui inscrit dans le tableau de Dijkstra avec quelles stations
+ une station donnée peut se connecter.
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Connect_Stations(Step : Byte; indexStationToConnect : Byte; Game
+ : Type_Game);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Fonction qui calcule le poids d'un trajet entre deux stations connectées.
+\end_layout
+
+\begin_layout Plain Layout
+
+Function Get_Weight(Var Station_1, Station_2 : Type_Station): Integer;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Procédure qui renvoie toutes les stations qui ont la même forme que le
+ passager donné.
+\end_layout
+
+\begin_layout Plain Layout
+
+Procedure Get_Ending_Stations_From_Shape(Game : Type_Game; Passenger : Type_Pass
+enger_Pointer; Var Index_Table : Type_Index_Table);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+// Fonction qui calcule le poids (la distance) d'un itinéraire complet.
+\end_layout
+
+\begin_layout Plain Layout
+
+Function Itinerary_Get_Weight(Game : Type_Game; Itinerary_Indexes : Type_Itinera
+ry_Indexes) : Integer;
+\end_layout
+
+\end_inset
+
+
 \begin_inset Float figure
 placement H
 wide false
