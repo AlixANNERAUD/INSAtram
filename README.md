@@ -53,7 +53,7 @@ sudo apt install synaptic
 You can download the archives containing the binaries here:
 
 - [Linux](https://github.com/AlixANNERAUD/INSAtram/releases/download/1.0.0/Binaries_Linux_x86_64.zip)
-- [Windows]()
+- [Windows](https://github.com/AlixANNERAUD/INSAtram/releases/download/1.0.0/Binaries_Windows_x86_64.zip)
 
 ### 🧑‍💻 Development
 
@@ -61,6 +61,10 @@ You can develop this project by making a fork of it and then clone it on your co
 
 - `Scripts/Build_Debug.sh` : Build for debugging purpose.
 - `Scripts/Test.sh` : Build and run for debugging purpose.
+- `Scripts/Build_Release.sh` : Build for release.
+
+Same thing on Windows, where you can use the following script :
+
 - `Scripts/Build_Release.sh` : Build for release.
 
 ## 🗃️ Structure
