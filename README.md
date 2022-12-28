@@ -1,6 +1,8 @@
 # 🚃 INSAtram
 
-![Logo](Resources/Images/Logo_White_Background.png)
+<p align="center">
+  <img src="Resources/Images/Logo_White_Background.png" />
+</p>
 
 ## 🗺️ Table of contents
 
@@ -20,14 +22,13 @@
 
 ## 🪧 Introduction
 
-This game is a copy of Mini Metro developed by the studio Dinosaur Polo Club.
+This game is a copy of [Mini Metro](https://dinopoloclub.com/games/mini-metro/) developed by the studio [Dinosaur Polo Club](https://dinopoloclub.com/).
 This is a project carried out for the IT project requested by INSA Rouen in the 2nd year of preparatory class.
 Thus, **no intellectual property rights were violated** during the realization of this project. It was designed and developed **solely** from **observations** made on the game.
 
 ## 📸 Screenshot
 
 ![Screenshot 1](Resources/Images/Screenshot%201.png)
-
 
 ## 📦️ Installation
 
@@ -75,7 +76,7 @@ The project is structured in folder as follows:
 
 ### ⚖️ Licence
 
-This project is under MIT License.
+This project is under [MIT License](https://github.com/AlixANNERAUD/INSAtram/blob/main/LICENSE).
 
 ### 👤 Authors
 
