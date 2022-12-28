@@ -66,8 +66,9 @@ You can develop this project by making a fork of it and then clone it on your co
 ## 🗃️ Structure
 
 The project is structured in folder as follows:
-- `Binaries` : Contains compiled binaries (compiler output) as well as the resources (Fonts, Images).
-- `Code` : Contains the project code as well as the scripts allowing the compilation and the launching.
+- `Binaries` : Contains compiled binaries (compiler output).
+- `Code` : Contains the code.
+- `Resources` : Contains the resources of the project (Fonts, Images, Musics).
 - `Documentation` : Contains project documentation (specifications, top-down analysis, final report).
 - `Librairies` : Contains libraries for Windows.
 - `Scripts` : Contains script for testing and compiling the code automatically.
