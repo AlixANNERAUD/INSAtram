@@ -65,7 +65,7 @@ You can develop this project by making a fork of it and then clone it on your co
 
 Same thing on Windows, where you can use the following script :
 
-- `Scripts/Build_Release.sh` : Build for release.
+- `Scripts/Build_Release.ps1` : Build for release.
 
 ## 🗃️ Structure
 
